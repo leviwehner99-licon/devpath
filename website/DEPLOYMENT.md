@@ -37,7 +37,7 @@ Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsic
 
 Vor dem Setzen von `DATABASE_URL` eine **dedizierte, gehostete** PostgreSQL-Datenbank in einer EU-Region (bevorzugt Frankfurt, falls verfügbar) erstellen. Lokal laufendes PostgreSQL auf dem Entwickler-PC ist kein Cloud-Backend. Port 5432 nicht am Router oder PC ins Internet freigeben.
 
-Die Datei `../server/migrations/001_initial.sql` nach Prüfung einmal auf der neuen leeren Datenbank ausführen (zum Beispiel in pgAdmin Query Tool, mit der dedizierten Migrationsrolle). Die Runtime-Rolle sollte nur die benötigten Tabellenrechte erhalten und nicht als `postgres` laufen. Danach die Runtime-Verbindungs-URI ausschließlich als geheime Makers-Variable hinterlegen.
+Bei einer neuen Datenbank zuerst `../server/migrations/001_initial.sql` und danach `../server/migrations/002_publish_html_css_pilot.sql` jeweils einmal ausführen (zum Beispiel im pgAdmin Query Tool, mit der dedizierten Migrationsrolle). Für das bereits eingerichtete Projekt gilt laut Nutzer: Migration 001 ist schon erfolgreich; **nur Migration 002 fehlt noch**. Sie veröffentlicht die Metadaten des lokalen HTML/CSS-Pilotkurses. Der Paketpfad ist `/courses/first-responsive-site-1.0.0.json`; die SHA-256-Prüfsumme steht in `content_sha256`. Die Runtime-Rolle sollte nur die benötigten Tabellenrechte erhalten und nicht als `postgres` laufen. Bereits ausgeführte Migrationen nicht wiederholen.
 
 ## API-Routen
 

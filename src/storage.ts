@@ -14,10 +14,15 @@ async function getDatabase(): Promise<LocalDatabase> {
 function normalizeState(value: unknown): DevPathState {
   if (!value || typeof value !== "object") return initialState;
   const parsed = value as Partial<DevPathState>;
+  const projects = Array.isArray(parsed.projects) ? parsed.projects.filter((project) => project && typeof project.id === "string" && typeof project.name === "string" && project.files && typeof project.files === "object") : [];
+  const safeProjects = projects.length ? projects : initialState.projects;
   return {
     ...initialState,
     ...parsed,
     progress: { ...initialState.progress, ...(parsed.progress ?? {}) },
+    versions: Array.isArray(parsed.versions) ? parsed.versions : [],
+    projects: safeProjects,
+    activeProjectId: safeProjects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : safeProjects[0].id,
     settings: { ...initialState.settings, ...(parsed.settings ?? {}) },
   };
 }
