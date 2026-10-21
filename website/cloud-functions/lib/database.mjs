@@ -10,9 +10,15 @@ export function getDatabase(env) {
     if (production && env.DATABASE_SSL !== "true") {
       throw new Error("DATABASE_SSL must be true in production");
     }
+    const ca = env.DATABASE_CA_CERT?.replace(/\\n/g, "\n");
+    if (production && !ca) {
+      throw new Error("DATABASE_CA_CERT is required in production");
+    }
     pool = new Pool({
       connectionString: env.DATABASE_URL,
-      ssl: env.DATABASE_SSL === "true" ? { rejectUnauthorized: true } : false,
+      ssl: env.DATABASE_SSL === "true"
+        ? { rejectUnauthorized: true, ...(ca ? { ca } : {}) }
+        : false,
       max: Number(env.DATABASE_POOL_SIZE ?? 1),
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 5_000,
