@@ -56,7 +56,7 @@ async function identityFor(request, env) {
   }
 }
 
-export async function onRequest({ request, env = {} }) {
+export async function onRequest({ request, env = {}, uuid }) {
   const cors = corsHeaders(request, env);
   if (cors === null) return json({ error: "origin_not_allowed" }, 403);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
@@ -118,8 +118,15 @@ export async function onRequest({ request, env = {} }) {
 
     return json({ error: "not_found" }, 404, cors);
   } catch (error) {
-    const requestId = randomUUID();
-    console.error("DevPath API request failed", { requestId });
+    // Use Makers' request UUID so this failure can be found in Log Analysis.
+    const requestId = uuid ?? randomUUID();
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("DevPath API request failed", {
+      requestId,
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      errorCode: error?.code,
+      errorMessage: errorMessage.replace(/postgres(?:ql)?:\/\/\S+/gi, "[redacted database URI]"),
+    });
     return json({ error: "temporarily_unavailable", requestId }, 503, cors);
   }
 }
