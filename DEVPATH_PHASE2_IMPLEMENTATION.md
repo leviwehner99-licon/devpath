@@ -4,6 +4,15 @@
 **Status:** Windows-Alpha-Build erstellt; Phase 2 ist noch nicht für private oder öffentliche Verteilung freigegeben.  
 **Plan:** [DEVPATH_PHASE2_PLAN.md](DEVPATH_PHASE2_PLAN.md)
 
+## EdgeOne-Vorbereitung (21. Oktober 2026)
+
+- GitHub-Deployment der Website vorbereitet: Makers-Projektwurzel ist `website`, statische Ausgabe `.`; die Website bleibt eine noch nicht produktionsreife Platzhalterseite.
+- Node.js-Cloud-Function-Handler unter `website/cloud-functions/api/` bilden Health-, Kurs-, Release- und OIDC-Kontorouten ab. Der lokale Fastify-Server bleibt für lokale Entwicklung und klassische Node-Hosts erhalten.
+- Cloud-Functions-Zielregion ist Frankfurt (`eu-frankfurt`). PostgreSQL und OIDC sind absichtlich nicht konfiguriert, weil dafür noch Anbieterentscheidungen fehlen.
+- Makers-Projektvariablen, Migrationsschritte, Routen und verbleibende Sicherheitsprüfung stehen in [website/DEPLOYMENT.md](website/DEPLOYMENT.md). Keine Zugangsdaten wurden gespeichert.
+- Ein Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Er ist erst nach Push in GitHub ausführbar; die plattformübergreifenden Pakete wurden noch nicht gebaut oder signiert.
+- EdgeOne-Handler-Syntax und JSON-Manifeste geprüft. `npm ci` für die neue Website-API konnte lokal nicht abgeschlossen werden, weil die npm-Paketregistrierung in dieser Umgebung nicht erreichbar war; der GitHub-/Makers-Build braucht Netzwerkzugriff.
+
 ## Lokal umgesetzt
 
 - Tauri-2-Desktop-App mit React/TypeScript, Monaco-Editor, Ansichten für Heute, Lernen, Code Studio, Code Base, Diplom und Einstellungen.
