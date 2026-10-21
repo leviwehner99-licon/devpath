@@ -1,0 +1,14 @@
+node_modules/
+dist/
+target/
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+src-tauri/gen/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db

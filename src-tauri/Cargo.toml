@@ -1,0 +1,19 @@
+[package]
+name = "devpath"
+version = "0.1.0"
+description = "DevPath Desktop"
+authors = ["DevPath"]
+edition = "2021"
+
+[lib]
+name = "devpath_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }

@@ -1,0 +1,24 @@
+#[tauri::command]
+fn app_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    let migrations = vec![tauri_plugin_sql::Migration {
+        version: 1,
+        description: "initial_local_learning_schema",
+        sql: include_str!("../migrations/001_initial.sql"),
+        kind: tauri_plugin_sql::MigrationKind::Up,
+    }];
+
+    tauri::Builder::default()
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:devpath.db", migrations)
+                .build(),
+        )
+        .invoke_handler(tauri::generate_handler![app_version])
+        .run(tauri::generate_context!())
+        .expect("DevPath konnte nicht gestartet werden");
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DevPath",
+  "version": "0.1.0",
+  "identifier": "app.devpath.desktop",
+  "build": { "beforeDevCommand": "npm run dev", "devUrl": "http://localhost:5173", "beforeBuildCommand": "npm run build", "frontendDist": "../dist" },
+  "app": {
+    "windows": [{ "title": "DevPath", "width": 1440, "height": 960, "minWidth": 760, "minHeight": 620, "resizable": true }],
+    "security": { "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src ipc: http://ipc.localhost; worker-src 'self' blob:;" }
+  },
+  "bundle": { "active": true, "targets": ["nsis", "dmg", "appimage"], "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png"], "category": "Education", "shortDescription": "Softwareentwicklung in deinem Tempo lernen", "longDescription": "Lokale Lernumgebung für Softwareentwicklung." }
+}
