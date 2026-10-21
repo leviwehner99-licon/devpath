@@ -10,12 +10,13 @@ function json(body, status) {
   });
 }
 
-export async function onRequestGet({ env = {}, uuid }) {
+export async function onRequestGet({ request, env = {}, uuid }) {
+  const requestId = request?.requestId ?? uuid ?? "unavailable";
   try {
     await getDatabase(env).query("SELECT 1");
     return json({ status: "ready" }, 200);
   } catch (error) {
-    logHealthFailure(error, uuid);
-    return json({ error: "temporarily_unavailable", requestId: uuid ?? "unavailable" }, 503);
+    logHealthFailure(error, requestId);
+    return json({ error: "temporarily_unavailable", requestId }, 503);
   }
 }

@@ -119,7 +119,7 @@ export async function onRequest({ request, env = {}, uuid }) {
     return json({ error: "not_found" }, 404, cors);
   } catch (error) {
     // Use Makers' request UUID so this failure can be found in Log Analysis.
-    const requestId = uuid ?? randomUUID();
+    const requestId = request?.requestId ?? uuid ?? randomUUID();
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("DevPath API request failed", {
       requestId,
