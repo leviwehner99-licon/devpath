@@ -24,7 +24,7 @@ Variablen ausschließlich in **Project Settings → Environment Variables** der 
 | `NODE_ENV` | Produktion | `production` |
 | `DATABASE_URL` | Nach Einrichtung der gehosteten PostgreSQL-Datenbank | TLS-Verbindungs-URI; nur eine eingeschränkte Anwendungsrolle verwenden |
 | `DATABASE_SSL` | Produktion | `true` |
-| `DATABASE_POOL_SIZE` | Produktion | `3` als Startwert für serverless Funktionen |
+| `DATABASE_POOL_SIZE` | Produktion | `1` als Startwert für serverless Funktionen |
 | `OIDC_ISSUER` | Nach Wahl des Identitätsanbieters | Exakter HTTPS-Issuer aus der Anbieter-Konfiguration |
 | `OIDC_AUDIENCE` | Nach Wahl des Identitätsanbieters | API-Audience, für die Zugriffstoken ausgestellt werden |
 | `OIDC_JWKS_URI` | Nach Wahl des Identitätsanbieters | HTTPS-URL des JWKS-Endpunkts |

@@ -15,7 +15,7 @@ function getPool(env) {
     pool = new Pool({
       connectionString: env.DATABASE_URL,
       ssl: env.DATABASE_SSL === "true" ? { rejectUnauthorized: true } : false,
-      max: Number(env.DATABASE_POOL_SIZE ?? 3),
+      max: Number(env.DATABASE_POOL_SIZE ?? 1),
       idleTimeoutMillis: 10_000,
       connectionTimeoutMillis: 5_000,
       statement_timeout: 5_000,
