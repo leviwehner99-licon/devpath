@@ -12,10 +12,7 @@ function getPool(env) {
     if (production && env.DATABASE_SSL !== "true") {
       throw new Error("DATABASE_SSL must be true in production");
     }
-    const ca = env.DATABASE_CA_CERT?.replace(/\\n/g, "\n");
-    if (production && !ca) {
-      throw new Error("DATABASE_CA_CERT is required in production");
-    }
+    const ca = getDatabaseCa(env, production);
     pool = new Pool({
       connectionString: env.DATABASE_URL,
       ssl: env.DATABASE_SSL === "true"
@@ -30,6 +27,20 @@ function getPool(env) {
     });
   }
   return pool;
+}
+
+function getDatabaseCa(env, production) {
+  const direct = env.DATABASE_CA_CERT?.replace(/\\n/g, "\n");
+  const encodedParts = [1, 2, 3, 4]
+    .map((part) => env[`DATABASE_CA_CERT_B64_${part}`])
+    .filter(Boolean);
+  const ca = direct || (encodedParts.length
+    ? Buffer.from(encodedParts.join(""), "base64").toString("utf8")
+    : "");
+  if (production && (!ca.includes("-----BEGIN CERTIFICATE-----") || !ca.includes("-----END CERTIFICATE-----"))) {
+    throw new Error("A valid DATABASE_CA_CERT or DATABASE_CA_CERT_B64_1..4 is required in production");
+  }
+  return ca;
 }
 
 function json(body, status = 200, headers = {}) {

@@ -24,7 +24,7 @@ Variablen ausschließlich in **Project Settings → Environment Variables** der 
 | `NODE_ENV` | Produktion | `production` |
 | `DATABASE_URL` | Nach Einrichtung der gehosteten PostgreSQL-Datenbank | TLS-Verbindungs-URI; nur eine eingeschränkte Anwendungsrolle verwenden |
 | `DATABASE_SSL` | Produktion | `true` |
-| `DATABASE_CA_CERT` | Produktion | Inhalt des Supabase-CA-Zertifikats (`prod-ca-2021.crt`); wird für die TLS-Zertifikatsprüfung benötigt |
+| `DATABASE_CA_CERT_B64_1` … `DATABASE_CA_CERT_B64_4` | Produktion | In bis zu vier Teile (je maximal 900 Zeichen) geteiltes Base64 des Supabase-CA-Zertifikats; die Teile werden in Reihenfolge zusammengesetzt und für TLS verwendet. Alternativ `DATABASE_CA_CERT`, falls der Anbieter den gesamten Inhalt zulässt. |
 | `DATABASE_POOL_SIZE` | Produktion | `1` als Startwert für serverless Funktionen |
 | `OIDC_ISSUER` | Nach Wahl des Identitätsanbieters | Exakter HTTPS-Issuer aus der Anbieter-Konfiguration |
 | `OIDC_AUDIENCE` | Nach Wahl des Identitätsanbieters | API-Audience, für die Zugriffstoken ausgestellt werden |
