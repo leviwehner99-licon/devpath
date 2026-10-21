@@ -96,7 +96,9 @@ export async function onRequest({ request, env = {}, uuid }) {
       const result = await database.query(
         "SELECT c.id, c.slug, c.title, c.summary, c.category, c.language, c.level, r.version, r.manifest, r.content_sha256 FROM courses c JOIN LATERAL (SELECT version, manifest, content_sha256 FROM course_releases WHERE course_id = c.id AND published_at IS NOT NULL ORDER BY published_at DESC LIMIT 1) r ON TRUE WHERE c.published = TRUE ORDER BY c.category, c.title",
       );
-      return json({ courses: result.rows }, 200, { ...cors, "Cache-Control": "public, max-age=60, stale-while-revalidate=300" });
+      // The catalog is read from mutable PostgreSQL metadata. Avoid serving an old
+      // empty catalog from a browser or edge cache after a course is published.
+      return json({ courses: result.rows }, 200, { ...cors, "Cache-Control": "no-store" });
     }
 
     const releaseMatch = path.match(/^\/api\/v1\/releases\/([^/]+)$/);

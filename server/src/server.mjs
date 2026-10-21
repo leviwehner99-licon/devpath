@@ -38,7 +38,7 @@ app.get("/v1/courses", async (_request, reply) => {
   const result = await pool.query(
     "SELECT c.id, c.slug, c.title, c.summary, c.category, c.language, c.level, r.version, r.manifest, r.content_sha256 FROM courses c JOIN LATERAL (SELECT version, manifest, content_sha256 FROM course_releases WHERE course_id = c.id AND published_at IS NOT NULL ORDER BY published_at DESC LIMIT 1) r ON TRUE WHERE c.published = TRUE ORDER BY c.category, c.title",
   );
-  reply.header("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
+  reply.header("Cache-Control", "no-store");
   return { courses: result.rows };
 });
 

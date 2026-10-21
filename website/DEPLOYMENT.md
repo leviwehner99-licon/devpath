@@ -37,13 +37,15 @@ Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsic
 
 Vor dem Setzen von `DATABASE_URL` eine **dedizierte, gehostete** PostgreSQL-Datenbank in einer EU-Region (bevorzugt Frankfurt, falls verfügbar) erstellen. Lokal laufendes PostgreSQL auf dem Entwickler-PC ist kein Cloud-Backend. Port 5432 nicht am Router oder PC ins Internet freigeben.
 
-Bei einer neuen Datenbank zuerst `../server/migrations/001_initial.sql` und danach `../server/migrations/002_publish_html_css_pilot.sql` jeweils einmal ausführen (zum Beispiel im pgAdmin Query Tool, mit der dedizierten Migrationsrolle). Für das bereits eingerichtete Projekt gilt laut Nutzer: Migration 001 ist schon erfolgreich; **nur Migration 002 fehlt noch**. Sie veröffentlicht die Metadaten des lokalen HTML/CSS-Pilotkurses. Der Paketpfad ist `/courses/first-responsive-site-1.0.0.json`; die SHA-256-Prüfsumme steht in `content_sha256`. Die Runtime-Rolle sollte nur die benötigten Tabellenrechte erhalten und nicht als `postgres` laufen. Bereits ausgeführte Migrationen nicht wiederholen.
+Bei einer neuen Datenbank zuerst `../server/migrations/001_initial.sql` und danach `../server/migrations/002_publish_html_css_pilot.sql` jeweils einmal ausführen (zum Beispiel im pgAdmin Query Tool, mit der dedizierten Migrationsrolle). Die Migrationen wurden in pgAdmin für eine Datenbank namens `devpath` ausgeführt. Die Produktions-API antwortet derzeit mit `{"courses":[]}`, während die konfigurierte PostgreSQL-URL auf Datenbank `postgres` zeigt. Vor weiteren Änderungen sicherstellen, dass pgAdmin tatsächlich mit dem Supabase-Host und der Produktionsdatenbank verbunden ist. Die Migration 002 veröffentlicht die Metadaten des lokalen HTML/CSS-Pilotkurses. Der Paketpfad ist `/courses/first-responsive-site-1.0.0.json`; die SHA-256-Prüfsumme steht in `content_sha256`. Vor einer Alpha ist eine eingeschränkte Runtime-Rolle einzurichten, die nur die benötigten Tabellen lesen bzw. für das Nutzerkonto ändern kann; die Anwendung sollte nicht als `postgres` laufen. Bereits ausgeführte Migrationen nicht wiederholen.
+
+Nach dem Datenbank-Setup muss die Produktion geprüft werden: `GET /api/v1/courses` soll `courses` mit dem Eintrag `pilot-html-css` zurückgeben. Aktuell wird `{"courses":[]}` gemeldet. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
 
 ## API-Routen
 
 - `GET /api/health/live` – Prozess-/Handler-Liveness ohne Datenbankzugriff.
 - `GET /api/health/ready` – prüft PostgreSQL.
-- `GET /api/v1/courses` – veröffentlichte Kursmetadaten.
+- `GET /api/v1/courses` – veröffentlichte Kursmetadaten; die Antwort wird mit `Cache-Control: no-store` ausgeliefert, damit neue Veröffentlichungen nicht hinter einem veralteten CDN-Katalog verborgen bleiben.
 - `GET /api/v1/releases/:platform?channel=alpha` – Release-Metadaten.
 - `PUT /api/v1/me` und `DELETE /api/v1/me` – OIDC-geschützte Kontoanlage/-löschung.
 
