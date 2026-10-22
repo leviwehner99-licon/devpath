@@ -4,18 +4,18 @@
 **Status:** Lokale Windows-Alpha und der Production-Kurskatalog funktionieren. Phase 2 ist weiterhin **nicht** als private Alpha freigegeben; externe Betriebs-, Produkt- und Sicherheitsgates sind offen.
 **Plan:** [DEVPATH_PHASE2_PLAN.md](DEVPATH_PHASE2_PLAN.md)
 
-## EdgeOne-Vorbereitung (21. Oktober 2026)
+## Website, Installer und EdgeOne-Bereitstellung (22. Oktober 2026)
 
-- GitHub-Deployment der Website vorbereitet: Makers-Projektwurzel ist `website`, statische Ausgabe `.`; die Website bleibt eine noch nicht produktionsreife Platzhalterseite.
+- Makers-Bereitstellung ist für Repository `leviwehner99-licon/devpath`, Branch `main`, Projektwurzel `website` und Ausgabe `.` vorbereitet. Die Website enthält eine Präsentationsseite unter `/` und eine Installationsseite unter `/download/`; beide verlinken aufeinander. Die Installationsseite liefert den versionierten Windows-NSIS-Installer und zeigt Plattform-/Alpha-Hinweise.
 - Node.js-Cloud-Function-Handler unter `website/cloud-functions/api/` bilden Health-, Kurs-, Release- und OIDC-Kontorouten ab. Der lokale Fastify-Server bleibt für lokale Entwicklung und klassische Node-Hosts erhalten.
 - Cloud-Functions-Zielregion ist Frankfurt (`eu-frankfurt`); die Supabase-Datenbank liegt in `eu-west-1` (Ireland). Der Nutzer hat die PostgreSQL-Migration und die Makers-Produktionsvariablen eingerichtet. `/api/health/ready` wurde auf der aktuellen Produktionsdomain erfolgreich bestätigt; der TLS-Handshake verwendet das geprüfte Supabase-CA-Zertifikat.
 - Eine versionierte HTML/CSS-Pilotkursdatei wird reproduzierbar aus `src/course.ts` generiert. Migration 001 erstellt Schema und Tabellen; Migration 002 veröffentlicht den HTML/CSS-Pilotkurs; Migration 003 gewährt `devpath_app` nur SELECT-Zugriff auf veröffentlichte Kurs-/Releasezeilen und setzt RLS-Policies. Am 22.10.2026 bestätigte der Nutzer, dass `/api/v1/courses` in Production jetzt alle erwarteten Kurse anzeigt. Damit ist der Produktionsabruf des veröffentlichten Katalogs verifiziert.
-- Aktuelle vom Nutzer bestätigte Produktionsdomain: `https://devpath-dpv9ts9ylvn2.edgeone.dev/`. Domainwechsel in Makers können diese Adresse ändern.
+- Frühere Makers-Domains lieferten bei der letzten Direktprüfung 404. Eine stabile Production-Domain war in Makers nicht eingetragen; nach dem Deployment von Commit `2a16b08` muss die aktuelle Domain im Makers-Dashboard kontrolliert werden. Keine frühere Deployment-Domain als garantiert gültig behandeln.
 - Makers-Projektvariablen, Migrationsschritte, Routen und verbleibende Sicherheitsprüfung stehen in [website/DEPLOYMENT.md](website/DEPLOYMENT.md). Keine Zugangsdaten wurden gespeichert.
 - Backup-/Restore-Ablauf, Incident-Triage und Alpha-Freigabeprotokoll sind in [docs/PHASE2_OPERATIONS.md](docs/PHASE2_OPERATIONS.md) vorbereitet. Eine Restoreprobe oder Incidentübung wurde dadurch nicht durchgeführt.
 - Bestätigte Produkt-/Architekturentscheidungen und offene Betreiberentscheidungen sind in [docs/PHASE2_DECISIONS.md](docs/PHASE2_DECISIONS.md) getrennt dokumentiert.
 - Dependabot ist für npm, Cargo und GitHub Actions eingerichtet; ein CI-Workflow für npm- und RustSec-Lockfile-Audits wurde ergänzt. Bis ein GitHub-Workflow erfolgreich gelaufen ist, gilt der Scan nicht als bestanden.
-- Ein Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Er ist erst nach Push in GitHub ausführbar; die plattformübergreifenden Pakete wurden noch nicht gebaut oder signiert.
+- Der Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Für Commit `2a16b08` liefen die drei GitHub-Actions-Workflows zum Zeitpunkt der letzten Prüfung noch; erfolgreiche Ergebnisse müssen in GitHub Actions bestätigt werden. Die Pakete werden als unsignierte CI-Artefakte abgelegt und sind keine öffentlichen Releases.
 - EdgeOne-Handler-Syntax und JSON-Manifeste geprüft. Der Frontend-Produktionsbuild wurde nach der Mehrdateien-Projektumsetzung erneut erfolgreich erstellt. Die Katalogantwort verwendet `Cache-Control: no-store`. Nach Vergabe der gezielten Leserechte durch Migration 003 bestätigte der Nutzer in Production, dass der Kurskatalog die erwarteten Kurse anzeigt. Dies verifiziert den Katalogendpunkt und die Lesepfade für veröffentlichte Kurs- und Release-Metadaten; es ersetzt keine Prüfung weiterer Tabellenrechte oder anderer API-Routen.
 
 ## Lokal umgesetzt
@@ -43,7 +43,7 @@
 
 ## Windows-Installer
 
-Erzeugter Pfad: `src-tauri/target/release/bundle/nsis/DevPath_0.1.0_x64-setup.exe`.
+Der neu gebaute NSIS-Installer mit dem aktualisierten `</>`-Logo liegt unter `src-tauri/target/release/bundle/nsis/DevPath_0.1.0_x64-setup.exe`. Eine Kopie für die Downloadseite liegt unter `website/downloads/DevPath_0.1.0_x64-setup.exe`; die zugehörige SHA-256-Datei liegt daneben. Die Website verlinkt auf `/downloads/DevPath_0.1.0_x64-setup.exe`.
 
 Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale DevPath-Daten sichern. Windows kann vor unsignierter Software warnen. Nicht öffentlich verteilen und nicht als produktives Release behandeln.
 
@@ -54,7 +54,7 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 3. **Konto:** Für die private Phase-2-Alpha ist offline-only beschlossen. Die App benötigt kein Konto; OIDC-/PKCE, Wiederherstellung, Logout/Widerruf und Kontolöschung sind daher bewusst nicht Teil dieser Alpha. Die optionalen API-Kontorouten bleiben ohne OIDC-Konfiguration geschlossen.
 4. **Codeausführung:** Runnerprotokoll und Sandbox je OS bauen und unabhängig prüfen. Bis zum bestandenen Gate bleibt Ausführung deaktiviert.
 5. **Release:** CI-Matrix auf allen Plattformen erfolgreich nachweisen; Artefakte mit real beschafften Plattformschlüsseln signieren/notarisieren; Updatefeed, Rollback/Widerruf, SBOM/Lizenzinventar und Schlüsselrotation umsetzen. Keine Signierschlüssel sind im Repository.
-6. **Website/API:** Website um echte Systemanforderungen, freigegebene Datenschutz-/Supportinformationen und verifizierte Releaseartefakte ergänzen. Aktuell zeigt sie transparent den Entwicklungsstatus; Betreiber-/Rechtsangaben und Downloads werden nicht erfunden. Die Katalogroute ist produktiv bestätigt; Makers-Rate-Limit und reale Produktionsregeln müssen in der Konsole geprüft werden. Kontoendpunkte bleiben ungenutzt.
+6. **Website/API:** Präsentations- und Downloadseite sind implementiert und mit dem Installer verbunden. Vor einer Alpha bleiben eine stabile Production-Domain, freigegebene Systemanforderungen, Betreiber-/Datenschutz-/Supportangaben, Produktions-Sicherheitsheader und verifizierte (signierte) Releaseartefakte zu bestätigen. Die Katalogroute ist produktiv bestätigt; Makers-Rate-Limit und reale Produktionsregeln müssen in der Konsole geprüft werden. Kontoendpunkte bleiben ungenutzt.
 7. **Unabhängige Prüfung:** Threat-/Datenschutzgates, Accessibility-/Screenreaderreview, Kursfachreview, Usabilitytests und Securityreview mit realen Personen durchführen; kritische Befunde schließen. CI-Dependency-Scans nach dem ersten GitHub-Lauf auswerten.
 8. **Betrieb:** Backup/Restore-Probe, Incident-Tabletop, reale Kontaktwege und Teilnahmebedingungen abschließen. Private Alpha erst danach freigeben.
 
