@@ -15,3 +15,4 @@
 @media(max-width:760px){.onboarding-dialog{padding:25px 20px}.onboarding-dialog .field-grid{grid-template-columns:1fr}.catalog-controls{align-items:stretch}.search-field{max-width:none}.curriculum-hero{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.catalog-card{transition:none}.catalog-card:hover{transform:none}}
 .theme-switch{min-height:34px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:700}.theme-switch:hover{background:var(--surface-subtle)}
+.editor-loading{min-height:260px;display:grid;place-items:center;background:var(--surface);color:var(--muted);font-size:13px}
