@@ -12,7 +12,7 @@ const glyphs: Record<IconName, ReactNode> = {
   curriculum: <><circle cx="6" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="6" cy="19" r="2"/><path d="M11 5h9M11 12h9M11 19h9"/></>,
   community: <><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0m1-11a3 3 0 0 1 0 6m2 1a5 5 0 0 1 3 4"/></>,
   projects: <><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></>,
-  settings: <><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.2 2.1-2 2-2.2-1.2h-.2l-2.4 1.1-.5 2.4h-2.8l-.5-2.4-2.4-1.1h-.2l-2.2 1.2-2-2 1.2-2.1-.1-.2L3.3 12l1.1-2.4-.1-.2-1.2-2.1 2-2 2.2 1.2h.2l2.4-1.1.5-2.4h2.8l.5 2.4 2.4 1.1h.2l2.2-1.2 2 2-1.2 2.1.1.2 1.1 2.4z" transform="translate(0 1) scale(.82) translate(2.6 2.6)"/></>,
+  settings: <><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2M12 19.5v2M4.8 4.8l1.4 1.4m11.6 11.6 1.4 1.4M2.5 12h2m15 0h2M4.8 19.2l1.4-1.4M17.8 6.2l1.4-1.4"/><circle cx="12" cy="12" r="8"/></>,
   spark: <><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></>,
   search: <><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></>,
   arrow: <><path d="M4 12h15m-6-6 6 6-6 6"/></>,
