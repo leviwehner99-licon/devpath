@@ -87,7 +87,7 @@ function normalizeState(value: unknown): DevPathState {
       ...(files ? { files } : {}),
     });
   }
-  const rawSettings = isRecord(parsed.settings) ? parsed.settings : {};
+  const rawSettings: Record<string, unknown> = isRecord(parsed.settings) ? parsed.settings : {};
   const experience = parsed.experience === "some" || parsed.experience === "experienced" ? parsed.experience : "new";
   const theme = rawSettings.theme === "light" || rawSettings.theme === "dark" ? rawSettings.theme : "system";
   const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
