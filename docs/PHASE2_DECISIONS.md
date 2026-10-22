@@ -7,6 +7,7 @@
 | Thema | Entscheidung | Folge |
 | --- | --- | --- |
 | Offline-Nutzung | Lernen soll vorerst ohne Konto funktionieren. | Desktop-App bleibt lokal nutzbar; Konto darf kein Startblocker sein. |
+| Konto in der privaten Phase-2-Alpha | Offline-only; kein Anmeldebildschirm und keine Kontodaten für die Alpha. | OIDC-/PKCE-Implementierung wird bis zu einer späteren ausdrücklichen Kontoentscheidung nicht aktiviert. Die vorbereiteten API-Kontorouten bleiben ohne OIDC-Konfiguration geschlossen. |
 | Hosted Datenbank | Supabase PostgreSQL, Projekt `rvhxsgexonmolrpdxdou`, Region `eu-west-1`. | Produktionskurskatalog wurde über die Makers-API bestätigt. Keine Geheimnisse in dieses Register aufnehmen. |
 | Website/API-Hosting | EdgeOne Pages/Makers; Production branch ist laut Projektkonfiguration `main`. | Website und Cloud Functions teilen ein Projekt. Deployment-Status in Makers ist vor Release zu prüfen. |
 | Runtime-Datenbankrolle | `devpath_app` liest veröffentlichte Kurse und Releases über Migration 003/RLS. | Andere Tabellenrechte und Restoreprobe bleiben offen. |

@@ -9,3 +9,5 @@
 @media(max-width:580px){.version-form{grid-template-columns:1fr}.version-form .button{grid-column:auto}.lesson-check .text-button{margin-left:0}}
 
 .recovery-panel{max-width:760px;margin-bottom:18px;border:1px solid var(--danger);padding:18px 20px}.recovery-panel strong{color:var(--danger)}.recovery-panel p,.storage-warning{color:var(--muted);font-size:12px;line-height:1.6}.storage-warning{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--danger) 9%,var(--surface));color:var(--ink)}.privacy-actions button:disabled{opacity:.5;cursor:not-allowed}
+
+.schedule-days{display:flex;flex-wrap:wrap;gap:8px 14px;min-width:0;margin:0 0 14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px}.schedule-days legend{padding:0 5px}.schedule-days label{display:inline-flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;cursor:pointer}.schedule-days input{accent-color:var(--accent);width:16px;height:16px}.schedule-days input:disabled{opacity:.6}.settings-schedule{margin:8px 0 16px}.time-input{max-width:220px}

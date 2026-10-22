@@ -1,6 +1,7 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { initialState, type DevPathState } from "./types";
 import { validateProjectFiles } from "./projects";
+import { defaultStudyDays } from "./planner";
 
 const STORAGE_KEY = "devpath.local.v1";
 const DATABASE_URL = "sqlite:devpath.db";
@@ -89,6 +90,12 @@ function normalizeState(value: unknown): DevPathState {
   }
   const rawSettings: Record<string, unknown> = isRecord(parsed.settings) ? parsed.settings : {};
   const experience = parsed.experience === "some" || parsed.experience === "experienced" ? parsed.experience : "new";
+  const weeklySessions = Number.isSafeInteger(parsed.weeklySessions) && Number(parsed.weeklySessions) >= 1 && Number(parsed.weeklySessions) <= 7 ? Number(parsed.weeklySessions) : initialState.weeklySessions;
+  const studyDays = Array.isArray(parsed.studyDays)
+    ? [...new Set(parsed.studyDays.filter((day): day is number => Number.isInteger(day) && day >= 0 && day <= 6))].slice(0, 7)
+    : [];
+  const safeStudyDays = studyDays.length ? studyDays : defaultStudyDays(weeklySessions);
+  const studyTime = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime) ? parsed.studyTime : "18:00";
   const theme = rawSettings.theme === "light" || rawSettings.theme === "dark" ? rawSettings.theme : "system";
   const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
 
@@ -96,7 +103,9 @@ function normalizeState(value: unknown): DevPathState {
     learnerName: boundedString(parsed.learnerName, initialState.learnerName, 32),
     goal: boundedString(parsed.goal, initialState.goal, 100),
     experience,
-    weeklySessions: Number.isSafeInteger(parsed.weeklySessions) && Number(parsed.weeklySessions) >= 1 && Number(parsed.weeklySessions) <= 7 ? Number(parsed.weeklySessions) : initialState.weeklySessions,
+    weeklySessions: safeStudyDays.length,
+    studyDays: safeStudyDays,
+    studyTime,
     sessionMinutes: [10, 15, 20, 30, 45, 60].includes(Number(parsed.sessionMinutes)) ? Number(parsed.sessionMinutes) : initialState.sessionMinutes,
     progress: safeProgress,
     versions: safeVersions,

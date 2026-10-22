@@ -31,6 +31,8 @@ export type DevPathState = {
   goal: string;
   experience: "new" | "some" | "experienced";
   weeklySessions: number;
+  studyDays: number[];
+  studyTime: string;
   sessionMinutes: number;
   progress: Record<string, LessonProgress>;
   versions: SavedVersion[];
@@ -46,6 +48,8 @@ export const initialState: DevPathState = {
   goal: "Meine erste eigene Website bauen",
   experience: "new",
   weeklySessions: 3,
+  studyDays: [0, 2, 4],
+  studyTime: "18:00",
   sessionMinutes: 20,
   progress: {},
   versions: [],

@@ -46,3 +46,10 @@ jobs:
           node --check website/cloud-functions/lib/auth.mjs
           node -e "JSON.parse(require('node:fs').readFileSync('website/edgeone.json', 'utf8'))"
       - run: npm run tauri -- build --bundles ${{ matrix.bundle }}
+      - name: Store unsigned CI package for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: DevPath-unsigned-${{ matrix.os }}-${{ github.sha }}
+          path: src-tauri/target/release/bundle/${{ matrix.bundle }}/*
+          if-no-files-found: error
+          retention-days: 14

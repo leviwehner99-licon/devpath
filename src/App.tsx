@@ -55,7 +55,7 @@ export default function App() {
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
-  const finishOnboarding = (values?: Pick<DevPathState, "goal" | "experience" | "weeklySessions" | "sessionMinutes">) => {
+  const finishOnboarding = (values?: Pick<DevPathState, "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
     setState((current) => ({ ...current, ...values, onboardingCompleted: true }));
     setShowOnboarding(false);
   };
@@ -167,9 +167,20 @@ export default function App() {
     setNotice(`Projekt „${project.name}“ wurde gelöscht.`);
   };
 
-  const markComplete = (lesson: CourseLesson, hintCount: number) => {
+  const recordHint = (lessonId: string, hintCount: number) => setState((current) => {
+    const previous = current.progress[lessonId];
+    return { ...current, progress: { ...current.progress, [lessonId]: { completed: previous?.completed ?? false, code: previous?.code ?? "", updatedAt: new Date().toISOString(), attempts: previous?.attempts ?? 0, hintCount: Math.max(previous?.hintCount ?? 0, hintCount), confidence: previous?.confidence ?? 0, nextReviewAt: previous?.nextReviewAt } } };
+  });
+
+  const recordAttempt = (lessonId: string) => setState((current) => {
+    const previous = current.progress[lessonId];
+    return { ...current, progress: { ...current.progress, [lessonId]: { completed: previous?.completed ?? false, code: previous?.code ?? "", updatedAt: new Date().toISOString(), attempts: (previous?.attempts ?? 0) + 1, hintCount: previous?.hintCount ?? 0, confidence: previous?.confidence ?? 0, nextReviewAt: previous?.nextReviewAt } } };
+  });
+
+  const markComplete = (lesson: CourseLesson, hintCount: number, passed: boolean) => {
     const currentCode = state.progress[lesson.id]?.code ?? lesson.starterCode;
-    if (!lesson.successPattern.test(currentCode)) {
+    if (!passed || !lesson.successPattern.test(currentCode)) {
+      recordAttempt(lesson.id);
       setNotice("Prüfe dein Ergebnis noch einmal. Das Lernziel ist im Code noch nicht erkennbar.");
       return;
     }
@@ -297,7 +308,7 @@ export default function App() {
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
         {stateLoaded && !storageIssue && view === "today" && <Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} />}
-        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} onComplete={(hints) => markComplete(activeLesson, hints)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
         {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
