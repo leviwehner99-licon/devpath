@@ -10,12 +10,12 @@
 - Node.js-Cloud-Function-Handler unter `website/cloud-functions/api/` bilden Health-, Kurs-, Release- und OIDC-Kontorouten ab. Der lokale Fastify-Server bleibt für lokale Entwicklung und klassische Node-Hosts erhalten.
 - Cloud-Functions-Zielregion ist Frankfurt (`eu-frankfurt`); die Supabase-Datenbank liegt in `eu-west-1` (Ireland). Der Nutzer hat die PostgreSQL-Migration und die Makers-Produktionsvariablen eingerichtet. `/api/health/ready` wurde auf der aktuellen Produktionsdomain erfolgreich bestätigt; der TLS-Handshake verwendet das geprüfte Supabase-CA-Zertifikat.
 - Eine versionierte HTML/CSS-Pilotkursdatei wird reproduzierbar aus `src/course.ts` generiert. Migration 001 erstellt Schema und Tabellen; Migration 002 veröffentlicht den HTML/CSS-Pilotkurs; Migration 003 gewährt `devpath_app` nur SELECT-Zugriff auf veröffentlichte Kurs-/Releasezeilen und setzt RLS-Policies. Am 22.10.2026 bestätigte der Nutzer, dass `/api/v1/courses` in Production jetzt alle erwarteten Kurse anzeigt. Damit ist der Produktionsabruf des veröffentlichten Katalogs verifiziert.
-- Frühere Makers-Domains lieferten bei der letzten Direktprüfung 404. Eine stabile Production-Domain war in Makers nicht eingetragen; nach dem Deployment von Commit `2a16b08` muss die aktuelle Domain im Makers-Dashboard kontrolliert werden. Keine frühere Deployment-Domain als garantiert gültig behandeln.
+- Die Makers-Production-Domain lässt sich aus dem Repository nicht verlässlich ermitteln. Frühere Deployment-Adressen wechselten bzw. lieferten 404; vor einer Freigabe muss die aktuelle **Project Domain** in Makers unter Domain Management abgelesen und live geprüft werden. Keine alte Deployment-Domain als garantiert gültig behandeln.
 - Makers-Projektvariablen, Migrationsschritte, Routen und verbleibende Sicherheitsprüfung stehen in [website/DEPLOYMENT.md](website/DEPLOYMENT.md). Keine Zugangsdaten wurden gespeichert.
 - Backup-/Restore-Ablauf, Incident-Triage und Alpha-Freigabeprotokoll sind in [docs/PHASE2_OPERATIONS.md](docs/PHASE2_OPERATIONS.md) vorbereitet. Eine Restoreprobe oder Incidentübung wurde dadurch nicht durchgeführt.
 - Bestätigte Produkt-/Architekturentscheidungen und offene Betreiberentscheidungen sind in [docs/PHASE2_DECISIONS.md](docs/PHASE2_DECISIONS.md) getrennt dokumentiert.
-- Dependabot ist für npm, Cargo und GitHub Actions eingerichtet; ein CI-Workflow für npm- und RustSec-Lockfile-Audits wurde ergänzt. Bis ein GitHub-Workflow erfolgreich gelaufen ist, gilt der Scan nicht als bestanden.
-- Der Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Für Commit `2a16b08` liefen die drei GitHub-Actions-Workflows zum Zeitpunkt der letzten Prüfung noch; erfolgreiche Ergebnisse müssen in GitHub Actions bestätigt werden. Die Pakete werden als unsignierte CI-Artefakte abgelegt und sind keine öffentlichen Releases.
+- Dependabot ist für npm, Cargo und GitHub Actions eingerichtet. Für Commit `f6983e8` am 22.10.2026 sind der Frontend-Build (Run #35) und der Dependency-Audit (Run #15) in GitHub Actions erfolgreich. Die Desktop-Matrix (Run #26) stand bei der letzten Prüfung noch auf „Queued“; Buildmatrix daher noch nicht als bestanden werten.
+- Der Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Für Commit `f6983e8` muss Run #26 mit den drei OS-Jobs noch erfolgreich abgeschlossen werden. Die Pakete werden als unsignierte CI-Artefakte abgelegt und sind keine öffentlichen Releases.
 - EdgeOne-Handler-Syntax und JSON-Manifeste geprüft. Der Frontend-Produktionsbuild wurde nach der Mehrdateien-Projektumsetzung erneut erfolgreich erstellt. Die Katalogantwort verwendet `Cache-Control: no-store`. Nach Vergabe der gezielten Leserechte durch Migration 003 bestätigte der Nutzer in Production, dass der Kurskatalog die erwarteten Kurse anzeigt. Dies verifiziert den Katalogendpunkt und die Lesepfade für veröffentlichte Kurs- und Release-Metadaten; es ersetzt keine Prüfung weiterer Tabellenrechte oder anderer API-Routen.
 
 ## Lokal umgesetzt
@@ -71,6 +71,13 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 - Lernversuche und Hilfen werden lokal erfasst. Bei Wiederholungen erklärt die Empfehlung, ob zusätzliche Hinweise oder eine niedrige Selbsteinschätzung den Termin ausgelöst haben.
 - Konto wurde für die private Phase-2-Alpha auf offline-only festgelegt. Damit ist für diese Alpha kein OIDC-Anbieter nötig; die API-Kontorouten bleiben unkonfiguriert und geschlossen.
 - Nach diesen Änderungen sind `npm run build` und der NSIS-Paketbuild erfolgreich. Der aktualisierte Installer wurde erzeugt; Verhalten des neuen Wochenplans und Datenexports muss noch in der installierten App von einer Person geprüft werden.
+
+## Statusprüfung am 22. Oktober 2026
+
+- HEAD ist `f6983e8` (`Fix audited Rust dependency and refresh CI actions`), Branch `main`; vor den unten genannten Dokumentationsupdates war das Arbeitsverzeichnis sauber.
+- Lokal erneut erfolgreich: `npm run build`, `npm run check --prefix server` und `cargo check --locked --manifest-path src-tauri/Cargo.toml`.
+- GitHub Actions: Frontend-Build #35 und Dependency-Audit #15 erfolgreich; Desktop-Matrix #26 war bei letzter UI-Prüfung weiterhin „Queued“.
+- Diese lokale Prüfung konnte nicht auf Makers oder Supabase zugreifen. Die aktuelle Production-Domain, Security-Header aus der echten HTTP-Antwort, Makers-Rate-Limit, Supabase-Tarif/Retention und Restoreprobe bleiben unbestätigt.
 
 ## Was du jetzt ausführen kannst
 

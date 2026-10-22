@@ -54,15 +54,37 @@ Vor dem ersten Lauf `manage-bde -status $env:SystemDrive` ausführen und bestät
 
 ### Restoreprobe ausschließlich in ein leeres Testziel
 
-Für den Restore müssen ebenfalls Host, Port, Datenbank und Benutzer des **separaten leeren Testziels** gesetzt werden; das Passwort erneut verdeckt abfragen und nur `PGPASSWORD` setzen wie oben. Dann:
+Eine zweite Supabase-Datenbank ist nicht zwingend nötig: Für die Restoreprobe kannst du die vorhandene lokale PostgreSQL-18-Installation in pgAdmin verwenden. In pgAdmin links **Servers → PostgreSQL 18 → Databases** rechts anklicken → **Create → Database…**. Datenbankname `devpath_restore_test`, Owner `postgres`, dann **Save**. Dadurch bleibt die Supabase-Production-Datenbank unberührt.
+
+Prüfe in einer PowerShell, ob PostgreSQL-18-Werkzeuge gefunden werden:
 
 ```powershell
-$env:PGHOST = 'TEST-HOST_AUS_SUPABASE_CONNECT'
-$env:PGPORT = 'TEST-PORT_AUS_SUPABASE_CONNECT'
-$env:PGDATABASE = 'LEERE_TESTDATENBANK'
-$env:PGUSER = 'TESTBENUTZER_AUS_SUPABASE_CONNECT'
-$env:PGSSLMODE = 'require'
-$secret = Read-Host 'Testdatenbankpasswort' -AsSecureString
+$env:Path = "C:\Program Files\PostgreSQL\18\bin;$env:Path"
+pg_dump --version
+pg_restore --version
+```
+
+Falls PostgreSQL 18 an einem anderen Ort installiert ist, ändere nur den Pfad zum `bin`-Ordner. Für die Restore-RLS-Policies muss die lokale Serverrolle `devpath_app` existieren. Öffne im pgAdmin-Browser den Query Tool des lokalen Servers (Rechtsklick auf `PostgreSQL 18` → **Query Tool**) und führe aus:
+
+```sql
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'devpath_app') THEN
+    CREATE ROLE devpath_app NOLOGIN;
+  END IF;
+END
+$$;
+```
+
+Setze danach die Variablen auf **localhost und die neue lokale Testdatenbank**; nicht auf Supabase. Frage das lokale `postgres`-Passwort verdeckt ab wie im Backupbeispiel:
+
+```powershell
+$env:PGHOST = 'localhost'
+$env:PGPORT = '5432'
+$env:PGDATABASE = 'devpath_restore_test'
+$env:PGUSER = 'postgres'
+$env:PGSSLMODE = 'disable'
+$secret = Read-Host 'Lokales PostgreSQL-Passwort für postgres' -AsSecureString
 $secretPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
 try {
   $env:PGPASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($secretPtr)
@@ -75,7 +97,7 @@ try {
 if ($LASTEXITCODE -ne 0) { throw 'Restore fehlgeschlagen; Ursache prüfen und Testziel neu bereitstellen.' }
 ```
 
-RLS-Policies verweisen auf die Rolle `devpath_app`. Diese Rolle muss im leeren Ziel vor dem Restore existieren. Nach Restore einer Supabase-Sicherung müssen Passwörter benutzerdefinierter Rollen gegebenenfalls neu gesetzt werden; Supabase weist darauf hin, dass diese nicht in täglichen Backups enthalten sind. Prüfe vor dem Restoreziel den [Supabase Restore-Ablauf](https://supabase.com/docs/guides/platform/backups). Ein Backup stellt keine externen Storage-Objekte wieder her; DevPath verwendet aktuell keinen Supabase Storage für Nutzercode.
+Danach in pgAdmin **devpath_restore_test → Query Tool** öffnen und `server/migrations/003_runtime_course_catalog_access.sql` ausführen. So werden die Lesegrants und Policies auf die lokale Rolle angewandt; Production-Migrationen werden nicht verändert. Ein Backup stellt keine externen Storage-Objekte wieder her; DevPath verwendet aktuell keinen Supabase Storage für Nutzercode.
 
 Danach im Testziel mindestens prüfen:
 
@@ -84,9 +106,12 @@ SELECT current_database(), current_user;
 SELECT count(*) AS courses FROM public.courses;
 SELECT count(*) AS published_courses FROM public.courses WHERE published IS TRUE;
 SELECT count(*) AS published_releases FROM public.course_releases WHERE published_at IS NOT NULL;
+SET ROLE devpath_app;
+SELECT count(*) AS app_visible_courses FROM public.courses;
+RESET ROLE;
 ```
 
-Anschließend die App-Runtimeverbindung gegen das Testziel prüfen und bestätigen, dass nur veröffentlichte Datensätze sichtbar sind. Restorezeit, Client-/Serverversion, Prüfsumme, Zähler und Abweichungen dokumentieren. Testprojekt und Backupkopien nach der festgelegten Aufbewahrungsregel löschen. Ein bestandener `pg_restore` allein ist noch keine erfolgreiche Wiederherstellungsübung.
+Die Zeile `app_visible_courses` muss denselben Wert wie `published_courses` ergeben. Restorezeit, Client-/Serverversion, Prüfsumme, Zähler und Abweichungen dokumentieren. Nach erfolgreicher Probe die lokale Testdatenbank in pgAdmin durch Rechtsklick → **Delete/Drop** entfernen und die Backupkopien nach der festgelegten Aufbewahrungsregel löschen. Ein bestandener `pg_restore` allein ist noch keine erfolgreiche Wiederherstellungsübung.
 
 ### Betriebsentscheidung vor einer privaten Alpha
 
@@ -135,3 +160,44 @@ Vor jedem privaten Alpha-Release müssen Verantwortliche Evidenz oder eine bewus
 | Feedback-/Vorfallweg und Teilnahmebedingungen |  |  | Offen |
 
 Eine leere Evidenzspalte ist kein bestandenes Gate. Dieses Protokoll ersetzt keine Rechtsberatung oder externe Sicherheitsprüfung.
+
+## 4. Live-Prüfung der Makers-Production-Adresse
+
+Die feste Makers-Adresse steht im Projekt unter **Domain Management** als Project Domain. Verwende nicht eine ältere URL aus einem einzelnen Deployment. Ersetze im folgenden PowerShell-Block ausschließlich `HIER_DIE_PROJECT_DOMAIN_EINTRAGEN` durch den Hostnamen aus Makers, ohne `https://` und ohne abschließenden Schrägstrich. Beispiel für das Format: `devpath-abcdefgh.edgeone.dev`.
+
+```powershell
+$base = 'https://HIER_DIE_PROJECT_DOMAIN_EINTRAGEN'
+$paths = @(
+  '/',
+  '/download/',
+  '/downloads/DevPath_0.1.0_x64-setup.exe',
+  '/downloads/DevPath_0.1.0_x64-setup.exe.sha256',
+  '/api/health/live',
+  '/api/health/ready',
+  '/api/v1/courses'
+)
+foreach ($path in $paths) {
+  try {
+    $response = Invoke-WebRequest -Uri ($base + $path) -Method Get -MaximumRedirection 5
+    [pscustomobject]@{
+      Path = $path
+      Status = [int]$response.StatusCode
+      ContentType = $response.Headers['Content-Type']
+      CacheControl = $response.Headers['Cache-Control']
+      CSP = $response.Headers['Content-Security-Policy']
+      XContentTypeOptions = $response.Headers['X-Content-Type-Options']
+    }
+    if ([int]$response.StatusCode -ne 200) { throw "Unerwarteter HTTP-Status für $path" }
+    if ($path -in @('/', '/download/') -and [string]::IsNullOrWhiteSpace($response.Headers['Content-Security-Policy'])) { throw "Content-Security-Policy fehlt auf $path" }
+    if ($path -in @('/', '/download/') -and $response.Headers['X-Content-Type-Options'] -ne 'nosniff') { throw "X-Content-Type-Options fehlt oder ist falsch auf $path" }
+    if ($path -eq '/api/health/live' -and $response.Content -notmatch '"status"\s*:\s*"ok"') { throw 'Liveness-Antwort ist unerwartet.' }
+    if ($path -eq '/api/health/ready' -and $response.Content -notmatch '"status"\s*:\s*"ready"') { throw 'Readiness-Antwort ist unerwartet.' }
+    if ($path -eq '/api/v1/courses' -and $response.Content -notmatch 'pilot-html-css') { throw 'Pilotkurs fehlt in der Katalogantwort.' }
+    if ($path -like '/downloads/*' -and $path.EndsWith('.exe') -and $response.Headers['Content-Type'] -notmatch 'octet-stream|application/x-msdownload') { Write-Warning 'Installer kam nicht mit erwartetem Download-Content-Type zurück; manuell prüfen.' }
+  } catch {
+    Write-Error "Prüfung fehlgeschlagen: $path — $($_.Exception.Message)"
+  }
+}
+```
+
+Erwartet werden sieben Antworten mit HTTP `200`. Bei der Präsentations- und Downloadseite muss `Content-Security-Policy` vorhanden sein; API- und Download-Antworten sollten ebenfalls die vorgesehenen Sicherheitsheader ausliefern. Die Katalogantwort muss `pilot-html-css` enthalten. Kopiere bei Problemen nur Statuscode, Pfad und die nicht geheimen Response-Header hierher, niemals `DATABASE_URL`, Zertifikate oder Passwörter.

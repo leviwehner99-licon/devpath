@@ -11,9 +11,13 @@
 
 Die Website und die API liegen im selben Makers-Projekt. Die statische Website bleibt im Ordner `website`; die API-Routen liegen unter `website/cloud-functions/api`. Makers erzeugt daraus `/api/...`-Routen.
 
-## Erst deployen, wenn die öffentliche Platzhalterseite in Ordnung ist
+## Produktionsbereitstellung
 
-Der erste erfolgreiche Produktions-Deploy macht `index.html` öffentlich erreichbar. Die Seite ist momentan noch eine Platzhalter-/Vorstellungsseite und kein fertiges Konto- oder Downloadportal.
+Die Repository-Wurzel für Makers ist `website`; die fertige Präsentationsseite liegt unter `/`, die Downloadseite unter `/download/`. Ein erfolgreicher Push auf den Production-Branch `main` löst entsprechend der Makers-Projekteinstellung ein Production-Deployment aus. Die aktuelle Project Domain ist danach im Makers-Projekt unter **Domain Management** abzulesen. Deployment-Domains pro Commit sind nicht als dauerhafte öffentliche Adresse zu behandeln.
+
+Nach erfolgreichem Deployment alle Website- und API-Routen aus dem Abschnitt „API-Routen“ sowie die Installer- und SHA-256-URLs live abrufen. Die statischen Sicherheitsheader in `edgeone.json` und `_headers` sind erst dann bestätigt, wenn die echte Production-Antwort sie ausliefert. Die verwendete Cloud-Function-Region Frankfurt ist nicht automatisch gleichbedeutend mit der PostgreSQL-Region; die Datenbank bleibt in Supabase `eu-west-1`.
+
+Vor einer Freigabe zusätzlich in Makers die Production-Domain-Zuordnung, Environment-Variablen, Request-/Rate-Limit-Regeln und Runtime-Logs prüfen. Keine geheimen Variablenwerte in GitHub, Screenshots oder Nachrichten kopieren.
 
 ## Projektvariablen
 
