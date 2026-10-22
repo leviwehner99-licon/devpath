@@ -7,3 +7,5 @@
 @keyframes diploma-enter{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}@keyframes sparkle-pulse{from{transform:scale(.88);opacity:.65}to{transform:scale(1.08);opacity:1}}
 @media(max-width:850px){.base-layout{grid-template-columns:1fr}.diff-panel{position:static}.version-form{grid-template-columns:1fr 1fr}.version-form .button{grid-column:1/-1}}
 @media(max-width:580px){.version-form{grid-template-columns:1fr}.version-form .button{grid-column:auto}.lesson-check .text-button{margin-left:0}}
+
+.recovery-panel{max-width:760px;margin-bottom:18px;border:1px solid var(--danger);padding:18px 20px}.recovery-panel strong{color:var(--danger)}.recovery-panel p,.storage-warning{color:var(--muted);font-size:12px;line-height:1.6}.storage-warning{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--danger) 9%,var(--surface));color:var(--ink)}.privacy-actions button:disabled{opacity:.5;cursor:not-allowed}

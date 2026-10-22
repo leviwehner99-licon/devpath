@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { clearState, exportState, loadState, saveState } from "./storage";
+import { clearState, exportState, loadState, parseDataExport, saveState } from "./storage";
 import { recommendNextLesson, reviewDate } from "./planner";
 import { pilotCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
@@ -17,6 +17,8 @@ const navigation: { id: View; label: string; icon: string }[] = [
 export default function App() {
   const [state, setState] = useState<DevPathState>(initialState);
   const [stateLoaded, setStateLoaded] = useState(false);
+  const [storageWritable, setStorageWritable] = useState(false);
+  const [storageIssue, setStorageIssue] = useState("");
   const [view, setView] = useState<View>("today");
   const [notice, setNotice] = useState("");
   const [runRequested, setRunRequested] = useState(false);
@@ -35,16 +37,16 @@ export default function App() {
   const progressPercent = Math.round(completedCount / pilotCourse.lessons.length * 100);
 
   useEffect(() => {
-    loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); }).catch(() => setNotice("Lokale Daten konnten nicht geladen werden.")).finally(() => setStateLoaded(true));
+    loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); setStorageWritable(true); }).catch(() => setStorageIssue("DevPath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
   }, []);
 
   useEffect(() => {
-    if (!stateLoaded) return;
+    if (!stateLoaded || !storageWritable) return;
     const timer = window.setTimeout(() => {
       void saveState(state).catch(() => setNotice("Deine Änderung konnte lokal nicht gespeichert werden."));
     }, 350);
     return () => window.clearTimeout(timer);
-  }, [state, stateLoaded]);
+  }, [state, stateLoaded, storageWritable]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = state.settings.theme;
@@ -239,18 +241,49 @@ export default function App() {
   };
 
   const resetData = async () => {
+    if (!storageWritable) { setNotice("Löschen ist gesperrt, weil die gespeicherten Daten nicht geladen werden konnten."); return; }
     if (!window.confirm("Lokales Profil und Lernfortschritt auf diesem Gerät löschen?")) return;
-    await clearState();
-    setState(initialState);
-    setSelectedLessonId(null);
-    setNotice("Lokale Daten wurden gelöscht.");
+    try {
+      await clearState();
+      setState(structuredClone(initialState));
+      setSelectedLessonId(null);
+      setNotice("Lokale Daten wurden gelöscht.");
+    } catch {
+      setNotice("Lokale Daten konnten nicht gelöscht werden. Es wurde nichts weiter geändert.");
+    }
+  };
+
+  const exportLocalData = () => {
+    if (!storageWritable) { setNotice("Export ist gesperrt, weil DevPath die gespeicherten Daten nicht lesen konnte."); return; }
+    try { exportState(state); setNotice("Datenexport wurde erstellt. Bewahre die Datei geschützt auf; sie enthält deinen Lernstand und Projektcode."); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Datenexport konnte nicht erstellt werden."); }
+  };
+
+  const importLocalData = async (file: File) => {
+    if (file.size > 50_000_000) { setNotice("Der Datenexport ist größer als 50 MB."); return; }
+    try {
+      const imported = parseDataExport(await file.text());
+      const projectCount = imported.projects.length;
+      const versionCount = imported.versions.length;
+      const completedCount = Object.values(imported.progress).filter((item) => item.completed).length;
+      if (!window.confirm(`Dieser Export enthält ${projectCount} Projekte, ${versionCount} gespeicherte Versionen und ${completedCount} abgeschlossene Lernziele. Er ersetzt dein aktuelles lokales Profil, den Lernstand, Projekte und Versionen. Fortfahren?`)) return;
+      await saveState(imported);
+      setState(imported);
+      setStorageWritable(true);
+      setStorageIssue("");
+      setShowOnboarding(false);
+      setSelectedLessonId(null);
+      setNotice("Datenexport wurde geprüft und auf diesem Gerät wiederhergestellt.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Datenexport konnte nicht importiert werden. Deine bisherigen Daten wurden nicht ersetzt.");
+    }
   };
 
   return <div className="app-shell">
     <aside className="sidebar" aria-label="Hauptnavigation">
       <div className="brand"><span className="brand-mark">d</span><span>devpath</span></div>
       <div className="nav-label">DEIN LERNRAUM</div>
-      <nav>{navigation.map((item) => <button key={item.id} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}</button>)}</nav>
+      <nav>{navigation.map((item) => <button key={item.id} disabled={Boolean(storageIssue)} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}</button>)}</nav>
       <div className="sidebar-spacer" />
       <div className="local-state"><span className="status-dot" /> Lokal auf diesem Gerät</div>
       <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon" aria-hidden="true">⚙</span>Einstellungen</button>
@@ -260,14 +293,15 @@ export default function App() {
     <main className="main-area">
       <header className="topbar"><div className="breadcrumbs">DevPath <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
+        {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
-        {stateLoaded && view === "today" && <Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} />}
-        {stateLoaded && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} onComplete={(hints) => markComplete(activeLesson, hints)} openStudio={openLessonInStudio} />}
-        {stateLoaded && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
-        {stateLoaded && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
-        {stateLoaded && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
-        {stateLoaded && view === "settings" && <Settings state={state} update={update} exportData={() => exportState(state)} clearData={() => { void resetData(); }} />}
+        {stateLoaded && !storageIssue && view === "today" && <Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} onComplete={(hints) => markComplete(activeLesson, hints)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
+        {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
+        {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
+        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
       {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}

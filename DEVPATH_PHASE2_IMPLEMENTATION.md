@@ -23,7 +23,7 @@
 - Tauri-2-Desktop-App mit React/TypeScript, Monaco-Editor, Ansichten für Heute, Lernen, Code Studio, Code Base, Diplom und Einstellungen.
 - Ersteinrichtung beim ersten Start: Lernziel, Vorerfahrung und gewünschte Einheiten sowie Zeit je Woche. Überspringbar; jederzeit lokal änderbar.
 - HTML-/CSS-Pilotkurs mit sieben Lernzielen, Kursbegründungen, Übungshinweisen und lokalen Wiederholungsintervallen.
-- Tauri-SQLite-Speicherung, Migration und einmaliger Import der alten Browserdaten; JSON-Export und lokale Löschfunktion.
+- Tauri-SQLite-Speicherung, Migration und einmaliger Import der alten Browserdaten; versionierter JSON-Gesamtexport, Import/Wiederherstellung mit Größen- und Dateivalidierung, Bestätigungsdialog und lokale Löschfunktion. Beim beschädigten Speicher werden normale Ansichten und Schreibvorgänge blockiert, bis ein gültiger Export wiederhergestellt ist. Exportdateien können privaten Quellcode enthalten.
 - Lokale Code-Base-Snapshots mit Notizen, Zeilendiff und Wiederherstellung. Code Studio enthält jetzt lokale Mehrdateien-Projekte, Dateiwechsel, Erstellen/Umbenennen/Löschen, Projektimport/-export als `.devpath-project.json`, Pfad-/Größenbegrenzungen und Erkennung typischer Schlüsseldateien. Code Base speichert ganze Projekt-Snapshots; vor Wiederherstellung wird automatisch der aktuelle Stand gesichert. Lektion und Studio teilen den Code der jeweils verknüpften Übungsdatei. Die Projektexporte sind JSON-Dateien, keine ZIP-Dateien oder Git-Repositories.
 - Lokales Diplom und überspringbarer Abschlussmoment mit Unterstützung für reduzierte Bewegung.
 - OIDC-geschütztes API-Grundgerüst mit Ratenbegrenzung, Herkunfts-Allowlist, Health-Endpunkten und minimaler PostgreSQL-Migration für Konto-/Kurs-/Release-Metadaten.
@@ -62,6 +62,9 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 - Entscheidungsregister mit den bestätigten Projektdaten und ausdrücklich offenen Produkt-/Providerfragen.
 - Wöchentliche Dependency-Updatekonfiguration für npm/Cargo/GitHub Actions und CI-Lockfile-Audits.
 - Website-Sprunglink, mobile Navigation und klar sichtbarer Tastaturfokus ergänzt. Das ist eine Implementierung, kein ersetzender Screenreader-/Kontrasttest.
+- Wiederherstellung des lokalen Profils in den Einstellungen ergänzt; alte unversionierte DevPath-0.1-Exporte bleiben importierbar. Projektdateien werden bei Import wie bei Code-Studio-Projektimport auf erlaubte relative Pfade, Geheimdateien und Größen geprüft. Beschädigter SQLite-/Browserzustand wird nicht automatisch mit Startdaten überschrieben.
+- Importpfade für Dateinamen- und Lernzielschlüssel so abgesichert, dass spezielle JavaScript-Schlüsselnamen keine Prototypen verändern.
+- Diese Änderungen sind implementiert, aber in dieser Runde wurde auf deinen Wunsch „programmieren“ kein Build oder Testlauf gestartet. Der Phase-2-Abschlussbericht muss daher erst nach lokalem Build/Installations- und Wiederherstellungstest auf den neuen Stand gesetzt werden.
 
 ## Was du jetzt ausführen kannst
 

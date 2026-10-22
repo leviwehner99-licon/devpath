@@ -72,11 +72,59 @@ export function CodeBase({ projects, activeProject, activeFile, versions, curren
   </>;
 }
 
-export function Settings({ state, update, exportData, clearData }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; exportData: () => void; clearData: () => void }) {
+export function Settings({ state, update, storageWritable, exportData, importData, clearData }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; storageWritable: boolean; exportData: () => void; importData: (file: File) => Promise<void>; clearData: () => void }) {
   const updateSettings = (patch: Partial<DevPathState["settings"]>) => update({ settings: { ...state.settings, ...patch } });
-  return <><PageTitle eyebrow="DEIN PROFIL" title="Einstellungen" subtitle="Du entscheidest, wie DevPath für dich arbeitet." /><div className="settings-layout"><nav className="settings-nav" aria-label="Einstellungsbereiche"><a href="#profil">Profil</a><a href="#lernen">Lernen</a><a href="#darstellung">Darstellung</a><a href="#datenschutz">Datenschutz</a></nav><div className="settings-content"><section id="profil" className="panel settings-panel"><div className="eyebrow">PROFIL</div><h2>Wie sollen wir dich nennen?</h2><label className="field-label" htmlFor="learner-name">Anzeigename</label><input id="learner-name" className="text-input" maxLength={32} value={state.learnerName} onChange={(event) => update({ learnerName: event.target.value || "Lernende Person" })} /><div className="field-note">Bleibt lokal auf diesem Gerät.</div></section><section id="lernen" className="panel settings-panel"><div className="eyebrow">DEIN LERNRHYTHMUS</div><h2>Ein Plan, der zu deinem Alltag passt</h2><div className="field-grid"><label className="field-label">Einheiten pro Woche<select className="text-input" value={state.weeklySessions} onChange={(event) => update({ weeklySessions: Number(event.target.value) })}>{[1, 2, 3, 4, 5, 6, 7].map((number) => <option key={number} value={number}>{number} Einheiten</option>)}</select></label><label className="field-label">Zeit pro Einheit<select className="text-input" value={state.sessionMinutes} onChange={(event) => update({ sessionMinutes: Number(event.target.value) })}>{[10, 15, 20, 30, 45, 60].map((minutes) => <option key={minutes} value={minutes}>etwa {minutes} Minuten</option>)}</select></label></div><label className="field-label">Dein Lernziel<input className="text-input" value={state.goal} maxLength={100} onChange={(event) => update({ goal: event.target.value })} /></label><p className="field-note">Vorschläge werden aus deinen lokal gespeicherten Lernzielen und Übungsergebnissen gebildet.</p></section><section id="darstellung" className="panel settings-panel"><div className="eyebrow">DARSTELLUNG</div><h2>Ruhig und gut lesbar</h2><label className="field-label">Farbschema<select className="text-input" value={state.settings.theme} onChange={(event) => updateSettings({ theme: event.target.value as DevPathState["settings"]["theme"] })}><option value="system">Wie mein Betriebssystem</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></label><Toggle label="Bewegung reduzieren" checked={state.settings.reducedMotion} onChange={(value) => updateSettings({ reducedMotion: value })} /></section><section id="datenschutz" className="panel settings-panel"><div className="eyebrow">DATENSCHUTZ</div><h2>Deine Daten bleiben deine</h2><p className="settings-description">Lernstand, Code und Versionen werden lokal gespeichert. Konto, Analyse, Synchronisierung und externe KI sind in dieser Alpha noch nicht verbunden.</p><Toggle label="Fehlerberichte senden" detail="Fehlerberichte werden in dieser Alpha noch nicht übertragen." checked={state.settings.sendDiagnostics} onChange={(value) => updateSettings({ sendDiagnostics: value })} /><div className="privacy-actions"><button className="button secondary" onClick={exportData}>Daten exportieren</button><button className="button danger-outline" onClick={clearData}>Lokale Daten löschen</button></div></section><section className="panel settings-panel"><div className="eyebrow">TUTOR</div><h2>Lokale Lernhinweise</h2><p className="settings-description">DevPath nutzt die Erklärungen und Hinweisstufen aus dem installierten Kurs. Ein externes KI-Modell ist nicht verbunden.</p><span className="local-badge">Code wird nicht übertragen</span></section></div></div></>;
-}
+  const dataImportRef = useRef<HTMLInputElement>(null);
 
+  return <>
+    <PageTitle eyebrow="DEIN PROFIL" title="Einstellungen" subtitle="Du entscheidest, wie DevPath für dich arbeitet." />
+    <div className="settings-layout">
+      <nav className="settings-nav" aria-label="Einstellungsbereiche">
+        <a href="#profil">Profil</a><a href="#lernen">Lernen</a><a href="#darstellung">Darstellung</a><a href="#datenschutz">Datenschutz</a>
+      </nav>
+      <div className="settings-content">
+        <section id="profil" className="panel settings-panel">
+          <div className="eyebrow">PROFIL</div><h2>Wie sollen wir dich nennen?</h2>
+          <label className="field-label" htmlFor="learner-name">Anzeigename</label>
+          <input id="learner-name" className="text-input" maxLength={32} value={state.learnerName} onChange={(event) => update({ learnerName: event.target.value || "Lernende Person" })} />
+          <div className="field-note">Bleibt lokal auf diesem Gerät.</div>
+        </section>
+        <section id="lernen" className="panel settings-panel">
+          <div className="eyebrow">DEIN LERNRHYTHMUS</div><h2>Ein Plan, der zu deinem Alltag passt</h2>
+          <div className="field-grid">
+            <label className="field-label">Einheiten pro Woche<select className="text-input" value={state.weeklySessions} onChange={(event) => update({ weeklySessions: Number(event.target.value) })}>{[1, 2, 3, 4, 5, 6, 7].map((number) => <option key={number} value={number}>{number} Einheiten</option>)}</select></label>
+            <label className="field-label">Zeit pro Einheit<select className="text-input" value={state.sessionMinutes} onChange={(event) => update({ sessionMinutes: Number(event.target.value) })}>{[10, 15, 20, 30, 45, 60].map((minutes) => <option key={minutes} value={minutes}>etwa {minutes} Minuten</option>)}</select></label>
+          </div>
+          <label className="field-label">Dein Lernziel<input className="text-input" value={state.goal} maxLength={100} onChange={(event) => update({ goal: event.target.value })} /></label>
+          <p className="field-note">Vorschläge werden aus deinen lokal gespeicherten Lernzielen und Übungsergebnissen gebildet.</p>
+        </section>
+        <section id="darstellung" className="panel settings-panel">
+          <div className="eyebrow">DARSTELLUNG</div><h2>Ruhig und gut lesbar</h2>
+          <label className="field-label">Farbschema<select className="text-input" value={state.settings.theme} onChange={(event) => updateSettings({ theme: event.target.value as DevPathState["settings"]["theme"] })}><option value="system">Wie mein Betriebssystem</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></label>
+          <Toggle label="Bewegung reduzieren" checked={state.settings.reducedMotion} onChange={(value) => updateSettings({ reducedMotion: value })} />
+        </section>
+        <section id="datenschutz" className="panel settings-panel">
+          <div className="eyebrow">DATENSCHUTZ</div><h2>Deine Daten bleiben deine</h2>
+          <p className="settings-description">Lernstand, Code und Versionen werden lokal gespeichert. Konto, Analyse, Synchronisierung und externe KI sind in dieser Alpha noch nicht verbunden.</p>
+          <Toggle label="Fehlerberichte senden" detail="Fehlerberichte werden in dieser Alpha noch nicht übertragen." checked={state.settings.sendDiagnostics} onChange={(value) => updateSettings({ sendDiagnostics: value })} />
+          <p className="field-note">Der Export enthält Profil, Lernstand, Projektdateien und Code-Base-Versionen. Die Datei kann privaten Quelltext enthalten und sollte geschützt aufbewahrt werden.</p>
+          {!storageWritable && <p className="storage-warning" role="status">Daten konnten nicht geladen werden. Export und Löschen sind gesperrt, bis du einen gültigen Datenexport wiederhergestellt hast.</p>}
+          <div className="privacy-actions">
+            <button className="button secondary" disabled={!storageWritable} onClick={exportData}>Daten exportieren</button>
+            <button className="button secondary" onClick={() => dataImportRef.current?.click()}>Daten wiederherstellen</button>
+            <input ref={dataImportRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) void importData(file); event.currentTarget.value = ""; }} />
+            <button className="button danger-outline" disabled={!storageWritable} onClick={clearData}>Lokale Daten löschen</button>
+          </div>
+        </section>
+        <section className="panel settings-panel">
+          <div className="eyebrow">TUTOR</div><h2>Lokale Lernhinweise</h2>
+          <p className="settings-description">DevPath nutzt die Erklärungen und Hinweisstufen aus dem installierten Kurs. Ein externes KI-Modell ist nicht verbunden.</p>
+          <span className="local-badge">Code wird nicht übertragen</span>
+        </section>
+      </div>
+    </div>
+  </>;
+}
 function Toggle({ label, detail, checked, onChange }: { label: string; detail?: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <label className="toggle-row"><span><strong>{label}</strong>{detail && <small>{detail}</small>}</span><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span className="toggle-ui" aria-hidden="true" /></label>;
 }

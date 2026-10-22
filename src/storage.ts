@@ -1,8 +1,12 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { initialState, type DevPathState } from "./types";
+import { validateProjectFiles } from "./projects";
 
 const STORAGE_KEY = "devpath.local.v1";
 const DATABASE_URL = "sqlite:devpath.db";
+const DATA_EXPORT_FORMAT = "devpath-data";
+const DATA_EXPORT_VERSION = 1;
+const MAX_DATA_EXPORT_BYTES = 50_000_000;
 type LocalDatabase = import("@tauri-apps/plugin-sql").default;
 let databasePromise: Promise<LocalDatabase> | undefined;
 
@@ -11,28 +15,155 @@ async function getDatabase(): Promise<LocalDatabase> {
   return databasePromise;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function boundedString(value: unknown, fallback: string, maxLength: number): string {
+  return typeof value === "string" ? value.slice(0, maxLength) : fallback;
+}
+
 function normalizeState(value: unknown): DevPathState {
-  if (!value || typeof value !== "object") return initialState;
+  if (!isRecord(value)) return structuredClone(initialState);
+
   const parsed = value as Partial<DevPathState>;
-  const projects = Array.isArray(parsed.projects) ? parsed.projects.filter((project) => project && typeof project.id === "string" && typeof project.name === "string" && project.files && typeof project.files === "object") : [];
-  const safeProjects = projects.length ? projects : initialState.projects;
+  const safeProjects = (Array.isArray(parsed.projects) ? parsed.projects : [])
+    .slice(0, 100)
+    .flatMap((value) => {
+      if (!isRecord(value) || typeof value.id !== "string" || !value.id || !isRecord(value.files)) return [];
+      try {
+        const files = validateProjectFiles(value.files);
+        const firstFile = Object.keys(files)[0];
+        return [{
+          id: value.id.slice(0, 128),
+          name: boundedString(value.name, "Importiertes Projekt", 80),
+          language: boundedString(value.language, "html", 32),
+          files,
+          activeFile: typeof value.activeFile === "string" && files[value.activeFile] !== undefined ? value.activeFile : firstFile,
+          ...(typeof value.linkedLessonId === "string" ? { linkedLessonId: value.linkedLessonId.slice(0, 128) } : {}),
+          ...(typeof value.linkedLessonFile === "string" && files[value.linkedLessonFile] !== undefined ? { linkedLessonFile: value.linkedLessonFile } : {}),
+          createdAt: boundedString(value.createdAt, new Date(0).toISOString(), 40),
+          updatedAt: boundedString(value.updatedAt, new Date(0).toISOString(), 40),
+        }];
+      } catch {
+        return [];
+      }
+    });
+  const uniqueProjects = safeProjects.filter((project, index, projects) => projects.findIndex((candidate) => candidate.id === project.id) === index);
+  const projects = uniqueProjects.length ? uniqueProjects : structuredClone(initialState.projects);
+  const safeProgress = Object.create(null) as DevPathState["progress"];
+  if (isRecord(parsed.progress)) {
+    for (const [lessonId, value] of Object.entries(parsed.progress).slice(0, 500)) {
+      if (!isRecord(value)) continue;
+      const safeLessonId = lessonId.slice(0, 128);
+      Object.defineProperty(safeProgress, safeLessonId, {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: {
+        completed: value.completed === true,
+        code: boundedString(value.code, "", 1_000_000),
+        updatedAt: boundedString(value.updatedAt, new Date(0).toISOString(), 40),
+        attempts: Number.isSafeInteger(value.attempts) && Number(value.attempts) >= 0 ? Number(value.attempts) : 0,
+        hintCount: Number.isSafeInteger(value.hintCount) && Number(value.hintCount) >= 0 ? Number(value.hintCount) : 0,
+        confidence: Number.isSafeInteger(value.confidence) && Number(value.confidence) >= 0 && Number(value.confidence) <= 5 ? Number(value.confidence) : 0,
+          ...(typeof value.nextReviewAt === "string" ? { nextReviewAt: value.nextReviewAt.slice(0, 40) } : {}),
+        },
+      });
+    }
+  }
+  const safeVersions: DevPathState["versions"] = [];
+  for (const value of (Array.isArray(parsed.versions) ? parsed.versions : []).slice(0, 2_000)) {
+    if (!isRecord(value) || typeof value.id !== "string" || typeof value.lessonId !== "string") continue;
+    const files = isRecord(value.files) ? (() => { try { return validateProjectFiles(value.files); } catch { return undefined; } })() : undefined;
+    safeVersions.push({
+      id: value.id.slice(0, 128),
+      name: boundedString(value.name, "Importierte Version", 60),
+      note: boundedString(value.note, "", 180),
+      code: boundedString(value.code, "", 1_000_000),
+      createdAt: boundedString(value.createdAt, new Date(0).toISOString(), 40),
+      lessonId: value.lessonId.slice(0, 128),
+      ...(typeof value.projectId === "string" ? { projectId: value.projectId.slice(0, 128) } : {}),
+      ...(files ? { files } : {}),
+    });
+  }
+  const rawSettings = isRecord(parsed.settings) ? parsed.settings : {};
+  const experience = parsed.experience === "some" || parsed.experience === "experienced" ? parsed.experience : "new";
+  const theme = rawSettings.theme === "light" || rawSettings.theme === "dark" ? rawSettings.theme : "system";
+  const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
+
   return {
-    ...initialState,
-    ...parsed,
-    progress: { ...initialState.progress, ...(parsed.progress ?? {}) },
-    versions: Array.isArray(parsed.versions) ? parsed.versions : [],
-    projects: safeProjects,
-    activeProjectId: safeProjects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : safeProjects[0].id,
-    settings: { ...initialState.settings, ...(parsed.settings ?? {}) },
+    learnerName: boundedString(parsed.learnerName, initialState.learnerName, 32),
+    goal: boundedString(parsed.goal, initialState.goal, 100),
+    experience,
+    weeklySessions: Number.isSafeInteger(parsed.weeklySessions) && Number(parsed.weeklySessions) >= 1 && Number(parsed.weeklySessions) <= 7 ? Number(parsed.weeklySessions) : initialState.weeklySessions,
+    sessionMinutes: [10, 15, 20, 30, 45, 60].includes(Number(parsed.sessionMinutes)) ? Number(parsed.sessionMinutes) : initialState.sessionMinutes,
+    progress: safeProgress,
+    versions: safeVersions,
+    projects,
+    activeProjectId: projects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : projects[0].id,
+    onboardingCompleted: parsed.onboardingCompleted === true,
+    ...(typeof parsed.courseCompletedAt === "string" ? { courseCompletedAt: parsed.courseCompletedAt.slice(0, 40) } : {}),
+    settings: {
+      theme,
+      reducedMotion: rawSettings.reducedMotion === true,
+      sendDiagnostics: false,
+      aiMode,
+    },
   };
 }
 
+export function parseDataExport(text: string): DevPathState {
+  if (new TextEncoder().encode(text).byteLength > MAX_DATA_EXPORT_BYTES) throw new Error("Der Datenexport ist größer als 50 MB.");
+  let value: unknown;
+  try { value = JSON.parse(text); } catch { throw new Error("Der Datenexport ist kein gültiges JSON."); }
+  if (!isRecord(value)) throw new Error("Das Datenexportformat wird nicht erkannt.");
+  if (value.format === DATA_EXPORT_FORMAT) {
+    if (value.version !== DATA_EXPORT_VERSION || !isRecord(value.state)) throw new Error("Diese Version des Datenexports wird nicht unterstützt.");
+    return validateImportedState(value.state);
+  }
+  // Accept exports created by DevPath 0.1 before the versioned envelope was added.
+  if ("learnerName" in value || "progress" in value || "projects" in value) return validateImportedState(value);
+  throw new Error("Das Datenexportformat wird nicht erkannt.");
+}
+
+function validateImportedState(value: Record<string, unknown>): DevPathState {
+  if (!Array.isArray(value.projects) || value.projects.length === 0 || value.projects.length > 100) {
+    throw new Error("Der Export enthält keine gültige Projektliste.");
+  }
+  for (const project of value.projects) {
+    if (!isRecord(project) || typeof project.id !== "string" || !project.id || !isRecord(project.files)) {
+      throw new Error("Der Export enthält ein ungültiges Projekt. Deine bisherigen Daten wurden nicht verändert.");
+    }
+    try { validateProjectFiles(project.files); }
+    catch (error) { throw new Error(error instanceof Error ? `Projekt im Export ungültig: ${error.message}` : "Ein Projekt im Export ist ungültig."); }
+  }
+  if (value.progress !== undefined && !isRecord(value.progress)) throw new Error("Der Lernfortschritt im Export ist ungültig.");
+  if (value.versions !== undefined && !Array.isArray(value.versions)) throw new Error("Die Versionsgeschichte im Export ist ungültig.");
+  if (Array.isArray(value.versions)) {
+    for (const version of value.versions) {
+      if (!isRecord(version) || typeof version.id !== "string" || typeof version.lessonId !== "string" || typeof version.code !== "string") {
+        throw new Error("Der Export enthält eine ungültige gespeicherte Version. Deine bisherigen Daten wurden nicht verändert.");
+      }
+      if (version.files !== undefined) {
+        if (!isRecord(version.files)) throw new Error("Eine gespeicherte Projektversion enthält keine gültige Dateiliste.");
+        try { validateProjectFiles(version.files); }
+        catch (error) { throw new Error(error instanceof Error ? `Gespeicherte Version im Export ungültig: ${error.message}` : "Eine gespeicherte Version im Export ist ungültig."); }
+      }
+    }
+  }
+  return normalizeState(value);
+}
+
 function loadBrowserState(): DevPathState {
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (!raw) return structuredClone(initialState);
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? normalizeState(JSON.parse(raw)) : initialState;
-  } catch {
-    return initialState;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) throw new Error("Ungültiges Datenformat.");
+    return normalizeState(parsed);
+  } catch (error) {
+    throw new Error("Die lokalen Browserdaten sind beschädigt. Sie wurden nicht überschrieben.", { cause: error });
   }
 }
 
@@ -41,7 +172,11 @@ export async function loadState(): Promise<DevPathState> {
   const db = await getDatabase();
   const rows = await db.select<{ state_json: string }[]>("SELECT state_json FROM app_state WHERE id = 1");
   const stored = rows[0]?.state_json;
-  if (stored && stored !== "{}") return normalizeState(JSON.parse(stored));
+  if (stored && stored !== "{}") {
+    const parsed: unknown = JSON.parse(stored);
+    if (!isRecord(parsed)) throw new Error("Die lokalen SQLite-Daten enthalten kein gültiges DevPath-Profil.");
+    return normalizeState(parsed);
+  }
 
   // Import prototype data once; only remove the old copy after SQLite accepted it.
   const oldState = loadBrowserState();
@@ -64,13 +199,14 @@ export async function saveState(state: DevPathState): Promise<void> {
 }
 
 export function exportState(state: DevPathState): void {
-  const data = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const data = new Blob([JSON.stringify({ format: DATA_EXPORT_FORMAT, version: DATA_EXPORT_VERSION, exportedAt: new Date().toISOString(), state }, null, 2)], { type: "application/json" });
+  if (data.size > MAX_DATA_EXPORT_BYTES) throw new Error("Der Datenexport wäre größer als 50 MB. Exportiere große Projekte einzeln über Code Studio.");
   const url = URL.createObjectURL(data);
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = "devpath-datenexport.json";
   anchor.click();
-  URL.revokeObjectURL(url);
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export async function clearState(): Promise<void> {

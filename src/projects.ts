@@ -21,7 +21,7 @@ export function validateProjectFiles(files: unknown): Record<string, string> {
   const entries = Object.entries(files);
   if (!entries.length || entries.length > MAX_PROJECT_FILES) throw new Error(`Ein Projekt muss 1 bis ${MAX_PROJECT_FILES} Textdateien enthalten.`);
   let totalBytes = 0;
-  const safeFiles: Record<string, string> = {};
+  const safeFiles = Object.create(null) as Record<string, string>;
   for (const [rawPath, content] of entries) {
     const path = safeProjectPath(rawPath);
     if (!path) throw new Error(`Der Dateipfad „${rawPath}“ ist nicht erlaubt. Absolute Pfade, Geheimdateien und Buildordner werden ausgeschlossen.`);
