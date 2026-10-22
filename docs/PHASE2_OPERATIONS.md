@@ -1,7 +1,7 @@
 # DevPath Phase 2 – Betriebsabläufe
 
 **Stand:** 22. Oktober 2026  
-**Status am 22. Oktober 2026:** Ein manueller Supabase-Dump wurde erstellt und mit `pg_restore --list` lesend geprüft. Das DevPath-`public`-Schema wurde erfolgreich in der lokalen Testdatenbank `devpath_restore_test` restauriert. Die Zähler ergaben `accounts=0`, `courses=1`, `course_releases=1`, `app_releases=0`. Supabase-Systemschemata wie `auth` und `vault` wurden ausdrücklich nicht restauriert; die Leserechte der lokalen Runtime-Rolle müssen noch mit Migration 003 verifiziert werden. Die Dump-Datei liegt vorübergehend auf C:, das nach der `manage-bde`-Prüfung unverschlüsselt ist; nach der Runtime-Prüfung löschen. Ein Incident-Tabletop und Alpha-Betrieb sind nicht nachgewiesen.
+**Status am 22. Oktober 2026:** Ein manueller Supabase-Dump wurde erstellt und mit `pg_restore --list` lesend geprüft. Das DevPath-`public`-Schema wurde erfolgreich in der lokalen Testdatenbank `devpath_restore_test` restauriert. Die Zähler ergaben `accounts=0`, `courses=1`, `course_releases=1`, `app_releases=0`. Migration 003 und `SET ROLE devpath_app` liefen erfolgreich; die Rolle las einen Kurs und eine Kursversion. Supabase-Systemschemata wie `auth` und `vault` wurden ausdrücklich nicht restauriert. Die Dump-Datei liegt vorübergehend auf C:, das nach der `manage-bde`-Prüfung unverschlüsselt ist; nach abgeschlossener Probe löschen. Ein Incident-Tabletop und Alpha-Betrieb sind nicht nachgewiesen.
 
 ## 0. Dependency-Audit-Ausnahme
 
@@ -154,7 +154,7 @@ Vor jedem privaten Alpha-Release müssen Verantwortliche Evidenz oder eine bewus
 | Zielgruppe, Altersrahmen und Zielmarkt festgelegt |  |  | Offen |
 | Datenschutz-/Support-/Sicherheitskontakt freigegeben |  |  | Offen |
 | PostgreSQL-Backupanbieter, Aufbewahrung, RPO/RTO |  |  | Offen |
-| Restoreprobe für DevPath-`public`-Schema in lokaler Testdatenbank | Ausgabe/Zählwerte vom 22.10.2026; lokale `devpath_app`-Rollenprüfung noch offen | Betreiber | Teilweise |
+| Restoreprobe für DevPath-`public`-Schema samt `devpath_app`-Leserechten | Ausgabe/Zählwerte vom 22.10.2026; vollständige Supabase-Systemwiederherstellung nicht umfasst | Betreiber | Bestanden (begrenzt) |
 | OIDC-Anbieter und PKCE-Flow (oder Konto bleibt deaktiviert) |  |  | Offline-only |
 | Codeausführung je OS unabhängig geprüft (oder überall deaktiviert) |  |  | Deaktiviert |
 | Signaturprüfung für tatsächlich verteilte Pakete |  |  | Offen |
