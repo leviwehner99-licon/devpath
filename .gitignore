@@ -10,5 +10,8 @@ server/.env.*
 src-tauri/gen/
 *.log
 *.tsbuildinfo
+*.dump
+*.backup
+DevPathBackups/
 .DS_Store
 Thumbs.db
