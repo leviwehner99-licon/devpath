@@ -1,4 +1,4 @@
-export type View = "today" | "learn" | "studio" | "base" | "diploma" | "settings";
+export type View = "today" | "learn" | "library" | "curriculum" | "studio" | "projects" | "community" | "base" | "diploma" | "settings";
 
 import { pilotCourse } from "./course";
 
@@ -40,11 +40,11 @@ export type DevPathState = {
   activeProjectId: string;
   onboardingCompleted: boolean;
   courseCompletedAt?: string;
-  settings: { theme: "system" | "light" | "dark"; reducedMotion: boolean; sendDiagnostics: boolean; aiMode: "off" | "local" | "external" };
+  settings: { theme: "light" | "dark"; reducedMotion: boolean; sendDiagnostics: boolean; aiMode: "off" | "local" | "external" };
 };
 
 export const initialState: DevPathState = {
-  learnerName: "Alex",
+  learnerName: "Lernende Person",
   goal: "Meine erste eigene Website bauen",
   experience: "new",
   weeklySessions: 3,
@@ -67,7 +67,7 @@ export const initialState: DevPathState = {
   }],
   activeProjectId: "starter-responsive-site",
   onboardingCompleted: false,
-  settings: { theme: "system", reducedMotion: false, sendDiagnostics: false, aiMode: "off" },
+  settings: { theme: "light", reducedMotion: false, sendDiagnostics: false, aiMode: "off" },
 };
 
 export const pilotLesson = { ...pilotCourse.lessons[0], course: "HTML Grundlagen" };

@@ -96,11 +96,11 @@ function normalizeState(value: unknown): DevPathState {
     : [];
   const safeStudyDays = studyDays.length ? studyDays : defaultStudyDays(weeklySessions);
   const studyTime = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime) ? parsed.studyTime : "18:00";
-  const theme = rawSettings.theme === "light" || rawSettings.theme === "dark" ? rawSettings.theme : "system";
+  const theme = rawSettings.theme === "dark" ? "dark" : "light";
   const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
 
   return {
-    learnerName: boundedString(parsed.learnerName, initialState.learnerName, 32),
+    learnerName: boundedString(parsed.learnerName, initialState.learnerName, 32).trim().toLowerCase() === "alex" ? "Lernende Person" : boundedString(parsed.learnerName, initialState.learnerName, 32),
     goal: boundedString(parsed.goal, initialState.goal, 100),
     experience,
     weeklySessions: safeStudyDays.length,

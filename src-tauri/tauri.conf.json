@@ -8,5 +8,5 @@
     "windows": [{ "title": "DevPath", "width": 1440, "height": 960, "minWidth": 760, "minHeight": 620, "resizable": true }],
     "security": { "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src ipc: http://ipc.localhost; worker-src 'self' blob:;" }
   },
-  "bundle": { "active": true, "targets": ["nsis", "dmg", "appimage"], "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png"], "category": "Education", "shortDescription": "Softwareentwicklung in deinem Tempo lernen", "longDescription": "Lokale Lernumgebung für Softwareentwicklung." }
+  "bundle": { "active": true, "targets": ["nsis", "dmg", "appimage"], "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png"], "category": "Education", "shortDescription": "Softwareentwicklung in deinem Tempo lernen", "longDescription": "Lokale Lernumgebung für Softwareentwicklung.", "windows": { "nsis": { "installerIcon": "icons/icon.ico", "uninstallerIcon": "icons/icon.ico", "headerImage": "icons/installer-header.bmp", "sidebarImage": "icons/installer-sidebar.bmp", "languages": ["German"], "displayLanguageSelector": false } } }
 }

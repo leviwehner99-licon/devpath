@@ -5,13 +5,19 @@ import { pilotCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
 import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, Today } from "./views";
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
+import { Icon, LogoMark } from "./ui";
+import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
 
-const navigation: { id: View; label: string; icon: string }[] = [
-  { id: "today", label: "Heute", icon: "◷" },
-  { id: "learn", label: "Lernen", icon: "⌁" },
-  { id: "studio", label: "Code Studio", icon: "⌘" },
-  { id: "base", label: "Code Base", icon: "▤" },
-  { id: "diploma", label: "Diplom", icon: "✧" },
+const navigation: { id: View; label: string; icon: "today" | "learn" | "library" | "curriculum" | "studio" | "projects" | "community" | "base" | "diploma" }[] = [
+  { id: "today", label: "Heute", icon: "today" },
+  { id: "learn", label: "Lernen", icon: "learn" },
+  { id: "library", label: "Bibliothek", icon: "library" },
+  { id: "curriculum", label: "Lehrplan", icon: "curriculum" },
+  { id: "studio", label: "Code Studio", icon: "studio" },
+  { id: "projects", label: "Meine Projekte", icon: "projects" },
+  { id: "community", label: "Community", icon: "community" },
+  { id: "base", label: "Code Base", icon: "base" },
+  { id: "diploma", label: "Diplom", icon: "diploma" },
 ];
 
 export default function App() {
@@ -55,8 +61,8 @@ export default function App() {
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
-  const finishOnboarding = (values?: Pick<DevPathState, "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
-    setState((current) => ({ ...current, ...values, onboardingCompleted: true }));
+  const finishOnboarding = (values?: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
+    setState((current) => ({ ...current, ...values, learnerName: values?.learnerName?.trim() || current.learnerName || "Lernende Person", onboardingCompleted: true }));
     setShowOnboarding(false);
   };
 
@@ -292,31 +298,35 @@ export default function App() {
 
   return <div className="app-shell">
     <aside className="sidebar" aria-label="Hauptnavigation">
-      <div className="brand"><span className="brand-mark">d</span><span>devpath</span></div>
+      <div className="brand"><LogoMark/><span>devpath</span></div>
       <div className="nav-label">DEIN LERNRAUM</div>
-      <nav>{navigation.map((item) => <button key={item.id} disabled={Boolean(storageIssue)} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><span className="nav-icon" aria-hidden="true">{item.icon}</span>{item.label}</button>)}</nav>
+      <nav>{navigation.map((item) => <button key={item.id} disabled={Boolean(storageIssue)} className={`nav-item ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}><span className="nav-icon"><Icon name={item.icon}/></span>{item.label}</button>)}</nav>
       <div className="sidebar-spacer" />
       <div className="local-state"><span className="status-dot" /> Lokal auf diesem Gerät</div>
-      <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon" aria-hidden="true">⚙</span>Einstellungen</button>
+      <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon"><Icon name="settings"/></span>Einstellungen</button>
       <div className="sidebar-footer">DevPath · Phase 2 Alpha</div>
     </aside>
 
     <main className="main-area">
-      <header className="topbar"><div className="breadcrumbs">DevPath <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
+      <header className="topbar"><div className="breadcrumbs">DevPath <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${state.settings.theme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: state.settings.theme === "dark" ? "light" : "dark" } })}>{state.settings.theme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
         {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
-        {stateLoaded && !storageIssue && view === "today" && <Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} />}
-        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
-        {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
+        {stateLoaded && !storageIssue && view === "today" && <><Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
+        {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openPilot={() => { setView("curriculum"); }} />}
+        {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum state={state} completedCount={completedCount} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
+        {stateLoaded && !storageIssue && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
+        {stateLoaded && !storageIssue && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={state.settings.theme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={state.settings.theme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
         {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
       {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}
-      {stateLoaded && showOnboarding && <Onboarding onFinish={finishOnboarding} onSkip={() => finishOnboarding()} />}
+      {stateLoaded && showOnboarding && <Onboarding onFinish={finishOnboarding} />}
     </main>
   </div>;
 }
