@@ -96,6 +96,21 @@ export async function onRequest({ request, env = {}, uuid }) {
       const result = await database.query(
         "SELECT c.id, c.slug, c.title, c.summary, c.category, c.language, c.level, r.version, r.manifest, r.content_sha256 FROM courses c JOIN LATERAL (SELECT version, manifest, content_sha256 FROM course_releases WHERE course_id = c.id AND published_at IS NOT NULL ORDER BY published_at DESC LIMIT 1) r ON TRUE WHERE c.published = TRUE ORDER BY c.category, c.title",
       );
+      if (result.rowCount === 0) {
+        const diagnostic = await database.query(`
+          SELECT current_database() AS database_name,
+                 current_user AS database_user,
+                 inet_server_addr()::text AS database_server,
+                 current_schema() AS current_schema,
+                 EXISTS (SELECT 1 FROM public.courses WHERE id = 'pilot-html-css' AND published = TRUE) AS pilot_course_visible,
+                 EXISTS (SELECT 1 FROM public.course_releases WHERE course_id = 'pilot-html-css' AND published_at IS NOT NULL) AS pilot_release_visible
+        `);
+        console.warn("DevPath published catalog is empty", {
+          requestId: request?.requestId ?? uuid ?? "unavailable",
+          courseCount: result.rowCount,
+          ...diagnostic.rows[0],
+        });
+      }
       // The catalog is read from mutable PostgreSQL metadata. Avoid serving an old
       // empty catalog from a browser or edge cache after a course is published.
       return json({ courses: result.rows }, 200, { ...cors, "Cache-Control": "no-store" });
