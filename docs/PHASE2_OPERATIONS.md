@@ -1,7 +1,7 @@
 # DevPath Phase 2 – Betriebsabläufe
 
 **Stand:** 22. Oktober 2026  
-**Status:** Vorbereitung; kein Backup-Restore, Incident-Tabletop oder Alpha-Betrieb wurde bisher nachgewiesen.
+**Status am 22. Oktober 2026:** Ein manueller Supabase-Dump wurde erstellt und mit `pg_restore --list` lesend geprüft. Das DevPath-`public`-Schema wurde erfolgreich in der lokalen Testdatenbank `devpath_restore_test` restauriert. Die Zähler ergaben `accounts=0`, `courses=1`, `course_releases=1`, `app_releases=0`. Supabase-Systemschemata wie `auth` und `vault` wurden ausdrücklich nicht restauriert; die Leserechte der lokalen Runtime-Rolle müssen noch mit Migration 003 verifiziert werden. Die Dump-Datei liegt vorübergehend auf C:, das nach der `manage-bde`-Prüfung unverschlüsselt ist; nach der Runtime-Prüfung löschen. Ein Incident-Tabletop und Alpha-Betrieb sind nicht nachgewiesen.
 
 ## 0. Dependency-Audit-Ausnahme
 
@@ -14,9 +14,9 @@ Dieses Dokument macht die noch offenen Betriebsarbeiten ausführbar. Es enthält
 ### Vorbedingungen
 
 1. In der Supabase-Projektkonsole **Database → Backups** öffnen. Supabase dokumentiert tägliche automatische Backups für Pro/Team/Enterprise und empfiehlt für Free-Projekte regelmäßige eigene Exporte. Aufbewahrungsdauer, Backupart, PITR-Verfügbarkeit und Restoreberechtigte hängen vom Tarif und Projektzustand ab: [Supabase Backup-Dokumentation](https://supabase.com/docs/guides/platform/backups). Tatsächliche Werte für DevPath sind noch nicht nachgesehen.
-2. Für eine Restoreprobe eine **separate leere Testdatenbank oder ein separates Testprojekt** bereitstellen. Niemals `pg_restore --clean` gegen Production ausführen.
+2. Für eine Restoreprobe eine **separate leere Testdatenbank oder ein separates Testprojekt** bereitstellen. Niemals `pg_restore --clean` gegen Production ausführen. Die am 22.10.2026 durchgeführte lokale Probe deckte nur DevPaths `public`-Schema ab; sie ist keine vollständige Wiederherstellungsprobe aller Supabase-Systemschemata.
 3. `pg_dump` und `pg_restore` aus derselben oder einer kompatiblen PostgreSQL-Hauptversion wie der Server verwenden.
-4. Einen geschützten lokalen Ordner außerhalb des Repositorys wählen. Backups enthalten Kurs-/Kontometadaten und sind vertraulich. Lokale Festplattenverschlüsselung aktivieren und eine zweite verschlüsselte Ablage mit begrenztem Zugriff festlegen.
+4. Einen geschützten lokalen Ordner außerhalb des Repositorys wählen. Backups enthalten Datenbankinhalte und können vertrauliche Daten enthalten. Lokale Festplattenverschlüsselung aktivieren und eine zweite verschlüsselte Ablage mit begrenztem Zugriff festlegen. Für die am 22.10.2026 durchgeführte Probe war C: laut `manage-bde` vollständig entschlüsselt; den lokalen Dump daher nach Abschluss der Prüfung entfernen und nicht als dauerhaftes Backup behalten.
 
 ### Manuelles logisches Backup in PowerShell
 
@@ -54,7 +54,7 @@ Vor dem ersten Lauf `manage-bde -status $env:SystemDrive` ausführen und bestät
 
 ### Restoreprobe ausschließlich in ein leeres Testziel
 
-Eine zweite Supabase-Datenbank ist nicht zwingend nötig: Für die Restoreprobe kannst du die vorhandene lokale PostgreSQL-18-Installation in pgAdmin verwenden. In pgAdmin links **Servers → PostgreSQL 18 → Databases** rechts anklicken → **Create → Database…**. Datenbankname `devpath_restore_test`, Owner `postgres`, dann **Save**. Dadurch bleibt die Supabase-Production-Datenbank unberührt.
+Eine zweite Supabase-Datenbank ist nicht zwingend nötig: Für die Restoreprobe kannst du die vorhandene lokale PostgreSQL-18-Installation in pgAdmin verwenden. In pgAdmin links **Servers → PostgreSQL 18 → Databases** rechts anklicken → **Create → Database…**. Datenbankname `devpath_restore_test`, Owner `postgres`, dann **Save**. Dadurch bleibt die Supabase-Production-Datenbank unberührt. Supabase-spezifische Systemerweiterungen (zum Beispiel `supabase_vault`) gibt es lokal nicht; deshalb ausschließlich das Anwendungsschema `public` restaurieren.
 
 Prüfe in einer PowerShell, ob PostgreSQL-18-Werkzeuge gefunden werden:
 
@@ -64,7 +64,7 @@ pg_dump --version
 pg_restore --version
 ```
 
-Falls PostgreSQL 18 an einem anderen Ort installiert ist, ändere nur den Pfad zum `bin`-Ordner. Für die Restore-RLS-Policies muss die lokale Serverrolle `devpath_app` existieren. Öffne im pgAdmin-Browser den Query Tool des lokalen Servers (Rechtsklick auf `PostgreSQL 18` → **Query Tool**) und führe aus:
+Falls PostgreSQL 18 an einem anderen Ort installiert ist, ändere nur den Pfad zum `bin`-Ordner. Für die Restore-RLS-Policies muss die lokale Serverrolle `devpath_app` existieren. Beim erneuten Restore eines bereits benutzten Testziels muss zuerst das `public`-Schema der lokalen Testdatenbank geleert und neu angelegt werden. Dieses Schema enthält dann nur DevPaths Anwendungstabellen; Supabase-Systemschemata werden ausgelassen. Führe den folgenden Rollenblock im Query Tool der **Datenbank `devpath_restore_test`** aus, nicht in Supabase Production:
 
 ```sql
 DO $$
@@ -88,7 +88,9 @@ $secret = Read-Host 'Lokales PostgreSQL-Passwort für postgres' -AsSecureString
 $secretPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
 try {
   $env:PGPASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($secretPtr)
-  pg_restore --no-owner --no-privileges --single-transaction "$backupFile"
+  $backupFile = Read-Host 'Vollständigen Pfad zur vorhandenen .dump-Datei eingeben'
+  if (-not (Test-Path -LiteralPath $backupFile)) { throw "Backup-Datei nicht gefunden: $backupFile" }
+  pg_restore --schema=public --no-owner --no-privileges --exit-on-error --verbose --dbname=devpath_restore_test "$backupFile"
 } finally {
   Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue
   [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($secretPtr)
@@ -152,7 +154,7 @@ Vor jedem privaten Alpha-Release müssen Verantwortliche Evidenz oder eine bewus
 | Zielgruppe, Altersrahmen und Zielmarkt festgelegt |  |  | Offen |
 | Datenschutz-/Support-/Sicherheitskontakt freigegeben |  |  | Offen |
 | PostgreSQL-Backupanbieter, Aufbewahrung, RPO/RTO |  |  | Offen |
-| Restoreprobe in separater Testdatenbank |  |  | Offen |
+| Restoreprobe für DevPath-`public`-Schema in lokaler Testdatenbank | Ausgabe/Zählwerte vom 22.10.2026; lokale `devpath_app`-Rollenprüfung noch offen | Betreiber | Teilweise |
 | OIDC-Anbieter und PKCE-Flow (oder Konto bleibt deaktiviert) |  |  | Offline-only |
 | Codeausführung je OS unabhängig geprüft (oder überall deaktiviert) |  |  | Deaktiviert |
 | Signaturprüfung für tatsächlich verteilte Pakete |  |  | Offen |
