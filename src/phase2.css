@@ -16,3 +16,4 @@
 @media(prefers-reduced-motion:reduce){.catalog-card{transition:none}.catalog-card:hover{transform:none}}
 .theme-switch{min-height:34px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--ink);font-size:10px;font-weight:700}.theme-switch:hover{background:var(--surface-subtle)}
 .editor-loading{min-height:260px;display:grid;place-items:center;background:var(--surface);color:var(--muted);font-size:13px}
+.first-run-shell{min-height:100vh;display:grid;place-items:center;background:var(--canvas);color:var(--ink)}

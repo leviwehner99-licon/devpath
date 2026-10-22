@@ -41,9 +41,21 @@ Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsic
 
 Vor dem Setzen von `DATABASE_URL` eine **dedizierte, gehostete** PostgreSQL-Datenbank in einer EU-Region (bevorzugt Frankfurt, falls verfügbar) erstellen. Lokal laufendes PostgreSQL auf dem Entwickler-PC ist kein Cloud-Backend. Port 5432 nicht am Router oder PC ins Internet freigeben.
 
-Bei einer neuen Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Migration 003 gibt der Runtime-Rolle `devpath_app` nur Leserechte auf veröffentlichte Kurs- und Releasezeilen und setzt passende RLS-Policies. Am 22.10.2026 bestätigte der Nutzer, dass `/api/v1/courses` in Production jetzt die erwarteten Kurse anzeigt. Die Runtime-Lesepfade für veröffentlichte Kurs- und Release-Metadaten funktionieren damit. Bereits ausgeführte Migrationen nicht wiederholen.
+Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Für die bereits verwendete DevPath-Datenbank nach dem Website-Update zusätzlich einmalig `../server/migrations/004_replace_html_css_with_programming_intro.sql` ausführen. Migration 004 nimmt den alten HTML/CSS-Kurs aus dem veröffentlichten Katalog und veröffentlicht stattdessen den JavaScript-Einstiegskurs samt SHA-256-Manifest. Bereits ausgeführte Migrationen 001 bis 003 nicht wiederholen.
 
-Nach dem Datenbank-Setup prüfen: `GET /api/v1/courses` soll `courses` mit dem Eintrag `pilot-html-css` zurückgeben. Dieser Produktionsabruf wurde am 22.10.2026 vom Nutzer bestätigt. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
+Migration 004 in Supabase unter **SQL Editor → New query** öffnen, vollständig ausführen und auf `COMMIT` ohne Fehler warten. Danach `GET /api/v1/courses` prüfen: die Antwort soll `programming-intro` enthalten und `pilot-html-css` nicht mehr enthalten. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
+
+## Öffentliche Desktop-Installer
+
+Die Workflow-Matrix baut Windows x64, macOS ARM64, macOS Intel x64 und Linux x64. Normale Pushes bauen und prüfen Windows, macOS ARM64 und Linux; der Intel-Mac-Build wird nur beim manuellen Plattformlauf ausgeführt. Öffentliche Pakete werden nach einem manuellen Lauf in den öffentlichen Supabase-Storage-Bucket `devpath-downloads` geladen; erst nach erfolgreichem Upload schaltet der Workflow die Installer- und SHA-256-Links in `/download/` frei und pusht die aktualisierte Seite nach `main`.
+
+Einmalige Einrichtung durch den Repository-Betreiber:
+
+1. Im Supabase-Projekt **Storage → New bucket** öffnen. Name: `devpath-downloads`; **Public bucket** einschalten; für die maximale Dateigröße mindestens den beim Build gemeldeten Installerwert, höchstens 50 MB im Free-Tarif, zulassen. Keine Client-Uploadrichtlinie für Besucher hinzufügen.
+2. In GitHub `leviwehner99-licon/devpath` **Settings → Secrets and variables → Actions → New repository secret** öffnen. `SUPABASE_URL` auf `https://rvhxsgexonmolrpdxdou.supabase.co` setzen. Ein zweites Secret `SUPABASE_SERVICE_ROLE_KEY` anlegen und dort den geheimen `service_role`-Schlüssel aus Supabase **Project Settings → API Keys** speichern. Den Schlüssel niemals in Dateien, Releases, Chat oder Website eintragen.
+3. In GitHub **Actions → Desktop build matrix → Run workflow** wählen, Branch `main` auswählen und den Lauf starten. Erst wenn alle Betriebssystem-Builds und der Job `publish-installers` grün sind, wurden Dateien hochgeladen. Die letzte Workflow-Aktion pusht die freigeschalteten Downloadlinks; Makers sollte daraufhin automatisch die Website neu deployen.
+
+Die Dateien sind unsignierte Alpha-Pakete. Der Workflow veröffentlicht neben jedem Paket eine SHA-256-Datei. Eine Prüfsumme belegt die Unverändertheit der Datei, ersetzt aber keine Codesignatur oder Sicherheitsprüfung.
 
 ## API-Routen
 

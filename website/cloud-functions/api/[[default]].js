@@ -102,8 +102,8 @@ export async function onRequest({ request, env = {}, uuid }) {
                  current_user AS database_user,
                  inet_server_addr()::text AS database_server,
                  current_schema() AS current_schema,
-                 EXISTS (SELECT 1 FROM public.courses WHERE id = 'pilot-html-css' AND published = TRUE) AS pilot_course_visible,
-                 EXISTS (SELECT 1 FROM public.course_releases WHERE course_id = 'pilot-html-css' AND published_at IS NOT NULL) AS pilot_release_visible
+                 EXISTS (SELECT 1 FROM public.courses WHERE id = 'programming-intro' AND published = TRUE) AS intro_course_visible,
+                 EXISTS (SELECT 1 FROM public.course_releases WHERE course_id = 'programming-intro' AND published_at IS NOT NULL) AS intro_release_visible
         `);
         console.warn("DevPath published catalog is empty", {
           requestId: request?.requestId ?? uuid ?? "unavailable",

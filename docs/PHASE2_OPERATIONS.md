@@ -194,7 +194,7 @@ foreach ($path in $paths) {
     if ($path -in @('/', '/download/') -and $response.Headers['X-Content-Type-Options'] -ne 'nosniff') { throw "X-Content-Type-Options fehlt oder ist falsch auf $path" }
     if ($path -eq '/api/health/live' -and $response.Content -notmatch '"status"\s*:\s*"ok"') { throw 'Liveness-Antwort ist unerwartet.' }
     if ($path -eq '/api/health/ready' -and $response.Content -notmatch '"status"\s*:\s*"ready"') { throw 'Readiness-Antwort ist unerwartet.' }
-    if ($path -eq '/api/v1/courses' -and $response.Content -notmatch 'pilot-html-css') { throw 'Pilotkurs fehlt in der Katalogantwort.' }
+    if ($path -eq '/api/v1/courses' -and $response.Content -notmatch 'programming-intro') { throw 'JavaScript-Einstiegskurs fehlt in der Katalogantwort.' }
     if ($path -like '/downloads/*' -and $path.EndsWith('.exe') -and $response.Headers['Content-Type'] -notmatch 'octet-stream|application/x-msdownload') { Write-Warning 'Installer kam nicht mit erwartetem Download-Content-Type zurück; manuell prüfen.' }
   } catch {
     Write-Error "Prüfung fehlgeschlagen: $path — $($_.Exception.Message)"
@@ -202,4 +202,4 @@ foreach ($path in $paths) {
 }
 ```
 
-Erwartet werden sieben Antworten mit HTTP `200`. Bei der Präsentations- und Downloadseite muss `Content-Security-Policy` vorhanden sein; API- und Download-Antworten sollten ebenfalls die vorgesehenen Sicherheitsheader ausliefern. Die Katalogantwort muss `pilot-html-css` enthalten. Kopiere bei Problemen nur Statuscode, Pfad und die nicht geheimen Response-Header hierher, niemals `DATABASE_URL`, Zertifikate oder Passwörter.
+Erwartet werden sieben Antworten mit HTTP `200`. Bei der Präsentations- und Downloadseite muss `Content-Security-Policy` vorhanden sein; API- und Download-Antworten sollten ebenfalls die vorgesehenen Sicherheitsheader ausliefern. Nach Migration 004 muss die Katalogantwort `programming-intro` enthalten und `pilot-html-css` ausschließen. Kopiere bei Problemen nur Statuscode, Pfad und die nicht geheimen Response-Header hierher, niemals `DATABASE_URL`, Zertifikate oder Passwörter.

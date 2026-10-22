@@ -4,36 +4,42 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1769e0" />
-  <meta name="description" content="DevPath Desktop für Windows herunterladen. Installationshinweise, Systemvoraussetzungen und Informationen zur Alpha-Version." />
-  <title>DevPath herunterladen – Installation</title>
+  <meta name="description" content="DevPath Desktop für Windows, macOS und Linux. Installer und Prüfsummen werden nach dem Plattformbuild veröffentlicht." />
+  <title>DevPath herunterladen — Desktop-App</title>
   <link rel="icon" href="../icons/devpath-logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../site.css" />
   <link rel="stylesheet" href="download.css" />
+  <link rel="stylesheet" href="../contrast.css" />
 </head>
 <body>
   <header class="site-header">
-    <a class="logo" href="/"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> devpath</a>
-    <nav aria-label="Hauptnavigation"><a href="/#so-funktionierts">Funktionen</a><a href="/#lernen">Kurse</a><a href="/#sicherheit">Datenschutz</a></nav>
-    <a class="header-cta" href="/">Zur Präsentation <span>↗</span></a>
+    <a class="logo" href="/" aria-label="DevPath Startseite"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>devpath</span></a>
+    <nav aria-label="Hauptnavigation"><a href="/#ablauf">So funktioniert's</a><a href="/#lernen">Kurse</a><a href="/#datenschutz">Datenschutz</a></nav>
+    <a class="header-cta" href="/">Zur Präsentation <span aria-hidden="true">↗</span></a>
   </header>
   <main class="download-page">
     <a class="back-link" href="/">← Zur DevPath-Präsentation</a>
     <section class="download-hero">
       <span class="download-logo" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <div class="eyebrow">DEVPATH DESKTOP · ALPHA 0.1</div>
-      <h1>Dein Lernpfad<br /><em>startet hier.</em></h1>
-      <p>Installiere DevPath auf deinem Windows-PC. Lernstand, Code und Projekte werden in dieser Alpha standardmäßig lokal auf deinem Gerät gespeichert.</p>
-      <a class="button primary download-button" href="/downloads/DevPath_0.1.0_x64-setup.exe" download>Windows-Installer herunterladen <span>↓</span></a>
-      <div class="download-meta"><span>Windows 10/11 · 64 Bit</span><span>Version 0.1.0 · NSIS-Installer</span><a href="/downloads/DevPath_0.1.0_x64-setup.exe.sha256">SHA-256-Prüfsumme</a></div>
+      <h1>Dein erster Lernschritt<br /><em>beginnt hier.</em></h1>
+      <p>Installiere die lokale Lernumgebung und starte mit sieben JavaScript-Lektionen. Profil und Lernstand bleiben auf deinem Gerät.</p>
+      <span class="button primary download-button platform-pending" data-installer="windows-x64">Windows-Installer wird veröffentlicht</span>
+      <div class="download-meta"><span>Windows 10/11 · x64</span><span>Unsignierte Alpha · Version 0.1.0</span><span class="platform-pending" data-checksum="windows-x64">Prüfsumme folgt mit dem Installer.</span></div>
     </section>
-    <section class="platform-status" aria-labelledby="platform-title"><h2 id="platform-title">Downloads nach Betriebssystem</h2><div class="platform-grid"><article class="platform-available"><h3>Windows</h3><p>Installer verfügbar · Windows 10/11 · 64 Bit</p><a href="/downloads/DevPath_0.1.0_x64-setup.exe">Windows-Installer herunterladen</a></article><article><h3>macOS</h3><p>Der macOS-Installer ist noch nicht veröffentlicht.</p><span>In Vorbereitung</span></article><article><h3>Linux</h3><p>Der Linux-Installer ist noch nicht veröffentlicht.</p><span>In Vorbereitung</span></article></div></section>
-    <section class="install-steps">
-      <div class="eyebrow">INSTALLATION</div><h2>In drei Schritten startklar</h2>
-      <ol><li><strong>Installer laden</strong><span>Wähle oben „Windows-Installer herunterladen“.</span></li><li><strong>Datei öffnen</strong><span>Öffne die heruntergeladene Datei und bestätige den Windows-Hinweis nur, wenn du die Alpha bewusst ausprobieren möchtest.</span></li><li><strong>DevPath starten</strong><span>Nach der Installation findest du DevPath im Startmenü und auf dem Desktop.</span></li></ol>
-    </section>
-    <aside class="alpha-note"><strong>Hinweis zur Alpha</strong><p>Diese unsignierte Vorabversion dient zum Ausprobieren. Windows kann deshalb eine Warnung zu einem unbekannten Herausgeber anzeigen. Sie ist keine Aussage darüber, dass die Datei bösartig ist oder sicher geprüft wurde. Installiere sie nur, wenn du diesem Projekt vertraust. macOS- und Linux-Installer sind noch nicht veröffentlicht.</p></aside>
+    <section class="platform-status" aria-labelledby="platform-title"><h2 id="platform-title">Installer für dein Betriebssystem</h2><p class="platform-intro">Die Pakete für Windows, macOS und Linux werden auf den jeweiligen Plattformen gebaut. Hier erscheinen Download und Prüfsumme, sobald der Plattformlauf alle Dateien erfolgreich veröffentlicht hat.</p><div class="platform-grid">
+      <article><h3>Windows</h3><p>Windows 10/11 · 64 Bit</p><span class="platform-pending" data-installer="windows-x64">Installer wird veröffentlicht.</span><span class="platform-pending" data-checksum="windows-x64">Prüfsumme folgt mit dem Installer.</span></article>
+      <article><h3>macOS · Apple Silicon</h3><p>DMG für ARM64 (M-Serie).</p><span class="platform-pending" data-installer="macos-arm64">Wird nach dem Plattformbuild hier veröffentlicht.</span><span class="platform-pending" data-checksum="macos-arm64">Prüfsumme folgt mit dem Installer.</span></article>
+      <article><h3>macOS · Intel</h3><p>DMG für x64.</p><span class="platform-pending" data-installer="macos-x64">Wird nach dem Plattformbuild hier veröffentlicht.</span><span class="platform-pending" data-checksum="macos-x64">Prüfsumme folgt mit dem Installer.</span></article>
+      <article><h3>Linux</h3><p>AppImage für x64.</p><span class="platform-pending" data-installer="linux-x64">Wird nach dem Plattformbuild hier veröffentlicht.</span><span class="platform-pending" data-checksum="linux-x64">Prüfsumme folgt mit dem Installer.</span></article>
+    </div></section>
+    <section class="install-steps"><div class="eyebrow">INSTALLATION</div><h2>In wenigen Schritten startklar</h2><ol>
+      <li><strong>1. Passendes Paket laden</strong><span>Wähle den Installer für dein Betriebssystem. Prüfe nach der Veröffentlichung die SHA-256-Datei gegen den Download.</span></li>
+      <li><strong>2. Installer öffnen</strong><span>Diese Alpha ist nicht digital signiert. Betriebssysteme können deshalb eine Herausgeber-Warnung anzeigen. Installiere sie nur, wenn du DevPath vertraust.</span></li>
+      <li><strong>3. Lernplan einrichten</strong><span>Beim ersten App-Start beantwortest du einmalig die Startabfrage für dein lokales Profil. Erst nach erfolgreichem Speichern öffnet sich dein Lernraum.</span></li>
+    </ol></section>
+    <aside class="alpha-note"><strong>Alpha- und Sicherheitsinfo</strong><p>Windows-Installer, macOS-DMGs und Linux-AppImage werden derzeit ohne Codesignatur gebaut. SHA-256-Prüfsummen helfen zu prüfen, ob ein Download unverändert ist; sie ersetzen keine Signatur und beweisen nicht, dass eine Anwendung vertrauenswürdig ist. macOS kann eine unsignierte App blockieren. Eine Veröffentlichung erfolgt erst, wenn die Plattformpakete erfolgreich gebaut und in den öffentlichen Downloadspeicher geladen wurden.</p></aside>
   </main>
-  <footer class="site-footer"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span> devpath</a><span>Desktop-App · Alpha 0.1</span><div><a href="/">Präsentation</a><a href="/#sicherheit">Datenschutz</a></div></footer>
+  <footer class="site-footer"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>devpath</span></a><span>Desktop-App · Alpha 0.1</span><div><a href="/">Präsentation</a><a href="/#datenschutz">Datenschutz</a><a href="mailto:devpath.support@gmail.com">Support</a></div></footer>
 </body>
 </html>
-

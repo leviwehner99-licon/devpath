@@ -6,7 +6,7 @@ Der Repositorystand enthält ein lokales Desktop-Alpha-Grundgerüst. Ein Windows
 
 - Tauri-2-Shell mit beschränkter Capability.
 - React + TypeScript-Oberfläche für Heute, Lernen, Code Studio, Code Base, Diplom und Einstellungen.
-- Ersteinrichtungsdialog und HTML-/CSS-Pilotkurs mit sieben Lernzielen.
+- Einmalige, lokal gespeicherte Startabfrage und JavaScript-Einstiegskurs mit sieben Lernzielen.
 - Lokale SQLite-Datenhaltung, Lernplan, Code-Base-Snapshots, JSON-Export und Löschfunktion.
 - PostgreSQL-Migration und OIDC-geschütztes API-Grundgerüst unter `server/`; noch ohne Hosting, Identitätsanbieter oder produktive Datenbank.
 - Statische Website unter `website/`.
@@ -22,7 +22,7 @@ $env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"
 npm run tauri -- dev
 ```
 
-Frontend-Produktionsbuild: `npm run build`. Windows-NSIS-Paket: `npm run tauri -- build --bundles nsis`. Builds für macOS und Linux müssen auf passenden Runnern gebaut und geprüft werden.
+Frontend-Produktionsbuild: `npm run build`. Windows-NSIS-Paket: `npm run tauri -- build --bundles nsis`. macOS-ARM64, macOS-x64 und Linux-x64 werden über die GitHub-Actions-Matrix gebaut. Für die öffentliche Veröffentlichung müssen die Supabase-Storage-Secrets eingerichtet und **Actions → Desktop build matrix → Run workflow** auf `main` gestartet werden; die Veröffentlichung erzeugt SHA-256-Prüfdateien. Die Plattformpakete sind in dieser Alpha unsigniert.
 
 Die PostgreSQL-Migration wird nicht automatisch ausgeführt. Das API-Grundgerüst und die vorsichtigen Datenbankhinweise stehen in [server/README.md](server/README.md).
 

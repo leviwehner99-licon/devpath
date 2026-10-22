@@ -1,0 +1,87 @@
+:root {
+  color-scheme: light;
+  --ink: #17233c;
+  --muted: #45546b;
+  --site-bg: #f8faff;
+  --site-surface: #ffffff;
+  --site-subtle: #edf3fb;
+  --site-border: #cbd6e5;
+  --brand: #1454b8;
+}
+
+body { color: var(--ink); background: var(--site-bg); }
+.logo, .logo:visited, .site-footer .logo, .site-footer .logo:visited { color: #1769e0 !important; }
+.logo-mark { background: #1769e0 !important; color: #fff !important; }
+.site-header nav a, .site-footer a { color: #35445b; }
+.header-cta, .quiet-link, .feature-card a, .text-link, .back-link { color: #124da9; }
+.eyebrow, .trust-row > span { color: #45536a; }
+.hero-copy > p, .section-intro p, .feature-card p, .course-copy > p, .privacy-copy > p,
+.privacy-copy li, .download-section p, .platform-note, .site-footer > span,
+.how-grid p, .preview-sidebar, .preview-content > small, .preview-lesson small,
+.floating-card small, .preview-lesson span { color: var(--muted); }
+.trust-row b { color: #34445d; }
+.feature-card.purple, .course-cloud span:nth-child(4n+1), .how-grid article { background: #e7efff; }
+.feature-card.mint, .course-cloud span:nth-child(4n+2) { background: #e4f3ef; }
+.feature-card.peach { background: #fff0e5; }
+.feature-card h3, .how-grid h3 { color: #19263d; }
+.feature-card p, .how-grid p { color: #394860; }
+.course-cloud span { color: #24344e; background: #fff; border-color: var(--site-border); }
+.how-grid article { border-color: #cbd9ef; }
+.site-footer { background: #edf2f8; border-color: var(--site-border); }
+.site-footer a { color: #263750; }
+.download-hero h1, .install-steps h2, .platform-status h2 { color: var(--ink); }
+.download-hero > p, .download-meta, .install-steps li span, .alpha-note p,
+.platform-status p, .platform-status span { color: var(--muted); }
+.install-steps li, .platform-status article { color: var(--ink); background: var(--site-surface); border-color: var(--site-border); }
+.install-steps li strong, .platform-status h3 { color: var(--ink); }
+.alpha-note { color: var(--ink); background: #eaf1fb; border-color: #cbd9ef; }
+.alpha-note strong { color: #124da9; }
+.platform-status a { color: #124da9; font-weight: 700; }
+.platform-intro, .roadmap-note { color: var(--muted); }
+.roadmap-note { margin-top: 20px; padding: 16px; border-left: 3px solid #1769e0; background: var(--site-subtle); border-radius: 0 12px 12px 0; }
+.skip-link:focus { color: #fff; background: #14213a; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --ink: #f3f6fc;
+    --muted: #d0d9e7;
+    --site-bg: #0d1420;
+    --site-surface: #172233;
+    --site-subtle: #1b2a40;
+    --site-border: #40516b;
+  }
+  body { color: var(--ink); background: var(--site-bg); }
+  .logo, .logo:visited, .site-footer .logo, .site-footer .logo:visited { color: #1769e0 !important; }
+  .logo-mark { background: #1769e0 !important; color: #fff !important; }
+  .site-header, .site-footer { background: #131d2b; border-color: #40516b; }
+  .site-header nav a, .site-footer a, .site-footer > span { color: #e3eaf4; }
+  .header-cta, .quiet-link, .feature-card a, .text-link, .back-link { color: #b9d2ff; }
+  .eyebrow, .trust-row > span { color: #d0d9e7; }
+  .hero-copy > p, .section-intro p, .feature-card p, .course-copy > p,
+  .privacy-copy > p, .privacy-copy li, .download-section p, .platform-note,
+  .how-grid p, .preview-sidebar, .preview-content > small, .preview-lesson small,
+  .floating-card small, .preview-lesson span { color: #d0d9e7; }
+  .trust-row b { color: #eef3fb; }
+  .feature-card.purple, .feature-card.mint, .feature-card.peach,
+  .course-cloud span, .how-grid article { color: #f3f6fc; background: #1b2a40; border-color: #40516b; }
+  .feature-card h3, .how-grid h3, .course-copy h2, .privacy-copy h2,
+  .section h2, .download-section h2 { color: #f3f6fc; }
+  .feature-icon { color: #b9d2ff; background: #253957; }
+  .course-cloud span:nth-child(4n+1), .course-cloud span:nth-child(4n+2) { color: #f3f6fc; background: #1b2a40; }
+  .site-footer { background: #131d2b; }
+  .download-hero { color: var(--ink); background: linear-gradient(135deg, #1c3150, #172233 60%, #183047); border-color: #40516b; }
+  .download-hero h1, .install-steps h2, .platform-status h2 { color: #f3f6fc; }
+  .download-hero > p, .download-meta, .install-steps li span, .alpha-note p,
+  .platform-status p, .platform-status span, .platform-intro { color: #d0d9e7; }
+  .install-steps li, .platform-status article { color: #f3f6fc; background: #172233; border-color: #40516b; }
+  .install-steps li strong, .platform-status h3 { color: #f3f6fc; }
+  .alpha-note, .roadmap-note { color: #f3f6fc; background: #1b2a40; border-color: #40516b; }
+  .alpha-note strong, .platform-status a { color: #b9d2ff; }
+  .privacy-orbit { border-color: #405a7d; }
+  .privacy-shield { color: #b9d2ff; background: linear-gradient(145deg, #20395d, #1b3b3b); }
+}
+
+@media (max-width: 760px) {
+  .roadmap-note { line-height: 1.6; }
+}

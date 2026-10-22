@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { clearState, exportState, loadState, parseDataExport, saveState } from "./storage";
 import { recommendNextLesson, reviewDate } from "./planner";
-import { pilotCourse, type CourseLesson } from "./course";
+import { programmingCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
 import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, Today } from "./views";
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
@@ -32,15 +32,15 @@ export default function App() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const recommendation = useMemo(() => recommendNextLesson(pilotCourse.lessons, state.progress), [state.progress]);
-  const activeLesson = pilotCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
+  const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
+  const activeLesson = programmingCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
   const lessonProgress = state.progress[activeLesson.id];
   const code = lessonProgress?.code ?? activeLesson.starterCode;
   const activeProject = state.projects.find((project) => project.id === state.activeProjectId) ?? state.projects[0];
-  const activeFilePath = activeProject?.files[activeProject.activeFile] !== undefined ? activeProject.activeFile : Object.keys(activeProject?.files ?? {})[0] ?? "index.html";
+  const activeFilePath = activeProject?.files[activeProject.activeFile] !== undefined ? activeProject.activeFile : Object.keys(activeProject?.files ?? {})[0] ?? "index.js";
   const projectCode = activeProject?.files[activeFilePath] ?? "";
-  const completedCount = pilotCourse.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
-  const progressPercent = Math.round(completedCount / pilotCourse.lessons.length * 100);
+  const completedCount = programmingCourse.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
+  const progressPercent = Math.round(completedCount / programmingCourse.lessons.length * 100);
 
   useEffect(() => {
     loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); setStorageWritable(true); }).catch(() => setStorageIssue("DevPath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
@@ -61,9 +61,16 @@ export default function App() {
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
-  const finishOnboarding = (values?: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
-    setState((current) => ({ ...current, ...values, learnerName: values?.learnerName?.trim() || current.learnerName || "Lernende Person", onboardingCompleted: true }));
-    setShowOnboarding(false);
+  const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
+    const nextState = { ...state, ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
+    try {
+      await saveState(nextState);
+      setState(nextState);
+      setStorageWritable(true);
+      setShowOnboarding(false);
+    } catch {
+      setNotice("Dein Lernplan konnte noch nicht gespeichert werden. Bitte versuche es erneut; die Startabfrage bleibt geöffnet.");
+    }
   };
 
   const saveCode = (lessonId: string, value: string | undefined) => setState((current) => {
@@ -103,7 +110,7 @@ export default function App() {
     if (linked) {
       setState((current) => ({ ...current, activeProjectId: linked.id, projects: current.projects.map((project) => project.id === linked.id && linked.linkedLessonFile ? { ...project, files: { ...project.files, [linked.linkedLessonFile]: code }, updatedAt: new Date().toISOString() } : project) }));
     } else {
-      const path = activeLesson.language === "css" ? "styles.css" : "index.html";
+      const path = "index.js";
       const project = createLocalProject(`Lektion · ${activeLesson.title}`, { [path]: code });
       project.language = activeLesson.language;
       project.linkedLessonId = activeLesson.id;
@@ -114,7 +121,8 @@ export default function App() {
   };
 
   const createProject = (name: string) => {
-    const project = createLocalProject(name, { "index.html": "<!doctype html>\n<html lang=\"de\">\n<head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Neues Projekt</title></head>\n<body>\n  <main>\n    <h1>Mein neues Projekt</h1>\n  </main>\n</body>\n</html>\n", "styles.css": "body { font-family: system-ui, sans-serif; }\n" });
+    const project = createLocalProject(name, { "index.js": "// Dein neues JavaScript-Projekt\nconsole.log(\"Hallo DevPath\");\n" });
+    project.language = "javascript";
     setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id }));
     setNotice(`Projekt „${project.name}“ wurde lokal angelegt.`);
   };
@@ -192,7 +200,7 @@ export default function App() {
     }
     const now = new Date();
     const confidence = Math.max(1, 5 - hintCount);
-    const courseFinished = pilotCourse.lessons.every((item) => item.id === lesson.id || state.progress[item.id]?.completed);
+    const courseFinished = programmingCourse.lessons.every((item) => item.id === lesson.id || state.progress[item.id]?.completed);
     setState((current) => ({
       ...current,
       ...(courseFinished ? { courseCompletedAt: current.courseCompletedAt ?? now.toISOString() } : {}),
@@ -212,7 +220,7 @@ export default function App() {
     setSelectedLessonId(null);
     if (courseFinished) {
       setShowCompletion(true);
-      setNotice("Du hast alle Lernziele des Pilotkurses erreicht. Dein lokales Diplom ist freigeschaltet.");
+      setNotice("Du hast alle Lernziele des Einstiegskurses erreicht. Dein lokales Diplom ist freigeschaltet.");
     } else setNotice("Lernziel abgeschlossen. Der Lernplan hat deinen nächsten Schritt ausgewählt.");
   };
 
@@ -263,6 +271,7 @@ export default function App() {
     try {
       await clearState();
       setState(structuredClone(initialState));
+      setShowOnboarding(true);
       setSelectedLessonId(null);
       setNotice("Lokale Daten wurden gelöscht.");
     } catch {
@@ -296,6 +305,9 @@ export default function App() {
     }
   };
 
+  if (!stateLoaded) return <div className="first-run-shell"><div className="loading-note" role="status">Dein lokales Profil wird sicher geöffnet …</div></div>;
+  if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
+
   return <div className="app-shell">
     <aside className="sidebar" aria-label="Hauptnavigation">
       <div className="brand"><LogoMark/><span>devpath</span></div>
@@ -314,11 +326,11 @@ export default function App() {
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
         {stateLoaded && !storageIssue && view === "today" && <><Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
-        {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openPilot={() => { setView("curriculum"); }} />}
+        {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openCourse={() => { setView("curriculum"); }} />}
         {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum state={state} completedCount={completedCount} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
         {stateLoaded && !storageIssue && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
         {stateLoaded && !storageIssue && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
-        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={pilotCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={state.settings.theme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={programmingCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={state.settings.theme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
         {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={state.settings.theme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
@@ -339,5 +351,5 @@ function CompletionDialog({ reducedMotion, onClose }: { reducedMotion: boolean; 
     return () => window.clearInterval(timer);
   }, [reducedMotion]);
   useEffect(() => { if (seconds === 0 || reducedMotion) onClose(); }, [seconds, reducedMotion, onClose]);
-  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle Lernziele deiner ersten responsiven Webseite abgeschlossen.</p><div className="diploma-preview"><span>DEVPATH · LERNERFOLG</span><strong>HTML &amp; CSS<br />Grundlagen</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
+  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle sieben Lektionen im Einstiegskurs abgeschlossen.</p><div className="diploma-preview"><span>DEVPATH · LERNERFOLG</span><strong>Programmier-<br />grundlagen</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
 }
