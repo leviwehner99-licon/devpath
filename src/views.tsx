@@ -127,7 +127,7 @@ export function Settings({ state, update, storageWritable, exportData, importDat
         <section id="datenschutz" className="panel settings-panel">
           <div className="eyebrow">DATENSCHUTZ</div><h2>Deine Daten bleiben deine</h2>
           <p className="settings-description">Lernstand, Code und Versionen werden lokal gespeichert. Konto, Analyse, Synchronisierung und externe KI sind in dieser Alpha noch nicht verbunden.</p>
-          <Toggle label="Fehlerberichte senden" detail="Fehlerberichte werden in dieser Alpha noch nicht übertragen." checked={state.settings.sendDiagnostics} onChange={(value) => updateSettings({ sendDiagnostics: value })} />
+          <div className="toggle-row" aria-label="Fehlerberichte deaktiviert"><span><strong>Fehlerberichte</strong><small>In dieser Alpha deaktiviert. DevPath überträgt keine Diagnoseberichte.</small></span><span className="local-badge">Deaktiviert</span></div>
           <p className="field-note">Der Export enthält Profil, Lernstand, Projektdateien und Code-Base-Versionen. Die Datei kann privaten Quelltext enthalten und sollte geschützt aufbewahrt werden.</p>
           {!storageWritable && <p className="storage-warning" role="status">Daten konnten nicht geladen werden. Export und Löschen sind gesperrt, bis du einen gültigen Datenexport wiederhergestellt hast.</p>}
           <div className="privacy-actions">
