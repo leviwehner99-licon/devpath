@@ -25,3 +25,19 @@
 .site-footer>span{color:#46546b}
 .site-footer .logo{color:#1769e0}
 @media(prefers-color-scheme:dark){.site-footer{background:#151d29;border-color:#3c4b60}.site-footer a{color:#e8effa}.site-footer>span{color:#c7d3e4}.site-footer .logo,.site-footer .logo:visited{color:#70a5ff!important}.site-footer .logo-mark{background:#1769e0!important}}
+
+/* Readable dark theme overrides for every major landing page region */
+@media(prefers-color-scheme:dark){
+  body{background:#0d1420!important;color:#f5f7fb!important}
+  .site-header,.site-footer{background:#131d2b!important}
+  .site-header nav a,.site-footer a,.site-footer>span{color:#eef4ff!important}
+  .site-footer .logo{color:#70a5ff!important}
+  .hero h1,.section h2,.feature-card h3,.course-copy h2,.privacy-copy h2,.download-section h2{color:#f7f9fd!important}
+  .hero-copy>p,.feature-card p,.course-copy>p,.privacy-copy>p,.privacy-copy li,.download-section p{color:#e1e8f2!important}
+  .eyebrow,.platform-note{color:#d0d9e7!important}
+  .trust-row,.course-section,.privacy-section{border-color:#42516a!important}
+  .trust-row b{color:#f0f4fa!important}
+  .feature-card.purple,.feature-card.mint,.feature-card.peach,.course-cloud span,.how-grid article{background:#1c293a!important;color:#f4f7fc!important;border-color:#42516a!important}
+  .feature-card a,.how-grid article>b{color:#b9d2ff!important}
+  .how-grid h3,.how-grid p{color:#f0f4fa!important}
+}
