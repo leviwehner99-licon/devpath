@@ -18,3 +18,10 @@
 
 /* High contrast fixes for dark preference */
 @media(prefers-color-scheme:dark){:root{color:#f4f7fc;background:#10151d;--ink:#f4f7fc;--muted:#d4ddeb}.eyebrow{color:#d3dced}.hero-copy>p,.feature-card p,.course-copy>p,.privacy-copy>p,.download-section p{color:#e1e8f2}.site-header nav a,.site-footer a{color:#e1e8f2}.platform-note,.site-footer>span{color:#cbd5e3}.feature-card h3,.course-copy h2,.privacy-copy h2,.section h2{color:#f4f7fc}.trust-row b{color:#e1e8f2}.feature-card.purple{background:#1d2b40;color:#f4f7fc}.feature-card.mint{background:#193b3a;color:#f4f7fc}.feature-card.peach{background:#3c3027;color:#f4f7fc}.course-cloud span{color:#f4f7fc;background:#1d2b40;border-color:#394a61}.how-grid article{background:#1d2b40;border-color:#394a61}.how-grid h3,.how-grid p{color:#f4f7fc}.privacy-section,.course-section,.trust-row{border-color:#3b4656}}
+
+/* Site theme colors and footer legibility */
+.site-footer{background:#f0f4fa;border-top:1px solid #d4dce8}
+.site-footer a{color:#263650;font-weight:600}
+.site-footer>span{color:#46546b}
+.site-footer .logo{color:#1769e0}
+@media(prefers-color-scheme:dark){.site-footer{background:#151d29;border-color:#3c4b60}.site-footer a{color:#e8effa}.site-footer>span{color:#c7d3e4}.site-footer .logo,.site-footer .logo:visited{color:#70a5ff!important}.site-footer .logo-mark{background:#1769e0!important}}
