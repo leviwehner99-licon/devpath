@@ -19,8 +19,8 @@ jobs:
       matrix:
         directory: [., server, website]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Audit locked npm dependencies
@@ -30,9 +30,12 @@ jobs:
   rust-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
       - name: Install cargo-audit
         run: cargo install cargo-audit --locked
       - name: Audit Rust lockfile
-        run: cargo audit --file src-tauri/Cargo.lock
+        # rsa is only a transitive dependency of sqlx-mysql, an optional SQLx driver
+        # not enabled by DevPath (the app uses SQLite). RustSec has no patched rsa
+        # release for RUSTSEC-2023-0071; remove this exception if MySQL/RSA is enabled.
+        run: cargo audit --file src-tauri/Cargo.lock --ignore RUSTSEC-2023-0071

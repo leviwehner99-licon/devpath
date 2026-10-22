@@ -3,6 +3,10 @@
 **Stand:** 22. Oktober 2026  
 **Status:** Vorbereitung; kein Backup-Restore, Incident-Tabletop oder Alpha-Betrieb wurde bisher nachgewiesen.
 
+## 0. Dependency-Audit-Ausnahme
+
+Der RustSec-Audit ignoriert ausschließlich `RUSTSEC-2023-0071` für `rsa`. Die aktuelle Abhängigkeitskette stammt aus `sqlx-mysql`, einem optionalen SQLx-Treiber, der im DevPath-App-Build nicht aktiviert ist; DevPath verwendet lokal SQLite. RustSec führt für den Marvin-Timing-Angriff derzeit keine gepatchte `rsa`-Version. Der CI-Befehl enthält die einzelne Advisory-ID sichtbar. Die Ausnahme muss entfernt werden, bevor MySQL oder Codepfade mit `rsa` aktiviert werden; sie ist keine Freigabe für betroffene Kryptografie. Zusätzlich wurde `tokio` von 1.54.0 auf die Fixversion 1.54.1 angehoben.
+
 Dieses Dokument macht die noch offenen Betriebsarbeiten ausführbar. Es enthält keine produktiven Zugangsdaten. Die Produktionsdatenbank darf für eine Wiederherstellungsprobe niemals als Restore-Ziel verwendet werden.
 
 ## 1. PostgreSQL-Backup und Wiederherstellungsprobe
