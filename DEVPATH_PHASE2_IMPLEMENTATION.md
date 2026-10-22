@@ -1,6 +1,6 @@
 # DevPath Phase 2 – Abschlussstand und Übergabe
 
-**Stand:** 21. Oktober 2026  
+**Stand:** 22. Oktober 2026
 **Status:** Lokale Windows-Alpha und EdgeOne-/Supabase-Readiness funktionieren; Phase 2 ist noch nicht als private Alpha freigegeben.
 **Plan:** [DEVPATH_PHASE2_PLAN.md](DEVPATH_PHASE2_PLAN.md)
 
@@ -9,11 +9,11 @@
 - GitHub-Deployment der Website vorbereitet: Makers-Projektwurzel ist `website`, statische Ausgabe `.`; die Website bleibt eine noch nicht produktionsreife Platzhalterseite.
 - Node.js-Cloud-Function-Handler unter `website/cloud-functions/api/` bilden Health-, Kurs-, Release- und OIDC-Kontorouten ab. Der lokale Fastify-Server bleibt für lokale Entwicklung und klassische Node-Hosts erhalten.
 - Cloud-Functions-Zielregion ist Frankfurt (`eu-frankfurt`); die Supabase-Datenbank liegt in `eu-west-1` (Ireland). Der Nutzer hat die PostgreSQL-Migration und die Makers-Produktionsvariablen eingerichtet. `/api/health/ready` wurde auf der aktuellen Produktionsdomain erfolgreich bestätigt; der TLS-Handshake verwendet das geprüfte Supabase-CA-Zertifikat.
-- Eine versionierte HTML/CSS-Pilotkursdatei wird reproduzierbar aus `src/course.ts` generiert. Ihre SHA-256-Prüfsumme und die zugehörige idempotente Metadatenmigration liegen im Repository. Der Nutzer hat Migration 001 und danach 002 in einer pgAdmin-Verbindung mit Datenbankname `devpath` erfolgreich ausgeführt. Die Produktions-API antwortet auf `/api/v1/courses` mit `{"courses":[]}`. Da die konfigurierte Produktions-URL auf `/postgres` zeigt, ist noch zu verifizieren, ob die Pilotkursmigration auch in genau dieser gehosteten Produktionsdatenbank ausgeführt wurde.
-- Aktuelle vom Nutzer bestätigte Produktionsdomain: `https://devpath-dpbd5xdq2oj6.edgeone.dev/`. Domainwechsel in Makers können diese Adresse ändern.
+- Eine versionierte HTML/CSS-Pilotkursdatei wird reproduzierbar aus `src/course.ts` generiert. Migration 001 erstellt Schema und Tabellen; Migration 002 veröffentlicht den HTML/CSS-Pilotkurs; Migration 003 gewährt `devpath_app` nur SELECT-Zugriff auf veröffentlichte Kurs-/Releasezeilen und setzt RLS-Policies. Am 22.10.2026 bestätigte der Nutzer, dass `/api/v1/courses` in Production jetzt alle erwarteten Kurse anzeigt. Damit ist der Produktionsabruf des veröffentlichten Katalogs verifiziert.
+- Aktuelle vom Nutzer bestätigte Produktionsdomain: `https://devpath-dpv9ts9ylvn2.edgeone.dev/`. Domainwechsel in Makers können diese Adresse ändern.
 - Makers-Projektvariablen, Migrationsschritte, Routen und verbleibende Sicherheitsprüfung stehen in [website/DEPLOYMENT.md](website/DEPLOYMENT.md). Keine Zugangsdaten wurden gespeichert.
 - Ein Windows-/macOS-/Linux-Desktop-Buildworkflow wurde ergänzt. Er ist erst nach Push in GitHub ausführbar; die plattformübergreifenden Pakete wurden noch nicht gebaut oder signiert.
-- EdgeOne-Handler-Syntax und JSON-Manifeste geprüft. Der Frontend-Produktionsbuild wurde nach der Mehrdateien-Projektumsetzung erneut erfolgreich erstellt. Ein erfolgreicher `/api/health/ready`-Aufruf bestätigt PostgreSQL-Erreichbarkeit; er bestätigt nicht, dass der Kurskatalog befüllt, ein Download signiert oder alle Datenbankrechte minimal sind. `/api/v1/courses` lieferte trotz gemeldeter Kursmigration `{"courses":[]}`. Die dynamische Katalogantwort verwendete CDN-Caching mit `stale-while-revalidate`; dies wurde auf `Cache-Control: no-store` geändert. Die Änderung ist lokal gebaut, muss aber noch in Makers deployed und gegen den Produktionsendpunkt geprüft werden. Bleibt die Antwort danach leer, muss die Produktions-DATABASE_URL mit der Datenbank abgeglichen werden, in der 002 ausgeführt wurde.
+- EdgeOne-Handler-Syntax und JSON-Manifeste geprüft. Der Frontend-Produktionsbuild wurde nach der Mehrdateien-Projektumsetzung erneut erfolgreich erstellt. Die Katalogantwort verwendet `Cache-Control: no-store`. Nach Vergabe der gezielten Leserechte durch Migration 003 bestätigte der Nutzer in Production, dass der Kurskatalog die erwarteten Kurse anzeigt. Dies verifiziert den Katalogendpunkt und die Lesepfade für veröffentlichte Kurs- und Release-Metadaten; es ersetzt keine Prüfung weiterer Tabellenrechte oder anderer API-Routen.
 
 ## Lokal umgesetzt
 
@@ -45,7 +45,7 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 ## Noch erforderlich, bevor Phase 2 als private Alpha abgeschlossen gilt
 
 1. **Produkt-/Rechtsfreigaben:** Zielmarkt, Altersrahmen, unterstützte OS-Mindestversionen, Datenschutz-/Supportkontakt und Teilnahmebedingungen festlegen. Minderjährige bis zur Freigabe nicht einladen.
-2. **Datenbankbetrieb:** Least-privilege-Runtime-Rolle, Kurs-/Releaseendpunkte, Kursdaten, Backup und Restore prüfen. Migration/TLS-Erreichbarkeit sind bestätigt; Rollenprüfung und Wiederherstellungsübung sind nicht bestätigt.
+2. **Datenbankbetrieb:** Least-privilege-Zugriff des `devpath_app` auf veröffentlichte Kurs-/Releasezeilen und den Kurskatalogabruf bestätigt. Weitere Rollen-/Tabellenrechte sowie Backup und Restore noch prüfen.
 3. **Konto:** Identitätsanbieter ist noch nicht gewählt; Desktop-PKCE, Wiederherstellung, Logout/Widerruf und Kontolöschung sind nicht verbunden. Offline-Lernen ohne Konto ist die aktuelle Vorgabe und darf dafür nicht blockiert werden.
 4. **Codeausführung:** Runnerprotokoll und Sandbox je OS bauen und unabhängig prüfen. Bis dahin bleibt Ausführung bewusst ausgeschaltet.
 5. **Release:** NSIS signieren; CI-Builds auf echten Windows-, macOS- und Linux-Runnern erfolgreich belegen; macOS signieren/notarisieren; Updatefeed, Rollback/Widerruf, SBOM und Schlüsselverwaltung einrichten.
