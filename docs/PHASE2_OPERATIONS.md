@@ -16,7 +16,7 @@ Dieses Dokument macht die noch offenen Betriebsarbeiten ausführbar. Es enthält
 
 ### Manuelles logisches Backup in PowerShell
 
-In Supabase **Connect** eine Direct- oder Session-Pooler-Verbindung wählen. Für `pg_dump` keinen Transaction-Pooler verwenden. Host, Port, Datenbank und Benutzer aus genau dieser Anzeige übernehmen. Das Passwort wird unten verdeckt abgefragt; es landet weder in der Befehlszeile noch im Git-Repository. Connection string und Poolerwahl: [Supabase-Verbindungsleitfaden](https://supabase.com/docs/guides/database/connecting-to-postgres).
+In Supabase **Connect** die **Session-Pooler**-Verbindung wählen (Supabase nennt dafür Port 5432) oder eine funktionierende Direct-Verbindung; keinen Transaction-Pooler verwenden. Host, Port, Datenbank und Benutzer genau aus der Anzeige übernehmen. Für den vollständigen Export den Datenbankbesitzer verwenden, nicht `devpath_app`: Diese App-Rolle darf nur veröffentlichte Kurs- und Releasezeilen lesen. Supabase zeigt den Besitzer-Benutzer gewöhnlich als `postgres.<Projekt-Referenz>`; für dieses Projekt ist die Referenz `rvhxsgexonmolrpdxdou`. Das Passwort ist das Datenbankpasswort aus Supabase, nicht das Makers-Feld `DATABASE_URL` und nicht das Passwort von `devpath_app`. Falls es unbekannt ist, in Supabase unter **Database → Settings** zurücksetzen. Das Passwort wird unten verdeckt abgefragt; es landet weder in der Befehlszeile noch im Git-Repository. [Supabase-Verbindungsleitfaden](https://supabase.com/docs/guides/database/connecting-to-postgres).
 
 ```powershell
 $env:PGHOST = 'HOST_AUS_SUPABASE_CONNECT'
