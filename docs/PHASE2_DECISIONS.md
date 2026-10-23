@@ -7,7 +7,7 @@
 | Thema | Entscheidung | Folge |
 | --- | --- | --- |
 | Konto vor dem ersten Lernen | Anmeldung erforderlich; das Lernprofil ist pro Konto. | Auf diesem Rechner bleiben Lernstand, Code und Projekte lokal und werden nicht zwischen Geräten synchronisiert. |
-| Konto in der privaten Phase-2-Alpha | Supabase Auth mit E-Mail/Passwort, Google und Apple; PKCE über Desktop-Deep-Link. | Providerkonfiguration, Makers-Umgebungsvariablen und Migration 005 sind vor produktivem Login einzurichten und zu verifizieren. Das Startprofil wird serverseitig dem Konto zugeordnet; Lerncode bleibt lokal. |
+| Konto in der privaten Phase-2-Alpha | Supabase Auth mit E-Mail/Passwort und Google; Google-PKCE über Desktop-Deep-Link. | Google-Provider, Makers-Umgebungsvariablen und Migration 005 müssen vor produktivem Login eingerichtet und verifiziert werden. Das Startprofil wird serverseitig dem Konto zugeordnet; Lerncode bleibt lokal. |
 | Hosted Datenbank | Supabase PostgreSQL, Projekt `rvhxsgexonmolrpdxdou`, Region `eu-west-1`. | Produktionskurskatalog wurde über die Makers-API bestätigt. Keine Geheimnisse in dieses Register aufnehmen. |
 | Website/API-Hosting | EdgeOne Pages/Makers; Production branch ist laut Projektkonfiguration `main`. | Website und Cloud Functions teilen ein Projekt. Deployment-Status in Makers ist vor Release zu prüfen. |
 | Runtime-Datenbankrolle | `devpath_app` liest veröffentlichte Kurse und Releases über Migration 003/RLS. | Andere Tabellenrechte und Restoreprobe bleiben offen. |
@@ -19,7 +19,7 @@
 
 | Entscheidung | Warum nötig | Zuständige Eingabe/Evidenz |
 | --- | --- | --- |
-| OIDC-/Providerkonfiguration und Kontolöschung | Ohne Supabase Provider-Clientdaten, Makers-Secrets, Migration 005 und erfolgreichen PKCE-Test funktioniert kein Produktionslogin. | Betreiber richtet Supabase Auth, Google/Apple Developer-Clients und Makers-Konfiguration ein; keine Geheimnisse im Repository oder Chat. |
+| OIDC-/Providerkonfiguration und Kontolöschung | Ohne Google-Clientdaten in Supabase, Makers-OIDC-Konfiguration, Migration 005 und erfolgreichen PKCE-Test funktioniert kein Produktionslogin. | Betreiber richtet Google Auth Platform, Supabase Auth und Makers ein; keine Geheimnisse im Repository oder Chat. |
 | Betreibername, Support- und Sicherheitskontakt | Website und Vorfallmeldung brauchen echte erreichbare Kontakte. | Vom Betreiber freigegebene Kontaktadresse; keine Platzhalteradresse veröffentlichen. |
 | Zielmarkt, Mindestalter und Umgang mit Minderjährigen | Bestimmt Teilnahme-, Datenschutz- und Einwilligungsanforderungen. | Produktverantwortliche und qualifizierte Rechtsprüfung. Bis dahin keine Minderjährigen einladen und keine allgemeine Teilnahme anbieten. |
 | Mindestversionen der Betriebssysteme | Buildmatrix allein definiert keine getesteten Nutzersysteme. | Auf echten Geräten/Runnern verifizierte Versionen und Supportzeitraum. |

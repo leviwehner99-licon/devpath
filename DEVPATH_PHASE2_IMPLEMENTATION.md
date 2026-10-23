@@ -21,7 +21,7 @@
 ## Lokal umgesetzt
 
 - Tauri-2-Desktop-App mit React/TypeScript, Monaco-Editor, Ansichten für Heute, Lernen, Code Studio, Code Base, Diplom und Einstellungen.
-- Nicht überspringbare Startabfrage vor dem Dashboard: Name, Lernziel, Vorerfahrung, Lerntage, bevorzugte Uhrzeit und Zeit je Einheit. Sie erscheint einmal je lokal gespeichertem App-Profil und wird erst nach erfolgreichem Speichern geschlossen. Die App hat noch keine Benutzerkonten; daher ist das Profil nicht über Geräte synchronisiert und nicht von einem Onlinekonto abgegrenzt.
+- Kontoansicht mit E-Mail/Passwort und Google-Anmeldung über Supabase Auth/PKCE; Microsoft und Apple werden in dieser Version nicht angeboten. Die Startabfrage speichert Name, Lernziel, Vorerfahrung, Lerntage, bevorzugte Uhrzeit und Einheitsdauer nach erfolgreichem Speichern am Konto. Lernstand, Programmcode und Projekte bleiben lokal auf dem Gerät.
 - Personalisierter Wochenrhythmus mit auswählbaren Lerntagen, bevorzugter Uhrzeit und Einheitsdauer; lokal gespeichert. Die Uhrzeit ist eine Orientierung innerhalb der App, keine Benachrichtigung. Begonnene Übungen, Fehlversuche und angeforderte Hinweise fließen lokal in die Empfehlung und die Begründung fälliger Wiederholungen ein.
 - Lokaler JavaScript-Einstiegskurs mit sieben Lernzielen, Kursbegründungen, Übungshinweisen und lokalen Wiederholungsintervallen.
 - Tauri-SQLite-Speicherung, Migration und einmaliger Import der alten Browserdaten; versionierter JSON-Gesamtexport, Import/Wiederherstellung mit Größen- und Dateivalidierung, Bestätigungsdialog und lokale Löschfunktion. Beim beschädigten Speicher werden normale Ansichten und Schreibvorgänge blockiert, bis ein gültiger Export wiederhergestellt ist. Exportdateien können privaten Quellcode enthalten.
@@ -29,7 +29,7 @@
 - Lokales Diplom und überspringbarer Abschlussmoment mit Unterstützung für reduzierte Bewegung.
 - OIDC-geschütztes API-Grundgerüst mit Ratenbegrenzung, Herkunfts-Allowlist, Health-Endpunkten und minimaler PostgreSQL-Migration für Konto-/Kurs-/Release-Metadaten.
 - Produktwebsite-Grundgerüst. Vite ignoriert Rust-Buildartefakte im Datei-Watcher.
-- Codeausführung bleibt deaktiviert, bis eine Sandbox pro Zielbetriebssystem unabhängig geprüft ist. Externe KI, Kontoanmeldung in der Desktop-App, Community und Synchronisierung sind nicht verbunden.
+- Codeausführung bleibt deaktiviert, bis eine Sandbox pro Zielbetriebssystem unabhängig geprüft ist. Externe KI, Community und Synchronisierung sind nicht verbunden.
 
 ## Erfolgreich verifiziert
 
@@ -51,7 +51,7 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 
 1. **Produkt-/Rechtsfreigaben:** Zielmarkt, Altersrahmen, unterstützte OS-Mindestversionen, Betreibername, Datenschutz-/Supportkontakt und Teilnahmebedingungen durch die zuständigen Personen festlegen. Minderjährige bis zur Freigabe nicht einladen.
 2. **Datenbankbetrieb:** Produktions-Lesezugriff auf den Kurskatalog und lokaler Restore samt `devpath_app`-Leserechten sind bestätigt. Supabase-Backuptarif/Aufbewahrung, sichere verschlüsselte Ablage und vollständige providerbezogene Wiederherstellung bleiben offen.
-3. **Konto:** Für die private Phase-2-Alpha ist offline-only beschlossen. Die App benötigt kein Konto; OIDC-/PKCE, Wiederherstellung, Logout/Widerruf und Kontolöschung sind daher bewusst nicht Teil dieser Alpha. Die optionalen API-Kontorouten bleiben ohne OIDC-Konfiguration geschlossen.
+3. **Konto:** E-Mail/Passwort und Google-PKCE sind in der App implementiert. Vor einem nutzbaren Produktionskonto müssen Migration 005 angewendet, Google in Supabase konfiguriert, Redirect-Allowlist und Makers-OIDC-Variablen eingerichtet und Kontoanlage, Profilabruf, Logout, Wiederherstellung sowie Kontolöschung getestet werden. Bis dahin ist die Anmeldung nicht als produktionsbereit bestätigt.
 4. **Codeausführung:** Runnerprotokoll und Sandbox je OS bauen und unabhängig prüfen. Bis zum bestandenen Gate bleibt Ausführung deaktiviert.
 5. **Release:** CI-Matrix auf allen Plattformen erfolgreich nachweisen; Artefakte mit real beschafften Plattformschlüsseln signieren/notarisieren; Updatefeed, Rollback/Widerruf, SBOM/Lizenzinventar und Schlüsselrotation umsetzen. Keine Signierschlüssel sind im Repository.
 6. **Website/API:** Präsentations- und Downloadseite sind implementiert und mit dem Installer verbunden. Der Nutzer prüfte für die damals verwendete Domain HTTP 200 sowie CSP und `X-Content-Type-Options: nosniff` auf `/` und `/download/`; die dauerhafte Project Domain aus Makers und die Header der API-Routen müssen noch bestätigt werden. Systemanforderungen und Betreiber-/Datenschutz-/Supportangaben, Makers-Rate-Limit und verifizierte (signierte) Releaseartefakte bleiben offen. Die Katalogroute ist produktiv bestätigt; Kontoendpunkte bleiben ungenutzt.
@@ -69,7 +69,7 @@ Das ist ein **unsignierter Entwicklungs-/Alpha-Build**. Vor Installation lokale 
 - Importpfade für Dateinamen- und Lernzielschlüssel so abgesichert, dass spezielle JavaScript-Schlüsselnamen keine Prototypen verändern.
 - Lerntage und bevorzugte Uhrzeit wurden in Ersteinrichtung und Einstellungen ergänzt; die Wochenübersicht zeigt jetzt die gewählten Tage. Die Lernenden können die Termine jederzeit ändern; es werden keine Benachrichtigungen außerhalb der App aktiviert.
 - Lernversuche und Hilfen werden lokal erfasst. Bei Wiederholungen erklärt die Empfehlung, ob zusätzliche Hinweise oder eine niedrige Selbsteinschätzung den Termin ausgelöst haben.
-- Konto wurde für die private Phase-2-Alpha auf offline-only festgelegt. Damit ist für diese Alpha kein OIDC-Anbieter nötig; die API-Kontorouten bleiben unkonfiguriert und geschlossen.
+- Die Kontofunktionen wurden nach der früheren offline-only Entscheidung ergänzt: E-Mail/Passwort, Google-OAuth mit PKCE, Startprofilkonto und geschützte API-Routen. Sie sind bis zur vollständigen Supabase-/Makers-Konfiguration und zum End-to-End-Test als nicht betriebsbereit zu behandeln.
 - Datenschutz-/Supportentwurf unter `docs/PRIVACY_SUPPORT_PHASE2.md` angelegt. Er dokumentiert lokale Datenarten, deaktivierte Übertragungen, die sichtbaren Makers-Protokollfelder, Support-Triage und vor Veröffentlichung fehlende Betreiber-/Kontakt-/Retentionangaben. Die Diagnoseoption in den App-Einstellungen zeigt jetzt ausdrücklich „Deaktiviert“, weil keine Diagnoseübertragung implementiert ist. Die Website-Kurzinfo benennt klar die derzeitige Windows-Alpha und verlinkt im Footer nicht länger auf ein „Datenschutzkonzept“, das noch keine vollständige Datenschutzerklärung ist.
 - Offener lokaler Datenschutzpunkt: DevPath verschlüsselt seine SQLite-Datenbank nicht anwendungsseitig. Auf dem bisherigen Gerät wurde Laufwerk C: als nicht BitLocker-verschlüsselt bestätigt. Vor Tests mit persönlichen Lern- oder Codeinhalten ist ein geeigneter lokaler Geräteschutz erforderlich.
 - Nach diesen Änderungen sind `npm run build` und der NSIS-Paketbuild erfolgreich. Der aktualisierte Installer wurde erzeugt; Verhalten des neuen Wochenplans und Datenexports muss noch in der installierten App von einer Person geprüft werden.
