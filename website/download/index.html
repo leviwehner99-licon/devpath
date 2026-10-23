@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#1769e0" />
-  <meta name="description" content="DevPath Desktop für Windows, macOS und Linux. Installer und Prüfsummen werden nach dem Plattformbuild veröffentlicht." />
+  <meta name="description" content="DevPath Desktop für Windows, macOS und Linux. Wähle dein System und starte mit deinem persönlichen Lernplan." />
   <title>DevPath herunterladen — Desktop-App</title>
   <link rel="icon" href="../icons/devpath-logo.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="../site.css" />
@@ -13,33 +13,32 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="logo" href="/" aria-label="DevPath Startseite"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>devpath</span></a>
+    <a class="logo" href="/" aria-label="DevPath Startseite"><span class="logo-mark" aria-hidden="true">&lt;/&gt;</span><span>devpath</span></a>
     <nav aria-label="Hauptnavigation"><a href="/#ablauf">So funktioniert's</a><a href="/#lernen">Kurse</a><a href="/#datenschutz">Datenschutz</a></nav>
     <a class="header-cta" href="/">Zur Präsentation <span aria-hidden="true">↗</span></a>
   </header>
   <main class="download-page">
     <a class="back-link" href="/">← Zur DevPath-Präsentation</a>
-    <section class="download-hero">
-      <span class="download-logo" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <section class="download-hero" aria-labelledby="download-title">
+      <span class="download-logo" aria-hidden="true">&lt;/&gt;</span>
       <div class="eyebrow">DEVPATH DESKTOP · ALPHA 0.1</div>
-      <h1>Dein erster Lernschritt<br /><em>beginnt hier.</em></h1>
-      <p>Installiere die lokale Lernumgebung und starte mit sieben JavaScript-Lektionen. Profil und Lernstand bleiben auf deinem Gerät.</p>
-      <a class="button primary download-button platform-download" data-installer="windows-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Windows-x64.exe?download">Windows-Installer herunterladen</a>
-      <div class="download-meta"><span>Windows 10/11 · x64</span><span>Unsignierte Alpha · Version 0.1.0</span><a class="platform-checksum" data-checksum="windows-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Windows-x64.exe.sha256?download">SHA-256-Prüfsumme</a></div>
+      <h1 id="download-title">DevPath für dein System.<br /><em>Hier herunterladen.</em></h1>
+      <p>Wähle dein Betriebssystem. Alle vier Pakete stehen direkt hier – für Windows, beide Mac-Varianten und Linux.</p>
+      <div class="platform-grid" aria-label="DevPath herunterladen">
+        <article class="platform-card"><span class="platform-symbol" aria-hidden="true">⊞</span><h2>Windows</h2><p>Windows 10/11 · 64 Bit</p><a class="button primary download-button platform-download" data-installer="windows-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Windows-x64.exe?download">Windows-Installer herunterladen</a></article>
+        <article class="platform-card"><span class="platform-symbol" aria-hidden="true">◉</span><h2>macOS · Apple Silicon</h2><p>DMG für M1, M2, M3 und neuer</p><a class="button primary download-button platform-download" data-installer="macos-arm64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-arm64.dmg?download">macOS-Installer herunterladen · Apple Silicon</a></article>
+        <article class="platform-card"><span class="platform-symbol" aria-hidden="true">◉</span><h2>macOS · Intel</h2><p>DMG für Intel-Macs · x64</p><a class="button primary download-button platform-download" data-installer="macos-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-x64.dmg?download">macOS-Installer herunterladen · Intel</a></article>
+        <article class="platform-card"><span class="platform-symbol" aria-hidden="true">🐧</span><h2>Linux</h2><p>Debian/Ubuntu · x64 · .deb</p><a class="button primary download-button platform-download" data-installer="linux-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Linux-x64.deb?download">Linux-Paket für Ubuntu/Debian herunterladen</a></article>
+      </div>
+      <div class="download-meta"><span>Alpha-Version 0.1.0</span><span>Windows, macOS Apple Silicon, macOS Intel und Linux</span></div>
     </section>
-    <section class="platform-status" aria-labelledby="platform-title"><h2 id="platform-title">Installer für dein Betriebssystem</h2><p class="platform-intro">Windows-x64, macOS für Apple Silicon und Intel sowie Linux-x64 sind veröffentlicht. Nutze die Prüfsumme neben dem Paket, um den Download auf Unverändertheit zu prüfen.</p><div class="platform-grid">
-      <article><h3>Windows</h3><p>Windows 10/11 · 64 Bit</p><a class="button primary download-button platform-download" data-installer="windows-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Windows-x64.exe?download">Windows-Installer herunterladen</a><a class="platform-checksum" data-checksum="windows-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Windows-x64.exe.sha256?download">SHA-256-Prüfsumme</a></article>
-      <article><h3>macOS · Apple Silicon</h3><p>DMG für ARM64 (M-Serie).</p><a class="button primary download-button platform-download" data-installer="macos-arm64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-arm64.dmg?download">macOS-Installer herunterladen · Apple Silicon</a><a class="platform-checksum" data-checksum="macos-arm64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-arm64.dmg.sha256?download">SHA-256-Prüfsumme</a></article>
-      <article><h3>macOS · Intel</h3><p>DMG für x64.</p><a class="button primary download-button platform-download" data-installer="macos-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-x64.dmg?download">macOS-Installer herunterladen · Intel</a><a class="platform-checksum" data-checksum="macos-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-macOS-x64.dmg.sha256?download">SHA-256-Prüfsumme</a></article>
-      <article><h3>Linux</h3><p>Debian-Paket für Ubuntu/Debian · x64.</p><a class="button primary download-button platform-download" data-installer="linux-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Linux-x64.deb?download">Linux-Paket für Ubuntu/Debian herunterladen</a><a class="platform-checksum" data-checksum="linux-x64" href="https://rvhxsgexonmolrpdxdou.supabase.co/storage/v1/object/public/devpath-downloads/DevPath-Linux-x64.deb.sha256?download">SHA-256-Prüfsumme</a></article>
-    </div></section>
     <section class="install-steps"><div class="eyebrow">INSTALLATION</div><h2>In wenigen Schritten startklar</h2><ol>
-      <li><strong>1. Passendes Paket laden</strong><span>Wähle den Installer für dein Betriebssystem. Prüfe nach der Veröffentlichung die SHA-256-Datei gegen den Download.</span></li>
+      <li><strong>1. Passendes Paket laden</strong><span>Wähle oben das Paket für dein Betriebssystem und lade es herunter.</span></li>
       <li><strong>2. Installer öffnen</strong><span>Diese Alpha ist nicht digital signiert. Betriebssysteme können deshalb eine Herausgeber-Warnung anzeigen. Installiere sie nur, wenn du DevPath vertraust.</span></li>
       <li><strong>3. Lernplan einrichten</strong><span>Beim ersten App-Start beantwortest du einmalig die Startabfrage für dein lokales Profil. Erst nach erfolgreichem Speichern öffnet sich dein Lernraum.</span></li>
     </ol></section>
-    <aside class="alpha-note"><strong>Alpha- und Sicherheitsinfo</strong><p>Windows-Installer, macOS-DMGs und das Linux-Paket werden derzeit ohne Codesignatur gebaut. SHA-256-Prüfsummen helfen zu prüfen, ob ein Download unverändert ist; sie ersetzen keine Signatur und beweisen nicht, dass eine Anwendung vertrauenswürdig ist. macOS kann eine unsignierte App blockieren. Das Linux-Paket ist für Ubuntu/Debian x64 vorgesehen. Eine Veröffentlichung erfolgt erst, wenn die Plattformpakete erfolgreich gebaut und in den öffentlichen Downloadspeicher geladen wurden.</p></aside>
+    <aside class="alpha-note"><strong>Alpha- und Installationsinfo</strong><p>Windows-Installer, macOS-DMGs und das Linux-Paket werden derzeit ohne Codesignatur gebaut. Das Betriebssystem kann beim Öffnen deshalb eine Herausgeber-Warnung anzeigen. macOS kann eine unsignierte App zunächst blockieren. Das Linux-Paket ist für Ubuntu/Debian x64 vorgesehen. Die Downloads werden nach erfolgreichem Plattformbuild freigeschaltet.</p></aside>
   </main>
-  <footer class="site-footer"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true"><svg viewBox="0 0 44 44" fill="none"><path d="m16 12-9 10 9 10M28 12l9 10-9 10M25 9l-6 26" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>devpath</span></a><span>Desktop-App · Alpha 0.1</span><div><a href="/">Präsentation</a><a href="/#datenschutz">Datenschutz</a><a href="mailto:devpath.support@gmail.com">Support</a></div></footer>
+  <footer class="site-footer"><a class="logo" href="/"><span class="logo-mark" aria-hidden="true">&lt;/&gt;</span><span>devpath</span></a><span>Desktop-App · Alpha 0.1</span><div><a href="/">Präsentation</a><a href="/#datenschutz">Datenschutz</a><a href="mailto:devpath.support@gmail.com">Support</a></div></footer>
 </body>
 </html>

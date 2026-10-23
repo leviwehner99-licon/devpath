@@ -26,15 +26,8 @@ function replaceTaggedElement(markup, attribute, id, replacement) {
 for (const [id, asset] of Object.entries(assets)) {
   const url = `${supabaseUrl}/storage/v1/object/public/devpath-downloads/${asset.name}`;
   const downloadLink = `<a class="button primary download-button platform-download" data-installer="${id}" href="${url}?download">${asset.label}</a>`;
-  const checksumLink = `<a class="platform-checksum" data-checksum="${id}" href="${url}.sha256?download">SHA-256-Prüfsumme</a>`;
   html = replaceTaggedElement(html, "data-installer", id, downloadLink);
-  html = replaceTaggedElement(html, "data-checksum", id, checksumLink);
 }
 
-html = html.replace(
-  /<p class="platform-intro"[^>]*>[\s\S]*?<\/p>/,
-  '<p class="platform-intro">Windows-x64, macOS für Apple Silicon und Intel sowie Linux-x64 sind veröffentlicht. Nutze die Prüfsumme neben dem Paket, um den Download auf Unverändertheit zu prüfen.</p>',
-);
-
 await writeFile(file, html);
-process.stdout.write("Public installer and checksum links enabled in website/download/index.html\n");
+process.stdout.write("Public installer links enabled in website/download/index.html\n");
