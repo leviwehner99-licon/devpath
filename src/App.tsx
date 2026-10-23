@@ -55,7 +55,7 @@ export default function App() {
   const progressPercent = Math.round(completedCount / programmingCourse.lessons.length * 100);
 
   useEffect(() => {
-    loadState().then((loaded) => { setState(loaded); }).catch(() => setStorageIssue("DevPath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
+    loadState().then((loaded) => { setState(loaded); }).catch(() => setStorageIssue("devpath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export default function App() {
   };
 
   const deleteAccount = async () => {
-    if (!session || !window.confirm("Dein DevPath-Konto, das gespeicherte Lernplanprofil und die lokalen Lern- und Projektdaten dieses Kontos werden gelöscht. Fortfahren?")) return;
+    if (!session || !window.confirm("Dein devpath-Konto, das gespeicherte Lernplanprofil und die lokalen Lern- und Projektdaten dieses Kontos werden gelöscht. Fortfahren?")) return;
     try {
       await accountRequest(session, "DELETE");
       await clearState();
@@ -240,7 +240,7 @@ export default function App() {
   };
 
   const createProject = (name: string) => {
-    const project = createLocalProject(name, { "index.js": "// Dein neues JavaScript-Projekt\nconsole.log(\"Hallo DevPath\");\n" });
+    const project = createLocalProject(name, { "index.js": "// Dein neues JavaScript-Projekt\nconsole.log(\"Hallo devpath\");\n" });
     project.language = "javascript";
     setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id }));
     setNotice(`Projekt „${project.name}“ wurde lokal angelegt.`);
@@ -360,7 +360,7 @@ export default function App() {
   };
 
   const restoreVersion = (version: SavedVersion) => {
-    if (!window.confirm(`„${version.name}“ wiederherstellen? DevPath legt vorher automatisch eine Sicherung deiner aktuellen Projektdateien an.`)) return;
+    if (!window.confirm(`„${version.name}“ wiederherstellen? devpath legt vorher automatisch eine Sicherung deiner aktuellen Projektdateien an.`)) return;
     if (activeProject && version.projectId === activeProject.id && version.files) {
       setState((current) => {
         const project = current.projects.find((item) => item.id === activeProject.id);
@@ -399,7 +399,7 @@ export default function App() {
   };
 
   const exportLocalData = () => {
-    if (!storageWritable) { setNotice("Export ist gesperrt, weil DevPath die gespeicherten Daten nicht lesen konnte."); return; }
+    if (!storageWritable) { setNotice("Export ist gesperrt, weil devpath die gespeicherten Daten nicht lesen konnte."); return; }
     try { exportState(state); setNotice("Datenexport wurde erstellt. Bewahre die Datei geschützt auf; sie enthält deinen Lernstand und Projektcode."); }
     catch (error) { setNotice(error instanceof Error ? error.message : "Datenexport konnte nicht erstellt werden."); }
   };
@@ -424,11 +424,11 @@ export default function App() {
     }
   };
 
-  if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">DevPath wird sicher gestartet …</div></div>;
-  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>DevPath</span></div><h1>Die Kontoanmeldung ist derzeit nicht verfügbar.</h1><p className="auth-description">Bitte versuche es später erneut oder wende dich an den DevPath-Support.</p></section></main>;
+  if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">devpath wird sicher gestartet …</div></div>;
+  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>devpath</span></div><h1>Die Kontoanmeldung ist derzeit nicht verfügbar.</h1><p className="auth-description">Bitte versuche es später erneut oder wende dich an den devpath-Support.</p></section></main>;
   if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
   if (!session) return <AuthView onAuthenticated={() => { void supabase?.auth.getSession().then(({ data }) => setSession(data.session)); }} />;
-  if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein DevPath-Konto wird geladen …</div></div>;
+  if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein devpath-Konto wird geladen …</div></div>;
   if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO</div><h1>Deine Kontodaten konnten nicht geladen werden.</h1><p>Prüfe deine Internetverbindung und versuche es erneut.</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button><button className="button secondary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button></div></section></div>;
   if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
 
@@ -441,11 +441,11 @@ export default function App() {
       <div className="local-state"><span className="status-dot" /> Lokal auf diesem Gerät</div>
       <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon"><Icon name="settings"/></span>Einstellungen</button>
       <button className="nav-item account-signout" onClick={() => void signOut()}><span className="nav-icon"><Icon name="settings"/></span>Abmelden</button>
-      <div className="sidebar-footer">DevPath · Phase 2 Alpha</div>
+      <div className="sidebar-footer">devpath · Phase 2 Alpha</div>
     </aside>
 
     <main className="main-area">
-      <header className="topbar"><div className="breadcrumbs">DevPath <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${state.settings.theme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: state.settings.theme === "dark" ? "light" : "dark" } })}>{state.settings.theme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
+      <header className="topbar"><div className="breadcrumbs">devpath <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${state.settings.theme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: state.settings.theme === "dark" ? "light" : "dark" } })}>{state.settings.theme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
         {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
@@ -477,5 +477,5 @@ function CompletionDialog({ reducedMotion, onClose }: { reducedMotion: boolean; 
     return () => window.clearInterval(timer);
   }, [reducedMotion]);
   useEffect(() => { if (seconds === 0 || reducedMotion) onClose(); }, [seconds, reducedMotion, onClose]);
-  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle sieben Lektionen im Einstiegskurs abgeschlossen.</p><div className="diploma-preview"><span>DEVPATH · LERNERFOLG</span><strong>Programmier-<br />grundlagen</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
+  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle sieben Lektionen im Einstiegskurs abgeschlossen.</p><div className="diploma-preview"><span>devpath · Lernerfolg</span><strong>Programmier-<br />grundlagen</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
 }

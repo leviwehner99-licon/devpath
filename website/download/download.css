@@ -1,7 +1,7 @@
 .download-page{max-width:1240px;margin:0 auto;padding:36px 42px 88px;color:var(--ink)}
 .back-link{display:inline-block;color:#1454b8;font-size:12px;font-weight:700;text-decoration:none;margin:0 0 22px}
 .download-hero{padding:34px 36px 30px;border:1px solid #cbd6e5;border-radius:26px;background:linear-gradient(135deg,#e8f1ff,#f8faff 60%,#e4f3f1);text-align:center}
-.download-logo{display:grid;place-items:center;margin:0 auto 15px;color:#1769e0;font:700 42px/1 ui-monospace,"Cascadia Code",Consolas,monospace;letter-spacing:-.13em;padding-right:.13em}
+.download-logo{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 15px;border-radius:20px;background:#1769e0;color:#fff}.download-logo svg{width:44px;height:44px;display:block}
 .download-hero .eyebrow{color:#1454b8;margin-bottom:10px}
 .download-hero h1{font:600 clamp(38px,5vw,58px)/1.06 'Space Grotesk',sans-serif;letter-spacing:-2.5px;margin:0 0 13px;color:#17233c}
 .download-hero h1 em{font-style:normal;color:#1454b8}

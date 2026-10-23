@@ -39,7 +39,7 @@ export async function accountRequest<T>(session: Session, method: "GET" | "PUT" 
   });
   if (!response.ok) {
     if (response.status === 401) throw new Error("Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.");
-    if (response.status === 403) throw new Error("Dieses DevPath-Konto ist deaktiviert.");
+    if (response.status === 403) throw new Error("Dieses devpath-Konto ist deaktiviert.");
     throw new Error("Deine Kontodaten sind derzeit nicht verfügbar. Bitte prüfe deine Internetverbindung und versuche es erneut.");
   }
   return await response.json() as T;

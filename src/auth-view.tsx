@@ -36,7 +36,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       if (mode === "register") {
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: authRedirectUrl } });
         if (error) throw error;
-        if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. DevPath öffnet sich danach automatisch wieder.");
+        if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. devpath öffnet sich danach automatisch wieder.");
         else onAuthenticated();
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -59,7 +59,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       if (authError) throw authError;
       if (!data.url) throw new Error("Die Google-Anmeldung ist derzeit nicht verfügbar.");
       await openUrl(data.url);
-      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich DevPath automatisch.");
+      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich devpath automatisch.");
     } catch {
       setError("Die Google-Anmeldung konnte nicht geöffnet werden. Bitte versuche es erneut.");
     } finally { setBusy(false); }
@@ -68,12 +68,12 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
   const title = mode === "register" ? "Dein Lernweg beginnt hier." : mode === "login" ? "Willkommen zurück." : "Passwort zurücksetzen.";
   return <main className="auth-screen">
     <section className="auth-card" aria-labelledby="auth-title">
-      <div className="auth-brand"><LogoMark /><span>DevPath</span></div>
+      <div className="auth-brand"><LogoMark /><span>devpath</span></div>
       <div className="eyebrow">DEIN PERSÖNLICHER LERNPLATZ</div>
       <h1 id="auth-title">{title}</h1>
-      <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem DevPath-Konto zugeordnet.</p>
+      <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem devpath-Konto zugeordnet.</p>
       {mode !== "reset" && <div className="auth-social">
-        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><GoogleMark /> Mit Google {mode === "register" ? "registrieren" : "anmelden"}</button>
+        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><GoogleMark /><span>Mit Google {mode === "register" ? "registrieren" : "anmelden"}</span></button>
       </div>}
       {mode !== "reset" && <div className="auth-divider"><span>oder mit E-Mail</span></div>}
       <form onSubmit={(event) => void submit(event)} className="auth-form">
@@ -87,7 +87,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
         {mode === "register" ? <><span>Schon ein Konto?</span><button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Anmelden</button></> : mode === "login" ? <><span>Noch kein Konto?</span><button className="text-button" onClick={() => { setMode("register"); setError(""); setMessage(""); }}>Konto erstellen</button></> : <button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Zurück zur Anmeldung</button>}
         {mode === "login" && <button className="text-button" onClick={() => { setMode("reset"); setError(""); setMessage(""); }}>Passwort vergessen?</button>}
       </div>
-      <p className="auth-privacy">E-Mail und Anbieter-Identität verwaltet Supabase Auth. Dein DevPath-Konto speichert die Verknüpfung und deinen Lernplan. Lerncode bleibt lokal auf diesem Gerät.</p>
+      <p className="auth-privacy">E-Mail und Anbieter-Identität verwaltet Supabase Auth. Dein devpath-Konto speichert die Verknüpfung und deinen Lernplan. Lerncode bleibt lokal auf diesem Gerät.</p>
     </section>
   </main>;
 }
@@ -110,5 +110,5 @@ export function PasswordRecoveryView({ onFinished }: { onFinished: () => void })
     } catch { setError("Das Passwort konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut."); }
     finally { setBusy(false); }
   };
-  return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>DevPath</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst DevPath jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu DevPath</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;
+  return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>devpath</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst devpath jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu devpath</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;
 }

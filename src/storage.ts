@@ -137,7 +137,7 @@ export function parseDataExport(text: string): DevPathState {
     if (value.version !== DATA_EXPORT_VERSION || !isRecord(value.state)) throw new Error("Diese Version des Datenexports wird nicht unterstützt.");
     return validateImportedState(value.state);
   }
-  // Accept exports created by DevPath 0.1 before the versioned envelope was added.
+  // Accept exports created by devpath 0.1 before the versioned envelope was added.
   if ("learnerName" in value || "progress" in value || "projects" in value) return validateImportedState(value);
   throw new Error("Das Datenexportformat wird nicht erkannt.");
 }
@@ -189,7 +189,7 @@ export async function loadState(): Promise<DevPathState> {
   const stored = rows[0]?.state_json;
   if (stored && stored !== "{}") {
     const parsed: unknown = JSON.parse(stored);
-    if (!isRecord(parsed)) throw new Error("Die lokalen SQLite-Daten enthalten kein gültiges DevPath-Profil.");
+    if (!isRecord(parsed)) throw new Error("Die lokalen SQLite-Daten enthalten kein gültiges devpath-Profil.");
     return normalizeState(parsed);
   }
 

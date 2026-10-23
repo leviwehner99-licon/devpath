@@ -143,3 +143,29 @@ body { color: var(--ink); background: var(--site-bg); }
   .download-section h2 { color: #f7f9fd !important; }
   .download-section p { color: #e1e8f2 !important; }
 }
+
+/* Keep every website wordmark and mark identical across pages and themes. */
+.logo, .logo:visited, .logo > span:last-child,
+.site-footer .logo, .site-footer .logo:visited,
+.site-footer .logo > span:last-child { color: #1769e0 !important; }
+.logo .logo-mark, .site-footer .logo .logo-mark {
+  display: inline-grid !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  border-radius: 11px !important;
+  background: #1769e0 !important;
+  color: #fff !important;
+  font: inherit !important;
+  letter-spacing: normal !important;
+}
+.logo .logo-mark svg, .site-footer .logo .logo-mark svg {
+  display: block !important;
+  width: 25px !important;
+  height: 25px !important;
+}
+.logo .logo-mark svg path, .site-footer .logo .logo-mark svg path {
+  stroke: #fff !important;
+}
+.preview-logo { color: #1769e0 !important; }

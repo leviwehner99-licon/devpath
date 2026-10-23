@@ -42,7 +42,7 @@ export function parseProjectBundle(text: string): Omit<LocalProject, "id" | "cre
   try { value = JSON.parse(text); } catch { throw new Error("Die Projektdatei ist kein gültiges JSON."); }
   if (!value || typeof value !== "object") throw new Error("Das Dateiformat wird nicht erkannt.");
   const bundle = value as { format?: unknown; version?: unknown; project?: { name?: unknown; language?: unknown; files?: unknown } };
-  if (bundle.format !== PROJECT_BUNDLE_FORMAT || bundle.version !== 1 || !bundle.project) throw new Error("Das ist kein unterstützter DevPath-Projektexport.");
+  if (bundle.format !== PROJECT_BUNDLE_FORMAT || bundle.version !== 1 || !bundle.project) throw new Error("Das ist kein unterstützter devpath-Projektexport.");
   const name = typeof bundle.project.name === "string" ? bundle.project.name.trim().slice(0, 80) : "Importiertes Projekt";
   const language = typeof bundle.project.language === "string" ? bundle.project.language.slice(0, 32) : "html";
   return { name: name || "Importiertes Projekt", language, files: validateProjectFiles(bundle.project.files) };

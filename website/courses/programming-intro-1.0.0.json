@@ -32,9 +32,9 @@
       ],
       "explanation": "Programme bestehen aus Anweisungen, die der Reihe nach ausgeführt werden. Mit console.log() kannst du einen Text oder Wert in der Konsole sichtbar machen.",
       "starterCode": "// Gib eine Begrüßung aus\n",
-      "task": "Gib mit console.log() den Text Hallo DevPath aus.",
+      "task": "Gib mit console.log() den Text Hallo devpath aus.",
       "successPattern": {
-        "source": "console\\s*\\.\\s*log\\s*\\(\\s*[\\\"'`]Hallo DevPath[\\\"'`]\\s*\\)",
+        "source": "console\\s*\\.\\s*log\\s*\\(\\s*[\\\"'`]Hallo devpath[\\\"'`]\\s*\\)",
         "flags": "i"
       }
     },
