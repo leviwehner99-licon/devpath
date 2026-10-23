@@ -66,12 +66,27 @@ export default function App() {
       if (alive && event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
     });
     void supabase.auth.getSession().then(({ data }) => { if (alive) { setSession(data.session); setAuthReady(true); } });
-    const acceptUrl = (url: string) => { void openAuthCallback(url).catch((error: unknown) => { if (alive) setAccountIssue(error instanceof Error ? error.message : "Die Anmelde-Rückleitung ist fehlgeschlagen."); }); };
+    const handledAuthUrls = new Set<string>();
+    const acceptUrl = (url: string) => {
+      if (!alive || handledAuthUrls.has(url)) return;
+      handledAuthUrls.add(url);
+      if (handledAuthUrls.size > 8) handledAuthUrls.delete(handledAuthUrls.values().next().value as string);
+      void openAuthCallback(url).catch(() => {
+        if (alive) setAccountIssue("Die Anmeldung konnte nicht abgeschlossen werden. Bitte starte sie erneut.");
+      });
+    };
     let unlistenDeepLink: (() => void) | undefined;
     if (isTauri()) {
-      void register("devpath").catch(() => {});
-      void onOpenUrl((urls) => urls.forEach(acceptUrl)).then((unlisten) => { unlistenDeepLink = unlisten; });
-      void getCurrent().then((urls) => urls?.forEach(acceptUrl));
+      void (async () => {
+        await register("devpath").catch(() => {});
+        const unlisten = await onOpenUrl((urls) => urls.forEach(acceptUrl));
+        if (!alive) { unlisten(); return; }
+        unlistenDeepLink = unlisten;
+        const initialUrls = await getCurrent();
+        initialUrls?.forEach(acceptUrl);
+      })().catch(() => {
+        if (alive) setAccountIssue("Die Anmeldung konnte nicht abgeschlossen werden. Bitte starte sie erneut.");
+      });
     }
     return () => { alive = false; subscription.unsubscribe(); unlistenDeepLink?.(); };
   }, []);

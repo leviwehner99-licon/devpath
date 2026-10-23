@@ -5,6 +5,15 @@ import { LogoMark } from "./ui";
 
 type AuthMode = "login" | "register" | "reset";
 
+function GoogleMark() {
+  return <svg className="google-mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+    <path fill="#4285F4" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6v5h6.6c3.9-3.6 6.1-8.8 6.1-14.7Z" />
+    <path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.6-5c-1.8 1.2-4.1 2-6.9 2-5.3 0-9.8-3.6-11.4-8.5H5.8v5.2C9.2 39.5 16 44 24 44Z" />
+    <path fill="#FBBC05" d="M12.6 27.6c-.4-1.2-.7-2.5-.7-3.6s.2-2.4.7-3.6v-5.2H5.8C4.3 18 3.5 20.9 3.5 24s.8 6 2.3 8.8l6.8-5.2Z" />
+    <path fill="#EA4335" d="M24 9.5c3 0 5.7 1 7.9 3.1l5.9-5.9C34.1 3.4 29.5 1.5 24 1.5 16 1.5 9.2 6 5.8 13.2l6.8 5.2c1.6-4.9 6.1-8.9 11.4-8.9Z" />
+  </svg>;
+}
+
 export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [mode, setMode] = useState<AuthMode>("register");
   const [email, setEmail] = useState("");
@@ -50,7 +59,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       if (authError) throw authError;
       if (!data.url) throw new Error("Die Google-Anmeldung ist derzeit nicht verfügbar.");
       await openUrl(data.url);
-      setMessage("Die Anmeldung wurde im Browser geöffnet. Kehre nach der Bestätigung zu DevPath zurück.");
+      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich DevPath automatisch.");
     } catch {
       setError("Die Google-Anmeldung konnte nicht geöffnet werden. Bitte versuche es erneut.");
     } finally { setBusy(false); }
@@ -64,7 +73,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       <h1 id="auth-title">{title}</h1>
       <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem DevPath-Konto zugeordnet.</p>
       {mode !== "reset" && <div className="auth-social">
-        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><span className="provider-g">G</span> Mit Google {mode === "register" ? "registrieren" : "anmelden"}</button>
+        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><GoogleMark /> Mit Google {mode === "register" ? "registrieren" : "anmelden"}</button>
       </div>}
       {mode !== "reset" && <div className="auth-divider"><span>oder mit E-Mail</span></div>}
       <form onSubmit={(event) => void submit(event)} className="auth-form">

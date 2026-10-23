@@ -14,6 +14,7 @@ Die Desktop-App verwendet Supabase Auth für E-Mail/Passwort und Google. Google-
 
 1. Öffne [Google Cloud Console](https://console.cloud.google.com/) und erstelle oder wähle das Projekt `DevPath`.
 2. Öffne **Google Auth Platform → Branding** und trage als App-Name `DevPath`, als Supportadresse `devpath.support@gmail.com` und als Entwicklerkontakt deine erreichbare Adresse ein.
+   Lade dort auch das DevPath-Logo hoch. Wenn Google im Anmeldefenster weiterhin `rvhxsgexonmolrpdxdou.supabase.co` statt `DevPath` nennt, prüfe diese Branding-Seite und speichere/publiziere die Angaben. Bei einer externen App im Testmodus oder ungeprüfter Marke kann Google Name und Logo ausblenden; für eine breite Veröffentlichung kann eine Markenprüfung nötig sein.
 3. Öffne **Audience**, wähle **External** und füge dein Google-Konto als **Test user** hinzu, solange die App im Testmodus ist.
 4. Öffne **Data Access** und vergewissere dich, dass `openid`, `email` und `profile` angefordert werden. Füge keine weiteren Scopes hinzu.
 5. Öffne **Clients → Create client**, wähle **Web application** und gib dem Client den Namen `DevPath Supabase Auth`.
@@ -25,7 +26,7 @@ Die Desktop-App verwendet Supabase Auth für E-Mail/Passwort und Google. Google-
 
 7. Erstelle den Client und kopiere Client-ID und Client-Secret direkt in **Supabase → Authentication → Sign In / Providers → Google**. Aktiviere und speichere den Google-Provider. Das Client-Secret bleibt ausschließlich in Supabase.
 
-Google leitet zuerst zu Supabase zurück. Supabase leitet anschließend an die erlaubte App-Adresse `devpath://auth/callback` weiter. Diese Deep-Link-Adresse gehört in Supabase unter **Authentication → URL Configuration → Redirect URLs**, nicht in Googles Callback-Feld. Client-Secrets niemals in `.env.local`, GitHub-Variablen oder den Desktop-Build kopieren.
+Google leitet zuerst zu Supabase zurück. Supabase leitet anschließend an die erlaubte App-Adresse `devpath://auth/callback` weiter. Diese Deep-Link-Adresse gehört in Supabase unter **Authentication → URL Configuration → Redirect URLs**, nicht in Googles Callback-Feld. Die Google-Callback-Adresse bleibt `https://rvhxsgexonmolrpdxdou.supabase.co/auth/v1/callback`; sie darf nicht durch die `devpath://`-Adresse ersetzt werden. Client-Secrets niemals in `.env.local`, GitHub-Variablen oder den Desktop-Build kopieren.
 
 ## 3. Datenbank einmalig migrieren
 
