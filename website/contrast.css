@@ -120,3 +120,26 @@ body { color: var(--ink); background: var(--site-bg); }
   .site-footer > span, .site-footer > div a { color: #eef4ff !important; }
   .site-footer .logo, .site-footer .logo * { color: #1769e0 !important; }
 }
+
+/* Reserve room for the footer brand and keep the final download callout legible. */
+.site-footer { position: relative !important; z-index: 2 !important; display: flex !important; flex-wrap: wrap !important; gap: 18px 28px !important; min-height: 88px; }
+.site-footer .logo { display: inline-flex !important; flex: 0 0 auto !important; width: max-content !important; min-width: max-content !important; gap: 8px !important; }
+.site-footer .logo-mark { display: inline-grid !important; flex: 0 0 32px !important; width: 32px !important; height: 32px !important; padding: 0 !important; background: transparent !important; color: #1769e0 !important; }
+.site-footer .logo-mark svg { display: block !important; width: 32px !important; height: 32px !important; overflow: visible; }
+.site-footer .logo-mark svg path { stroke: #1769e0 !important; }
+.site-footer .logo > span:last-child { color: #1769e0 !important; font-weight: 700; }
+.site-footer > div { display: flex; flex: 0 0 auto; flex-wrap: wrap; gap: 14px 20px; }
+.download-section { color: #17233c !important; background: linear-gradient(110deg,#e1ebfa,#e5f2ef) !important; border: 1px solid #cbd6e5; }
+.download-section .eyebrow { color: #124da9 !important; }
+.download-section h2 { color: #17233c !important; }
+.download-section p { color: #33445d !important; }
+@media (prefers-color-scheme: dark) {
+  .site-footer .logo-mark { background: transparent !important; color: #1769e0 !important; }
+  .site-footer .logo-mark svg path, .site-footer .logo > span:last-child { color: #1769e0 !important; stroke: #1769e0 !important; }
+  .site-footer > span { color: #eef4ff !important; }
+  .site-footer > div a { color: #eef4ff !important; }
+  .download-section { color: #f4f7fc !important; background: linear-gradient(110deg,#1b2a40,#1b3537) !important; border-color: #40516b !important; }
+  .download-section .eyebrow { color: #b9d2ff !important; }
+  .download-section h2 { color: #f7f9fd !important; }
+  .download-section p { color: #e1e8f2 !important; }
+}

@@ -3,7 +3,7 @@ import { clearState, exportState, loadState, parseDataExport, saveState } from "
 import { recommendNextLesson, reviewDate } from "./planner";
 import { programmingCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
-import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, Today } from "./views";
+import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, Today } from "./views";
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
 import { Icon, LogoMark } from "./ui";
 import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
@@ -31,6 +31,7 @@ export default function App() {
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
 
   const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
   const activeLesson = programmingCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
@@ -334,10 +335,11 @@ export default function App() {
         {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={state.settings.theme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
-        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} />}
+        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
       {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}
+      {showSupport && <SupportDialog learnerName={state.learnerName} onClose={() => setShowSupport(false)} onNotice={setNotice} />}
       {stateLoaded && showOnboarding && <Onboarding onFinish={finishOnboarding} />}
     </main>
   </div>;

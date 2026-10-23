@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState, type FormEvent } from "react";
 import type { CourseLesson } from "./course";
 import type { DevPathState, LessonProgress, LocalProject, SavedVersion } from "./types";
 import { defaultStudyDays, weekdays, type PlanRecommendation } from "./planner";
@@ -108,7 +108,7 @@ export function CodeBase({ projects, activeProject, activeFile, versions, curren
   </>;
 }
 
-export function Settings({ state, update, storageWritable, exportData, importData, clearData }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; storageWritable: boolean; exportData: () => void; importData: (file: File) => Promise<void>; clearData: () => void }) {
+export function Settings({ state, update, storageWritable, exportData, importData, clearData, onOpenSupport }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; storageWritable: boolean; exportData: () => void; importData: (file: File) => Promise<void>; clearData: () => void; onOpenSupport: () => void }) {
   const updateSettings = (patch: Partial<DevPathState["settings"]>) => update({ settings: { ...state.settings, ...patch } });
   const dataImportRef = useRef<HTMLInputElement>(null);
 
@@ -160,14 +160,61 @@ export function Settings({ state, update, storageWritable, exportData, importDat
         </section>
         <section id="support" className="panel settings-panel">
           <div className="eyebrow">SUPPORT</div><h2>Wir helfen dir weiter</h2>
-          <p className="settings-description">Schreibe an den DevPath-Support. Nenne DevPath-Version, Windows-Version und die Schritte, mit denen das Problem auftritt.</p>
-          <a className="button primary" href="mailto:devpath.support@gmail.com?subject=DevPath%20Support">E-Mail an den Support</a>
-          <p className="field-note">Bitte keine Passwörter, Zugangscodes oder vollständigen Datenexporte senden. Projektdateien und Exporte können privaten Code enthalten.</p>
+          <p className="settings-description">Erstelle in DevPath eine Supportnachricht an devpath.support@gmail.com. Es öffnet sich kein Browser.</p>
+          <button className="button primary" type="button" onClick={onOpenSupport}>Supportnachricht verfassen</button>
+          <p className="field-note">Bitte keine Passwörter, Zugangscodes, Quelltexte oder vollständigen Datenexporte senden.</p>
         </section>
       </div>
     </div>
   </>;
 }
+
+export function SupportDialog({ learnerName, onClose, onNotice }: { learnerName: string; onClose: () => void; onNotice: (message: string) => void }) {
+  const [name, setName] = useState(learnerName);
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [prepared, setPrepared] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const draft = `An: devpath.support@gmail.com\nBetreff: DevPath Support: ${subject.trim()}\n\nVon: ${name.trim()} <${email.trim()}>\n\n${message.trim()}`;
+  const prepare = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPrepared(true);
+    setCopied(false);
+  };
+  const copyDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(draft);
+      setCopied(true);
+    } catch {
+      onNotice("DevPath konnte die Nachricht nicht in die Zwischenablage kopieren. Markiere sie im Entwurf und kopiere sie manuell.");
+    }
+  };
+
+  return <div className="modal-backdrop support-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <section className="dialog support-dialog" role="dialog" aria-modal="true" aria-labelledby="support-title">
+      <button className="support-close" type="button" aria-label="Fenster schließen" onClick={onClose}>×</button>
+      <div className="dialog-icon" aria-hidden="true">✉</div>
+      <div className="eyebrow">DEVPATH SUPPORT</div>
+      <h2 id="support-title">Wie können wir helfen?</h2>
+      <p className="support-recipient">Empfänger: <strong>devpath.support@gmail.com</strong></p>
+      {!prepared ? <form onSubmit={prepare}>
+        <label className="field-label">Dein Name<input className="text-input" required maxLength={80} autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} /></label>
+        <label className="field-label">Deine E-Mail-Adresse<input className="text-input" type="email" required maxLength={254} autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@beispiel.de" /></label>
+        <label className="field-label">Betreff<input className="text-input" required minLength={3} maxLength={120} value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Worum geht es?" /></label>
+        <label className="field-label">Nachricht<textarea className="text-input support-message" required minLength={10} maxLength={5000} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Beschreibe kurz, was passiert ist und welche Schritte dazu geführt haben." /></label>
+        <p className="field-note">DevPath sendet diese Nachricht noch nicht automatisch. Du kannst sie hier vorbereiten und kopieren; der direkte Versand wird erst aktiviert, wenn der Maildienst eingerichtet und freigegeben ist. Bitte keine Passwörter, Zugangscodes, Quelltexte oder Datenexporte einfügen.</p>
+        <div className="support-actions"><button className="button secondary" type="button" onClick={onClose}>Abbrechen</button><button className="button primary" type="submit">Nachricht vorbereiten</button></div>
+      </form> : <>
+        <label className="field-label">E-Mail-Entwurf<textarea className="text-input support-message support-draft" readOnly value={draft} /></label>
+        <p className="field-note">Der Entwurf wurde in DevPath erstellt. Der Versanddienst ist noch nicht eingerichtet; deshalb wurde noch keine E-Mail versendet.</p>
+        <div className="support-actions"><button className="button secondary" type="button" onClick={() => setPrepared(false)}>Zurück zum Entwurf</button><button className="button primary" type="button" onClick={() => void copyDraft()}>{copied ? "Entwurf kopiert ✓" : "Entwurf kopieren"}</button></div>
+      </>}
+    </section>
+  </div>;
+}
+
 function Toggle({ label, detail, checked, onChange }: { label: string; detail?: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <label className="toggle-row"><span><strong>{label}</strong>{detail && <small>{detail}</small>}</span><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span className="toggle-ui" aria-hidden="true" /></label>;
 }

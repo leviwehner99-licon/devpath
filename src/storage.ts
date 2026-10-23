@@ -98,9 +98,14 @@ function normalizeState(value: unknown): DevPathState {
   const studyTime = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime) ? parsed.studyTime : "18:00";
   const theme = rawSettings.theme === "dark" ? "dark" : "light";
   const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
+  const learnerName = boundedString(parsed.learnerName, initialState.learnerName, 32);
+  const hasCompletedOnboarding = parsed.onboardingCompleted === true
+    && learnerName.trim().length > 0
+    && learnerName.trim().toLowerCase() !== "alex"
+    && learnerName.trim().toLowerCase() !== initialState.learnerName.toLowerCase();
 
   return {
-    learnerName: boundedString(parsed.learnerName, initialState.learnerName, 32).trim().toLowerCase() === "alex" ? "Lernende Person" : boundedString(parsed.learnerName, initialState.learnerName, 32),
+    learnerName: learnerName.trim().toLowerCase() === "alex" ? initialState.learnerName : learnerName,
     goal: boundedString(parsed.goal, initialState.goal, 100),
     experience,
     weeklySessions: safeStudyDays.length,
@@ -111,7 +116,7 @@ function normalizeState(value: unknown): DevPathState {
     versions: safeVersions,
     projects,
     activeProjectId: projects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : projects[0].id,
-    onboardingCompleted: parsed.onboardingCompleted === true,
+    onboardingCompleted: hasCompletedOnboarding,
     ...(typeof parsed.courseCompletedAt === "string" ? { courseCompletedAt: parsed.courseCompletedAt.slice(0, 40) } : {}),
     settings: {
       theme,
