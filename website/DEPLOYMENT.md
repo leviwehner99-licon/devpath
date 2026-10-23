@@ -51,7 +51,7 @@ Die Workflow-Matrix baut Windows x64, macOS ARM64, macOS Intel x64 und Linux x64
 
 Einmalige Einrichtung durch den Repository-Betreiber:
 
-1. Im Supabase-Projekt **Storage → New bucket** öffnen. Name: `devpath-downloads`; **Public bucket** einschalten; für die maximale Dateigröße mindestens den beim Build gemeldeten Installerwert, höchstens 50 MB im Free-Tarif, zulassen. Keine Client-Uploadrichtlinie für Besucher hinzufügen.
+1. Im Supabase-Projekt **Storage → New bucket** öffnen. Name: `devpath-downloads`; **Public bucket** einschalten; die maximale Dateigröße auf 50 MB setzen. Der Workflow verwendet für Linux ein Debian-Paket für Ubuntu/Debian x64 statt eines zu großen AppImages und prüft alle Installer vor dem Upload auf höchstens 48 MiB. Keine Client-Uploadrichtlinie für Besucher hinzufügen.
 2. In GitHub `leviwehner99-licon/devpath` **Settings → Secrets and variables → Actions → New repository secret** öffnen. `SUPABASE_URL` auf `https://rvhxsgexonmolrpdxdou.supabase.co` setzen. Ein zweites Secret `SUPABASE_SERVICE_ROLE_KEY` anlegen und dort den geheimen `service_role`-Schlüssel aus Supabase **Project Settings → API Keys** speichern. Den Schlüssel niemals in Dateien, Releases, Chat oder Website eintragen.
 3. In GitHub **Actions → Desktop build matrix → Run workflow** wählen, Branch `main` auswählen und den Lauf starten. Erst wenn alle Betriebssystem-Builds und der Job `publish-installers` grün sind, wurden Dateien hochgeladen. Die letzte Workflow-Aktion pusht die freigeschalteten Downloadlinks; Makers sollte daraufhin automatisch die Website neu deployen.
 

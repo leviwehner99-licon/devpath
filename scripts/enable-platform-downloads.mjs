@@ -12,7 +12,7 @@ const assets = {
   "windows-x64": { name: "DevPath-Windows-x64.exe", label: "Windows-Installer herunterladen" },
   "macos-arm64": { name: "DevPath-macOS-arm64.dmg", label: "macOS-Installer herunterladen · Apple Silicon" },
   "macos-x64": { name: "DevPath-macOS-x64.dmg", label: "macOS-Installer herunterladen · Intel" },
-  "linux-x64": { name: "DevPath-Linux-x64.AppImage", label: "Linux-AppImage herunterladen" },
+  "linux-x64": { name: "DevPath-Linux-x64.deb", label: "Linux-Paket für Ubuntu/Debian herunterladen" },
 };
 
 function replaceTaggedElement(markup, attribute, id, replacement) {
