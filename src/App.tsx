@@ -410,11 +410,11 @@ export default function App() {
   };
 
   if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">DevPath wird sicher gestartet …</div></div>;
-  if (!authConfigured) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTOEINRICHTUNG FEHLT</div><h1>DevPath braucht noch die Supabase-App-Konfiguration.</h1><p>Lege im Projektstamm eine Datei <code>.env.local</code> mit <code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code> und <code>VITE_DEVPATH_API_URL</code> an. Danach DevPath neu starten.</p></section></div>;
+  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>DevPath</span></div><h1>Die Kontoanmeldung ist derzeit nicht verfügbar.</h1><p className="auth-description">Bitte versuche es später erneut oder wende dich an den DevPath-Support.</p></section></main>;
   if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
   if (!session) return <AuthView onAuthenticated={() => { void supabase?.auth.getSession().then(({ data }) => setSession(data.session)); }} />;
   if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein DevPath-Konto wird geladen …</div></div>;
-  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO NICHT ERREICHBAR</div><h1>Anmeldung erfolgreich, Kontodaten fehlen noch.</h1><p>{accountIssue}</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button><button className="button secondary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button></div></section></div>;
+  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO</div><h1>Deine Kontodaten konnten nicht geladen werden.</h1><p>Prüfe deine Internetverbindung und versuche es erneut.</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button><button className="button secondary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button></div></section></div>;
   if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
 
   return <div className="app-shell">

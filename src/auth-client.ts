@@ -14,7 +14,7 @@ export const supabase = authConfigured
   : null;
 
 export async function openAuthCallback(url: string): Promise<Session | null> {
-  if (!supabase) throw new Error("Die Supabase-Anmeldedaten fehlen in der App-Konfiguration.");
+  if (!supabase) throw new Error("Die Kontoanmeldung ist derzeit nicht verfügbar.");
   const callback = new URL(url);
   if (callback.protocol !== "devpath:" || callback.hostname !== "auth" || callback.pathname !== "/callback") {
     throw new Error("Die Anmelde-Rückleitung ist ungültig.");
@@ -40,7 +40,7 @@ export async function accountRequest<T>(session: Session, method: "GET" | "PUT" 
   if (!response.ok) {
     if (response.status === 401) throw new Error("Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.");
     if (response.status === 403) throw new Error("Dieses DevPath-Konto ist deaktiviert.");
-    throw new Error(`Das DevPath-Konto konnte nicht geladen werden (HTTP ${response.status}). Prüfe die Serverkonfiguration und deine Internetverbindung.`);
+    throw new Error("Deine Kontodaten sind derzeit nicht verfügbar. Bitte prüfe deine Internetverbindung und versuche es erneut.");
   }
   return await response.json() as T;
 }

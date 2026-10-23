@@ -34,8 +34,8 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
         if (error) throw error;
         onAuthenticated();
       }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Die Anmeldung ist fehlgeschlagen. Bitte versuche es erneut.");
+    } catch {
+      setError("Die Anmeldung konnte nicht abgeschlossen werden. Prüfe deine Eingaben oder versuche es später erneut.");
     } finally { setBusy(false); }
   };
 
@@ -48,11 +48,11 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
         options: { redirectTo: authRedirectUrl, skipBrowserRedirect: true, scopes: "openid email profile" },
       });
       if (authError) throw authError;
-      if (!data.url) throw new Error("Supabase hat keine Anmeldeseite geliefert.");
+      if (!data.url) throw new Error("Die Google-Anmeldung ist derzeit nicht verfügbar.");
       await openUrl(data.url);
       setMessage("Die Anmeldung wurde im Browser geöffnet. Kehre nach der Bestätigung zu DevPath zurück.");
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Der Anmeldedienst konnte nicht geöffnet werden.");
+    } catch {
+      setError("Die Google-Anmeldung konnte nicht geöffnet werden. Bitte versuche es erneut.");
     } finally { setBusy(false); }
   };
 
@@ -98,7 +98,7 @@ export function PasswordRecoveryView({ onFinished }: { onFinished: () => void })
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
       setDone(true);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Das Passwort konnte nicht aktualisiert werden."); }
+    } catch { setError("Das Passwort konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut."); }
     finally { setBusy(false); }
   };
   return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>DevPath</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst DevPath jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu DevPath</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;
