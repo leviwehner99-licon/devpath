@@ -29,6 +29,10 @@ jobs:
             bundle: deb
             platform: linux-x64
     runs-on: ${{ matrix.os }}
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_DEVPATH_API_URL: ${{ vars.VITE_DEVPATH_API_URL }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -45,6 +49,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf
       - run: npm ci
+      - name: Require public DevPath auth configuration
+        shell: bash
+        run: |
+          test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
+          test -n "$VITE_SUPABASE_ANON_KEY" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_ANON_KEY'; exit 1; }
+          test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
@@ -66,6 +76,10 @@ jobs:
   build-macos-intel:
     if: github.event_name == 'workflow_dispatch'
     runs-on: macos-15-intel
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_DEVPATH_API_URL: ${{ vars.VITE_DEVPATH_API_URL }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -77,6 +91,12 @@ jobs:
         with:
           workspaces: src-tauri -> target
       - run: npm ci
+      - name: Require public DevPath auth configuration
+        shell: bash
+        run: |
+          test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
+          test -n "$VITE_SUPABASE_ANON_KEY" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_ANON_KEY'; exit 1; }
+          test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=4096

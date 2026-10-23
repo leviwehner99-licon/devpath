@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Minimale Rechte für die DevPath-Oberfläche",
   "windows": ["main"],
-  "permissions": ["core:default", "sql:default", "sql:allow-execute", "sql:allow-select"]
+  "permissions": ["core:default", "sql:default", "sql:allow-execute", "sql:allow-select", "deep-link:allow-get-current", "deep-link:allow-register", "opener:default"]
 }

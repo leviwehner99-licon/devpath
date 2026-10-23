@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { clearState, exportState, loadState, parseDataExport, saveState } from "./storage";
+import { clearState, exportState, loadState, parseDataExport, saveState, setStorageProfileId } from "./storage";
 import { recommendNextLesson, reviewDate } from "./planner";
 import { programmingCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
@@ -7,6 +7,11 @@ import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, 
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
 import { Icon, LogoMark } from "./ui";
 import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
+import { authConfigured, accountRequest, openAuthCallback, supabase } from "./auth-client";
+import { AuthView, PasswordRecoveryView } from "./auth-view";
+import { isTauri } from "@tauri-apps/api/core";
+import { getCurrent, onOpenUrl, register } from "@tauri-apps/plugin-deep-link";
+import type { Session } from "@supabase/supabase-js";
 
 const navigation: { id: View; label: string; icon: "today" | "learn" | "library" | "curriculum" | "studio" | "projects" | "community" | "base" | "diploma" }[] = [
   { id: "today", label: "Heute", icon: "today" },
@@ -32,6 +37,12 @@ export default function App() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [accountReady, setAccountReady] = useState(false);
+  const [accountIssue, setAccountIssue] = useState("");
+  const [accountRetry, setAccountRetry] = useState(0);
+  const [passwordRecovery, setPasswordRecovery] = useState(false);
 
   const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
   const activeLesson = programmingCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
@@ -44,8 +55,65 @@ export default function App() {
   const progressPercent = Math.round(completedCount / programmingCourse.lessons.length * 100);
 
   useEffect(() => {
-    loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); setStorageWritable(true); }).catch(() => setStorageIssue("DevPath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
+    loadState().then((loaded) => { setState(loaded); }).catch(() => setStorageIssue("DevPath konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!authConfigured || !supabase) { setAuthReady(true); return; }
+    let alive = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (alive) setSession(nextSession);
+      if (alive && event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
+    });
+    void supabase.auth.getSession().then(({ data }) => { if (alive) { setSession(data.session); setAuthReady(true); } });
+    const acceptUrl = (url: string) => { void openAuthCallback(url).catch((error: unknown) => { if (alive) setAccountIssue(error instanceof Error ? error.message : "Die Anmelde-Rückleitung ist fehlgeschlagen."); }); };
+    let unlistenDeepLink: (() => void) | undefined;
+    if (isTauri()) {
+      void register("devpath").catch(() => {});
+      void onOpenUrl((urls) => urls.forEach(acceptUrl)).then((unlisten) => { unlistenDeepLink = unlisten; });
+      void getCurrent().then((urls) => urls?.forEach(acceptUrl));
+    }
+    return () => { alive = false; subscription.unsubscribe(); unlistenDeepLink?.(); };
+  }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+    setAccountReady(false);
+    setAccountIssue("");
+    setStorageWritable(false);
+    if (!session || !supabase) { setAccountReady(true); return; }
+    let alive = true;
+    void (async () => {
+      try {
+        const { data } = await supabase!.auth.getSession();
+        const currentSession = data.session;
+        if (!currentSession) return;
+        const account = await accountRequest<{ id: string; profile: Record<string, unknown> }>(currentSession, "PUT");
+        await setStorageProfileId(account.id);
+        const localState = await loadState();
+        const remoteProfile = account.profile ?? {};
+        const completed = remoteProfile.onboardingCompleted === true;
+        const hydrated = completed ? {
+          ...localState,
+          learnerName: typeof remoteProfile.learnerName === "string" ? remoteProfile.learnerName : localState.learnerName,
+          goal: typeof remoteProfile.goal === "string" ? remoteProfile.goal : localState.goal,
+          experience: (remoteProfile.experience === "some" || remoteProfile.experience === "experienced" ? remoteProfile.experience : "new") as DevPathState["experience"],
+          weeklySessions: Number.isInteger(remoteProfile.weeklySessions) ? Number(remoteProfile.weeklySessions) : localState.weeklySessions,
+          studyDays: Array.isArray(remoteProfile.studyDays) ? remoteProfile.studyDays.filter((day): day is number => Number.isInteger(day) && Number(day) >= 0 && Number(day) <= 6) : localState.studyDays,
+          studyTime: typeof remoteProfile.studyTime === "string" ? remoteProfile.studyTime : localState.studyTime,
+          sessionMinutes: Number.isInteger(remoteProfile.sessionMinutes) ? Number(remoteProfile.sessionMinutes) : localState.sessionMinutes,
+          onboardingCompleted: true,
+        } : { ...localState, onboardingCompleted: false, learnerName: initialState.learnerName };
+        if (!alive) return;
+        setState(hydrated);
+        setShowOnboarding(!completed);
+        setStorageWritable(true);
+      } catch (error) {
+        if (alive) setAccountIssue(error instanceof Error ? error.message : "Das Konto konnte nicht geladen werden.");
+      } finally { if (alive) setAccountReady(true); }
+    })();
+    return () => { alive = false; };
+  }, [authReady, session?.user.id, accountRetry]);
 
   useEffect(() => {
     if (!stateLoaded || !storageWritable) return;
@@ -56,16 +124,51 @@ export default function App() {
   }, [state, stateLoaded, storageWritable]);
 
   useEffect(() => {
+    if (!session || !accountReady || !storageWritable || !state.onboardingCompleted) return;
+    const timer = window.setTimeout(() => {
+      void supabase?.auth.getSession().then(({ data }) => {
+        if (!data.session) return;
+        return accountRequest(data.session, "PATCH", { profile: {
+          learnerName: state.learnerName, goal: state.goal, experience: state.experience,
+          weeklySessions: state.weeklySessions, studyDays: state.studyDays,
+          studyTime: state.studyTime, sessionMinutes: state.sessionMinutes, onboardingCompleted: true,
+        } });
+      }).catch(() => setNotice("Dein Lernplanprofil konnte gerade nicht mit deinem Konto gespeichert werden."));
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [session?.user.id, accountReady, storageWritable, state.onboardingCompleted, state.learnerName, state.goal, state.experience, state.weeklySessions, state.studyDays, state.studyTime, state.sessionMinutes]);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = state.settings.theme;
     document.documentElement.dataset.motion = state.settings.reducedMotion ? "reduced" : "full";
   }, [state.settings]);
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
+  const signOut = async () => {
+    await supabase?.auth.signOut();
+    setSession(null);
+    setStorageWritable(false);
+    setState(initialState);
+  };
+
+  const deleteAccount = async () => {
+    if (!session || !window.confirm("Dein DevPath-Konto, das gespeicherte Lernplanprofil und die lokalen Lern- und Projektdaten dieses Kontos werden gelöscht. Fortfahren?")) return;
+    try {
+      await accountRequest(session, "DELETE");
+      await clearState();
+      await signOut();
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Das Konto konnte nicht gelöscht werden.");
+    }
+  };
+
   const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
     const nextState = { ...state, ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
     try {
+      if (!session) throw new Error("Bitte melde dich an, bevor du deinen Lernplan speicherst.");
       await saveState(nextState);
+      await accountRequest(session, "PATCH", { profile: { ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true } });
       setState(nextState);
       setStorageWritable(true);
       setShowOnboarding(false);
@@ -306,7 +409,12 @@ export default function App() {
     }
   };
 
-  if (!stateLoaded) return <div className="first-run-shell"><div className="loading-note" role="status">Dein lokales Profil wird sicher geöffnet …</div></div>;
+  if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">DevPath wird sicher gestartet …</div></div>;
+  if (!authConfigured) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTOEINRICHTUNG FEHLT</div><h1>DevPath braucht noch die Supabase-App-Konfiguration.</h1><p>Lege im Projektstamm eine Datei <code>.env.local</code> mit <code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code> und <code>VITE_DEVPATH_API_URL</code> an. Danach DevPath neu starten.</p></section></div>;
+  if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
+  if (!session) return <AuthView onAuthenticated={() => { void supabase?.auth.getSession().then(({ data }) => setSession(data.session)); }} />;
+  if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein DevPath-Konto wird geladen …</div></div>;
+  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO NICHT ERREICHBAR</div><h1>Anmeldung erfolgreich, Kontodaten fehlen noch.</h1><p>{accountIssue}</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button><button className="button secondary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button></div></section></div>;
   if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
 
   return <div className="app-shell">
@@ -317,6 +425,7 @@ export default function App() {
       <div className="sidebar-spacer" />
       <div className="local-state"><span className="status-dot" /> Lokal auf diesem Gerät</div>
       <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon"><Icon name="settings"/></span>Einstellungen</button>
+      <button className="nav-item account-signout" onClick={() => void signOut()}><span className="nav-icon"><Icon name="settings"/></span>Abmelden</button>
       <div className="sidebar-footer">DevPath · Phase 2 Alpha</div>
     </aside>
 
@@ -335,7 +444,7 @@ export default function App() {
         {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={state.settings.theme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
-        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} />}
+        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} accountEmail={session.user.email ?? ""} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} onSignOut={() => void signOut()} onDeleteAccount={() => void deleteAccount()} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
       {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}

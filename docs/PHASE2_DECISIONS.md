@@ -6,8 +6,8 @@
 
 | Thema | Entscheidung | Folge |
 | --- | --- | --- |
-| Offline-Nutzung | Lernen soll vorerst ohne Konto funktionieren. | Desktop-App bleibt lokal nutzbar; Konto darf kein Startblocker sein. |
-| Konto in der privaten Phase-2-Alpha | Offline-only; kein Anmeldebildschirm und keine Kontodaten für die Alpha. | OIDC-/PKCE-Implementierung wird bis zu einer späteren ausdrücklichen Kontoentscheidung nicht aktiviert. Die vorbereiteten API-Kontorouten bleiben ohne OIDC-Konfiguration geschlossen. |
+| Konto vor dem ersten Lernen | Anmeldung erforderlich; das Lernprofil ist pro Konto. | Auf diesem Rechner bleiben Lernstand, Code und Projekte lokal und werden nicht zwischen Geräten synchronisiert. |
+| Konto in der privaten Phase-2-Alpha | Supabase Auth mit E-Mail/Passwort, Google und Apple; PKCE über Desktop-Deep-Link. | Providerkonfiguration, Makers-Umgebungsvariablen und Migration 005 sind vor produktivem Login einzurichten und zu verifizieren. Das Startprofil wird serverseitig dem Konto zugeordnet; Lerncode bleibt lokal. |
 | Hosted Datenbank | Supabase PostgreSQL, Projekt `rvhxsgexonmolrpdxdou`, Region `eu-west-1`. | Produktionskurskatalog wurde über die Makers-API bestätigt. Keine Geheimnisse in dieses Register aufnehmen. |
 | Website/API-Hosting | EdgeOne Pages/Makers; Production branch ist laut Projektkonfiguration `main`. | Website und Cloud Functions teilen ein Projekt. Deployment-Status in Makers ist vor Release zu prüfen. |
 | Runtime-Datenbankrolle | `devpath_app` liest veröffentlichte Kurse und Releases über Migration 003/RLS. | Andere Tabellenrechte und Restoreprobe bleiben offen. |
@@ -19,9 +19,9 @@
 
 | Entscheidung | Warum nötig | Zuständige Eingabe/Evidenz |
 | --- | --- | --- |
-| Zielmarkt, Mindestalter und Umgang mit Minderjährigen | Bestimmt Teilnahme-, Datenschutz- und Einwilligungsanforderungen. | Produktverantwortliche und qualifizierte Rechtsprüfung. Bis dahin keine Minderjährigen einladen und keine allgemeine Teilnahme anbieten. |
+| OIDC-/Providerkonfiguration und Kontolöschung | Ohne Supabase Provider-Clientdaten, Makers-Secrets, Migration 005 und erfolgreichen PKCE-Test funktioniert kein Produktionslogin. | Betreiber richtet Supabase Auth, Google/Apple Developer-Clients und Makers-Konfiguration ein; keine Geheimnisse im Repository oder Chat. |
 | Betreibername, Support- und Sicherheitskontakt | Website und Vorfallmeldung brauchen echte erreichbare Kontakte. | Vom Betreiber freigegebene Kontaktadresse; keine Platzhalteradresse veröffentlichen. |
-| OIDC-Anbieter oder dauerhaft offline-only | OIDC-/PKCE-, Wiederherstellungs- und Löschabläufe hängen davon ab. | Anbieterprüfung; keine Zugangsdaten im Repository. Offline-Lernen bleibt verfügbar. |
+| Zielmarkt, Mindestalter und Umgang mit Minderjährigen | Bestimmt Teilnahme-, Datenschutz- und Einwilligungsanforderungen. | Produktverantwortliche und qualifizierte Rechtsprüfung. Bis dahin keine Minderjährigen einladen und keine allgemeine Teilnahme anbieten. |
 | Mindestversionen der Betriebssysteme | Buildmatrix allein definiert keine getesteten Nutzersysteme. | Auf echten Geräten/Runnern verifizierte Versionen und Supportzeitraum. |
 | Backup-Retention, RPO/RTO und Restoreverantwortung | Tarif und Betriebsziel sind noch nicht bekannt. | Aktueller Supabase-Tarif, Backupansicht, Kosten-/Aufbewahrungsentscheidung und Restoreprotokoll. |
 | Signierung und Releasekanal | Signierschlüssel, Kosten und Veröffentlichung brauchen Eigentümer und kontrollierten Zugriff. | Getrennte Plattformkonten/Schlüssel, freigegebener Releaseprozess und Signaturverifikation. |

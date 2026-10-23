@@ -57,7 +57,7 @@ function corsHeaders(request, env) {
   if (origin === new URL(request.url).origin || allowed.has(origin)) {
     return {
       "Access-Control-Allow-Origin": origin,
-      "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, PUT, PATCH, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Authorization, Content-Type",
       "Vary": "Origin",
     };
@@ -70,6 +70,25 @@ async function identityFor(request, env) {
     return await verifyAccessToken(request.headers.get("authorization"), env);
   } catch {
     return false;
+  }
+}
+
+async function withAccountContext(database, identity, operation) {
+  const client = await database.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      "SELECT set_config('devpath.oidc_issuer', $1, true), set_config('devpath.oidc_subject', $2, true)",
+      [identity.issuer, identity.subject],
+    );
+    const result = await operation(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
   }
 }
 
@@ -132,21 +151,75 @@ export async function onRequest({ request, env = {}, uuid }) {
       return json(result.rows[0], 200, { ...cors, "Cache-Control": "public, max-age=60, stale-while-revalidate=300" });
     }
 
-    if ((request.method === "PUT" || request.method === "DELETE") && path === "/api/v1/me") {
+    if (["GET", "PUT", "PATCH", "DELETE"].includes(request.method) && path === "/api/v1/me") {
       const identity = await identityFor(request, env);
       if (identity === false) return json({ error: "invalid_access_token" }, 401, cors);
       if (!identity) return json({ error: "authentication_required" }, 401, cors);
 
       if (request.method === "PUT") {
-        const result = await database.query(
-          "INSERT INTO accounts (id, oidc_issuer, oidc_subject) VALUES ($1, $2, $3) ON CONFLICT (oidc_issuer, oidc_subject) DO UPDATE SET updated_at = now() WHERE accounts.disabled_at IS NULL RETURNING id, created_at",
-          [randomUUID(), identity.issuer, identity.subject],
-        );
+        const result = await withAccountContext(database, identity, async (client) => {
+          await client.query(
+            "INSERT INTO accounts (id, oidc_issuer, oidc_subject) VALUES ($1, $2, $3) ON CONFLICT (oidc_issuer, oidc_subject) DO NOTHING",
+            [randomUUID(), identity.issuer, identity.subject],
+          );
+          return client.query(
+            "SELECT id, created_at, profile FROM accounts WHERE oidc_issuer = $1 AND oidc_subject = $2 AND disabled_at IS NULL",
+            [identity.issuer, identity.subject],
+          );
+        });
         if (!result.rowCount) return json({ error: "account_unavailable" }, 403, cors);
-        return json({ id: result.rows[0].id, createdAt: result.rows[0].created_at }, 200, cors);
+        return json({ id: result.rows[0].id, createdAt: result.rows[0].created_at, profile: result.rows[0].profile }, 200, cors);
       }
 
-      await database.query("DELETE FROM accounts WHERE oidc_issuer = $1 AND oidc_subject = $2", [identity.issuer, identity.subject]);
+      if (request.method === "GET") {
+        const result = await withAccountContext(database, identity, (client) => client.query(
+          "SELECT id, created_at, profile FROM accounts WHERE oidc_issuer = $1 AND oidc_subject = $2 AND disabled_at IS NULL",
+          [identity.issuer, identity.subject],
+        ));
+        if (!result.rowCount) return json({ error: "account_not_found" }, 404, cors);
+        return json({ id: result.rows[0].id, createdAt: result.rows[0].created_at, profile: result.rows[0].profile }, 200, cors);
+      }
+
+      if (request.method === "PATCH") {
+        const raw = await request.text();
+        if (raw.length > 12_000) return json({ error: "profile_too_large" }, 413, cors);
+        let body;
+        try { body = JSON.parse(raw); } catch { return json({ error: "invalid_json" }, 400, cors); }
+        const profile = body?.profile;
+        if (!profile || typeof profile !== "object" || Array.isArray(profile)) return json({ error: "invalid_profile" }, 400, cors);
+        const learnerName = typeof profile.learnerName === "string" ? profile.learnerName.trim() : "";
+        const goal = typeof profile.goal === "string" ? profile.goal.trim() : "";
+        const experience = profile.experience;
+        const weeklySessions = profile.weeklySessions;
+        const studyDays = profile.studyDays;
+        const studyTime = profile.studyTime;
+        const sessionMinutes = profile.sessionMinutes;
+        if (!learnerName || learnerName.length > 32 || !goal || goal.length > 100 || !["new", "some", "experienced"].includes(experience)
+          || !Number.isInteger(weeklySessions) || weeklySessions < 1 || weeklySessions > 7
+          || !Array.isArray(studyDays) || studyDays.length !== weeklySessions || studyDays.some((day) => !Number.isInteger(day) || day < 0 || day > 6)
+          || new Set(studyDays).size !== studyDays.length || typeof studyTime !== "string" || !/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(studyTime)
+          || ![10, 15, 20, 30, 45, 60].includes(sessionMinutes) || profile.onboardingCompleted !== true) {
+          return json({ error: "invalid_profile" }, 400, cors);
+        }
+        const safeProfile = { learnerName, goal, experience, weeklySessions, studyDays, studyTime, sessionMinutes, onboardingCompleted: true };
+        const result = await withAccountContext(database, identity, (client) => client.query(
+          "UPDATE accounts SET profile = $3::jsonb, updated_at = now() WHERE oidc_issuer = $1 AND oidc_subject = $2 AND disabled_at IS NULL RETURNING id, created_at, profile",
+          [identity.issuer, identity.subject, JSON.stringify(safeProfile)],
+        ));
+        if (!result.rowCount) return json({ error: "account_not_found" }, 404, cors);
+        return json({ id: result.rows[0].id, createdAt: result.rows[0].created_at, profile: result.rows[0].profile }, 200, cors);
+      }
+
+      if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return json({ error: "account_deletion_not_configured" }, 503, cors);
+      const deletedIdentity = await fetch(`${env.SUPABASE_URL.replace(/\/$/, "")}/auth/v1/admin/users/${encodeURIComponent(identity.subject)}`, {
+        method: "DELETE",
+        headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` },
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (!deletedIdentity.ok && deletedIdentity.status !== 404) return json({ error: "account_deletion_failed" }, 502, cors);
+      await withAccountContext(database, identity, (client) => client.query(
+        "DELETE FROM accounts WHERE oidc_issuer = $1 AND oidc_subject = $2", [identity.issuer, identity.subject],
+      ));
       return json({ deleted: true }, 200, cors);
     }
 

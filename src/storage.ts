@@ -4,6 +4,7 @@ import { validateProjectFiles } from "./projects";
 import { defaultStudyDays } from "./planner";
 
 const STORAGE_KEY = "devpath.local.v1";
+let activeProfileId = "local";
 const DATABASE_URL = "sqlite:devpath.db";
 const DATA_EXPORT_FORMAT = "devpath-data";
 const DATA_EXPORT_VERSION = 1;
@@ -170,7 +171,7 @@ function validateImportedState(value: Record<string, unknown>): DevPathState {
 }
 
 function loadBrowserState(): DevPathState {
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw = window.localStorage.getItem(`${STORAGE_KEY}.${activeProfileId}`) ?? (activeProfileId === "local" ? window.localStorage.getItem(STORAGE_KEY) : null);
   if (!raw) return structuredClone(initialState);
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -184,7 +185,7 @@ function loadBrowserState(): DevPathState {
 export async function loadState(): Promise<DevPathState> {
   if (!isTauri()) return loadBrowserState();
   const db = await getDatabase();
-  const rows = await db.select<{ state_json: string }[]>("SELECT state_json FROM app_state WHERE id = 1");
+  const rows = await db.select<{ state_json: string }[]>("SELECT state_json FROM app_state WHERE account_id = $1", [activeProfileId]);
   const stored = rows[0]?.state_json;
   if (stored && stored !== "{}") {
     const parsed: unknown = JSON.parse(stored);
@@ -202,14 +203,19 @@ export async function loadState(): Promise<DevPathState> {
 async function persistSqliteState(state: DevPathState, existingDb?: LocalDatabase): Promise<void> {
   const db = existingDb ?? await getDatabase();
   await db.execute(
-    "INSERT INTO app_state (id, state_json, updated_at) VALUES (1, $1, CURRENT_TIMESTAMP) ON CONFLICT(id) DO UPDATE SET state_json = excluded.state_json, updated_at = CURRENT_TIMESTAMP",
-    [JSON.stringify(state)],
+    "INSERT INTO app_state (account_id, state_json, updated_at) VALUES ($1, $2, CURRENT_TIMESTAMP) ON CONFLICT(account_id) DO UPDATE SET state_json = excluded.state_json, updated_at = CURRENT_TIMESTAMP",
+    [activeProfileId, JSON.stringify(state)],
   );
+}
+
+export async function setStorageProfileId(accountId: string): Promise<void> {
+  if (!/^[a-zA-Z0-9_-]{1,128}$/.test(accountId)) throw new Error("Die Konto-ID für den lokalen Speicher ist ungültig.");
+  activeProfileId = accountId;
 }
 
 export async function saveState(state: DevPathState): Promise<void> {
   if (isTauri()) await persistSqliteState(state);
-  else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  else window.localStorage.setItem(`${STORAGE_KEY}.${activeProfileId}`, JSON.stringify(state));
 }
 
 export function exportState(state: DevPathState): void {
@@ -226,8 +232,9 @@ export function exportState(state: DevPathState): void {
 export async function clearState(): Promise<void> {
   if (isTauri()) {
     const db = await getDatabase();
-    await db.execute("UPDATE app_state SET state_json = '{}' WHERE id = 1");
+    await db.execute("DELETE FROM app_state WHERE account_id = $1", [activeProfileId]);
   } else {
-    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(`${STORAGE_KEY}.${activeProfileId}`);
+    if (activeProfileId === "local") window.localStorage.removeItem(STORAGE_KEY);
   }
 }

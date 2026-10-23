@@ -33,7 +33,9 @@ Variablen ausschließlich in **Project Settings → Environment Variables** der 
 | `OIDC_ISSUER` | Nach Wahl des Identitätsanbieters | Exakter HTTPS-Issuer aus der Anbieter-Konfiguration |
 | `OIDC_AUDIENCE` | Nach Wahl des Identitätsanbieters | API-Audience, für die Zugriffstoken ausgestellt werden |
 | `OIDC_JWKS_URI` | Nach Wahl des Identitätsanbieters | HTTPS-URL des JWKS-Endpunkts |
-| `CORS_ORIGINS` | Wenn Browser-/Desktopclients cross-origin zugreifen | Kommagetrennte, exakte Ursprünge; keine Wildcards |
+| `SUPABASE_URL` | Konto löschen | `https://rvhxsgexonmolrpdxdou.supabase.co`; nur serverseitig |
+| `SUPABASE_SERVICE_ROLE_KEY` | Konto löschen | Supabase-`service_role`-Key; nur als Makers-Secret, niemals in App oder Website einbetten |
+| `CORS_ORIGINS` | Desktop-/Websitezugriff | Exakte Ursprünge: `http://tauri.localhost,https://tauri.localhost,tauri://localhost,https://devpath-dpxzcux4g6bz.edgeone.dev` |
 
 Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsichtigt: es gibt keinen Rückfall auf eine lokale oder unsichere Datenbank.
 
@@ -41,7 +43,7 @@ Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsic
 
 Vor dem Setzen von `DATABASE_URL` eine **dedizierte, gehostete** PostgreSQL-Datenbank in einer EU-Region (bevorzugt Frankfurt, falls verfügbar) erstellen. Lokal laufendes PostgreSQL auf dem Entwickler-PC ist kein Cloud-Backend. Port 5432 nicht am Router oder PC ins Internet freigeben.
 
-Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Für die bereits verwendete DevPath-Datenbank nach dem Website-Update zusätzlich einmalig `../server/migrations/004_replace_html_css_with_programming_intro.sql` ausführen. Migration 004 nimmt den alten HTML/CSS-Kurs aus dem veröffentlichten Katalog und veröffentlicht stattdessen den JavaScript-Einstiegskurs samt SHA-256-Manifest. Bereits ausgeführte Migrationen 001 bis 003 nicht wiederholen.
+Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Für die bereits verwendete DevPath-Datenbank zusätzlich einmalig `../server/migrations/004_replace_html_css_with_programming_intro.sql` und `../server/migrations/005_account_profiles.sql` ausführen. Migration 005 erweitert die vorhandene `accounts`-Tabelle um das Startprofil und erteilt der Serverrolle kontoindividuelle Rechte über transaktionsgebundene OIDC-Claims und RLS. Bereits ausgeführte Migrationen 001 bis 004 nicht wiederholen.
 
 Migration 004 in Supabase unter **SQL Editor → New query** öffnen, vollständig ausführen und auf `COMMIT` ohne Fehler warten. Danach `GET /api/v1/courses` prüfen: die Antwort soll `programming-intro` enthalten und `pilot-html-css` nicht mehr enthalten. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
 
@@ -63,9 +65,9 @@ Die Dateien sind unsignierte Alpha-Pakete. Der Workflow veröffentlicht neben je
 - `GET /api/health/ready` – prüft PostgreSQL.
 - `GET /api/v1/courses` – veröffentlichte Kursmetadaten; die Antwort wird mit `Cache-Control: no-store` ausgeliefert, damit neue Veröffentlichungen nicht hinter einem veralteten CDN-Katalog verborgen bleiben.
 - `GET /api/v1/releases/:platform?channel=alpha` – Release-Metadaten.
-- `PUT /api/v1/me` und `DELETE /api/v1/me` – OIDC-geschützte Kontoanlage/-löschung.
+- `PUT`, `GET`, `PATCH`, `DELETE /api/v1/me` – OIDC-geschütztes Konto anlegen, lesen, Startprofil speichern und löschen.
 
-Konto-Routen bleiben nicht nutzbar, bis Issuer, Audience, JWKS, Datenbank und ein passender Client-PKCE-Flow eingerichtet und überprüft sind. Die Desktop-App sendet derzeit noch keinen produktiven Login-Flow.
+Die Konto-Routen verlangen gültige Supabase-Auth-JWTs und bearbeiten unter transaktionsgebundenen OIDC-Claims nur das Konto der angemeldeten Identität. App-Builds benötigen `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` und `VITE_DEVPATH_API_URL`. Die Einrichtung steht in `../docs/AUTH_SETUP.md`.
 
 ## Vor einer Alpha-Freigabe
 
