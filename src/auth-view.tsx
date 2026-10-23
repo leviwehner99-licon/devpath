@@ -39,13 +39,13 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
     } finally { setBusy(false); }
   };
 
-  const social = async (provider: "google" | "apple") => {
+  const social = async (provider: "google" | "azure") => {
     if (!supabase || busy) return;
     setBusy(true); setMessage(""); setError("");
     try {
       const { data, error: authError } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: authRedirectUrl, skipBrowserRedirect: true, scopes: provider === "apple" ? "name email" : "openid email profile" },
+        options: { redirectTo: authRedirectUrl, skipBrowserRedirect: true, scopes: provider === "azure" ? "email" : "openid email profile" },
       });
       if (authError) throw authError;
       if (!data.url) throw new Error("Supabase hat keine Anmeldeseite geliefert.");
@@ -65,7 +65,7 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem DevPath-Konto zugeordnet.</p>
       {mode !== "reset" && <div className="auth-social">
         <button className="button secondary auth-provider" disabled={busy} onClick={() => void social("google")}><span className="provider-g">G</span> Mit Google {mode === "register" ? "registrieren" : "anmelden"}</button>
-        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social("apple")}><span className="provider-apple" aria-hidden="true">●</span> Mit Apple {mode === "register" ? "registrieren" : "anmelden"}</button>
+        <button className="button secondary auth-provider" disabled={busy} onClick={() => void social("azure")}><svg className="provider-microsoft" viewBox="0 0 18 18" aria-hidden="true"><path fill="#f25022" d="M1 1h7.6v7.6H1z"/><path fill="#7fba00" d="M9.4 1H17v7.6H9.4z"/><path fill="#00a4ef" d="M1 9.4h7.6V17H1z"/><path fill="#ffb900" d="M9.4 9.4H17V17H9.4z"/></svg> Mit Microsoft {mode === "register" ? "registrieren" : "anmelden"}</button>
       </div>}
       {mode !== "reset" && <div className="auth-divider"><span>oder mit E-Mail</span></div>}
       <form onSubmit={(event) => void submit(event)} className="auth-form">
