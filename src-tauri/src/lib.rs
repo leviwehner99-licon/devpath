@@ -1,3 +1,5 @@
+use tauri::Manager;
+
 #[tauri::command]
 fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
@@ -21,10 +23,18 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
-        // Use the plugin's default callback: with the `deep-link` feature enabled it forwards
-        // Windows/Linux second-instance command-line URLs to the deep-link plugin. A custom
-        // empty callback here silently discarded OAuth callbacks while CodeZone was already open.
-        .plugin(tauri_plugin_single_instance::Builder::new().build())
+        // The builder forwards Windows/Linux second-instance URLs to the deep-link plugin
+        // before this callback. Bring the original window forward after the browser returns.
+        .plugin(
+            tauri_plugin_single_instance::Builder::new()
+                .callback(|app, _argv, _cwd| {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                })
+                .build(),
+        )
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(

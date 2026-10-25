@@ -37,12 +37,34 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: authRedirectUrl } });
         if (error) throw error;
         if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. CodeZone öffnet sich danach automatisch wieder.");
-        else onAuthenticated();
+        else {
+          setMessage("Konto erstellt und angemeldet. Für dieses Konto ist keine E-Mail-Bestätigung erforderlich.");
+          onAuthenticated();
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
         onAuthenticated();
       }
+    } catch (cause) {
+      setError(readableAuthError(cause));
+    } finally { setBusy(false); }
+  };
+
+  const sendMagicLink = async () => {
+    if (!supabase || busy) return;
+    if (!email.trim()) {
+      setError("Gib zuerst deine E-Mail-Adresse ein.");
+      return;
+    }
+    setBusy(true); setMessage(""); setError("");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim(),
+        options: { emailRedirectTo: authRedirectUrl, shouldCreateUser: false },
+      });
+      if (error) throw error;
+      setMessage("Wenn diese Adresse zu einem CodeZone-Konto gehört, wurde ein Anmeldelink gesendet. Öffne ihn auf diesem Gerät, während CodeZone geöffnet ist.");
     } catch (cause) {
       setError(readableAuthError(cause));
     } finally { setBusy(false); }
@@ -83,6 +105,7 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
         {error && <p className="auth-message error" role="alert">{error}</p>}
         {message && <p className="auth-message" role="status">{message}</p>}
         <button className="button primary auth-submit" type="submit" disabled={busy}>{busy ? "Einen Moment …" : mode === "register" ? "Konto erstellen" : mode === "login" ? "Anmelden" : "Link zum Zurücksetzen senden"}</button>
+        {mode === "login" && <button className="text-button" type="button" disabled={busy} onClick={() => void sendMagicLink()}>Anmeldelink per E-Mail senden</button>}
       </form>
       <div className="auth-switch">
         {mode === "register" ? <><span>Schon ein Konto?</span><button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Anmelden</button></> : mode === "login" ? <><span>Noch kein Konto?</span><button className="text-button" onClick={() => { setMode("register"); setError(""); setMessage(""); }}>Konto erstellen</button></> : <button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Zurück zur Anmeldung</button>}
