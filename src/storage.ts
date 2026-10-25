@@ -97,7 +97,9 @@ function normalizeState(value: unknown): DevPathState {
     : [];
   const safeStudyDays = studyDays.length ? studyDays : defaultStudyDays(weeklySessions);
   const studyTime = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime) ? parsed.studyTime : "18:00";
-  const theme = rawSettings.theme === "dark" ? "dark" : "light";
+  const theme = rawSettings.theme === "dark" || rawSettings.theme === "light" || rawSettings.theme === "system"
+    ? rawSettings.theme
+    : "system";
   const aiMode = rawSettings.aiMode === "local" || rawSettings.aiMode === "external" ? rawSettings.aiMode : "off";
   const learnerName = boundedString(parsed.learnerName, initialState.learnerName, 32);
   const hasCompletedOnboarding = parsed.onboardingCompleted === true

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useRef, useState, type FormEvent } from "react";
 import type { CourseLesson } from "./course";
 import type { DevPathState, LessonProgress, LocalProject, SavedVersion } from "./types";
-import { defaultStudyDays, weekdays, type PlanRecommendation } from "./planner";
+import { defaultStudyDays, studyTimeLabel, weekdays, type PlanRecommendation } from "./planner";
 import { editorLanguage } from "./projects";
 import { programmingCourse } from "./course";
 
@@ -22,31 +22,35 @@ export function Onboarding({ onFinish }: { onFinish: (values: { learnerName: str
   const [learnerName, setLearnerName] = useState("");
   const [goal, setGoal] = useState("Programmieren von Grund auf lernen");
   const [experience, setExperience] = useState<DevPathState["experience"]>("new");
-  const [weeklySessions, setWeeklySessions] = useState(3);
   const [studyDays, setStudyDays] = useState<number[]>(defaultStudyDays(3));
   const [studyTime, setStudyTime] = useState("18:00");
   const [sessionMinutes, setSessionMinutes] = useState(20);
   const [saving, setSaving] = useState(false);
   const toggleDay = (day: number) => {
     const next = studyDays.includes(day) ? studyDays.filter((value) => value !== day) : [...studyDays, day].sort();
-    if (!next.length) return;
+    if (!next.length || next.length > 7) return;
     setStudyDays(next);
-    setWeeklySessions(next.length);
   };
   const submit = async () => {
     if (!learnerName.trim() || saving) return;
     setSaving(true);
-    try { await onFinish({ learnerName: learnerName.trim(), goal, experience, weeklySessions, studyDays, studyTime, sessionMinutes }); }
+    try { await onFinish({ learnerName: learnerName.trim(), goal, experience, weeklySessions: studyDays.length, studyDays, studyTime, sessionMinutes }); }
     finally { setSaving(false); }
   };
-  return <div className="modal-backdrop onboarding-backdrop"><section className="dialog onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="onboarding-title"><div className="eyebrow">DEIN START · EINMALIG PRO KONTO</div><h2 id="onboarding-title">Dein Lernplan beginnt mit dir.</h2><p>CodeZone fragt dich nach deinem Namen, Ziel, deiner Erfahrung und deinem Zeitplan. Dein Startprofil wird mit deinem Konto gespeichert. Lernstand, Code und Projekte bleiben lokal auf diesem Gerät.</p><label className="field-label">Wie dürfen wir dich nennen?<input className="text-input" autoFocus required maxLength={32} value={learnerName} onChange={(event) => setLearnerName(event.target.value)} placeholder="Dein Name" /></label><label className="field-label">Was möchtest du erreichen?<select className="text-input" value={goal} onChange={(event) => setGoal(event.target.value)}><option>Programmieren von Grund auf lernen</option><option>Ein eigenes Softwareprojekt umsetzen</option><option>Meine Webkenntnisse vertiefen</option></select></label><label className="field-label">Wie viel Erfahrung hast du?<select className="text-input" value={experience} onChange={(event) => setExperience(event.target.value as DevPathState["experience"])}><option value="new">Ich fange gerade an</option><option value="some">Ich kenne schon Grundlagen</option><option value="experienced">Ich programmiere bereits regelmäßig</option></select></label><div className="field-grid"><label className="field-label">Einheiten pro Woche<select className="text-input" value={weeklySessions} onChange={(event) => { const count = Number(event.target.value); setWeeklySessions(count); setStudyDays(defaultStudyDays(count)); }}>{[1,2,3,4,5,6,7].map((value) => <option key={value} value={value}>{value} {value === 1 ? "Einheit" : "Einheiten"}</option>)}</select></label><label className="field-label">Zeit pro Einheit<select className="text-input" value={sessionMinutes} onChange={(event) => setSessionMinutes(Number(event.target.value))}>{[10,15,20,30,45,60].map((value) => <option key={value} value={value}>{value} Minuten</option>)}</select></label></div><fieldset className="schedule-days"><legend className="field-label">An welchen Tagen lernst du am liebsten?</legend>{weekdays.map((day, index) => <label key={day}><input type="checkbox" checked={studyDays.includes(index)} onChange={() => toggleDay(index)} />{day}</label>)}</fieldset><label className="field-label">Bevorzugte Uhrzeit<input className="text-input time-input" type="time" value={studyTime} onChange={(event) => setStudyTime(event.target.value)} /></label><p className="field-note">Deine Antworten werden erst gespeichert, wenn du den Lernplan erstellst. CodeZone schickt keine Benachrichtigungen außerhalb der App.</p><div className="onboarding-actions"><button className="button primary" disabled={!learnerName.trim() || saving} onClick={() => void submit()}>{saving ? "Lernplan wird gespeichert …" : "Meinen Lernplan erstellen →"}</button></div></section></div>;
+  const goals = [
+    ["Programmieren von Grund auf lernen", "Grundlagen verstehen und Schritt für Schritt erste Programme schreiben."],
+    ["Webseiten und Webanwendungen bauen", "Mit interaktiven Oberflächen und Browserprojekten starten."],
+    ["Eigene Softwareprojekte umsetzen", "Programmieren lernen, um eine eigene Idee in Code zu verwandeln."],
+    ["Mich auf den Berufseinstieg vorbereiten", "Grundlagen festigen und später ein Portfolio aufbauen."],
+  ];
+  return <div className="modal-backdrop onboarding-backdrop"><section className="dialog onboarding-dialog" role="dialog" aria-modal="true" aria-labelledby="onboarding-title"><div className="eyebrow">DEIN START · EINMALIG PRO KONTO</div><h2 id="onboarding-title">Dein Lernplan beginnt mit dir.</h2><p>Ein paar kurze Angaben helfen CodeZone, einen passenden Einstieg vorzuschlagen. Name und Lernplan werden mit deinem Konto gespeichert; Code und Projekte bleiben lokal.</p><label className="field-label">Wie dürfen wir dich nennen?<input className="text-input" autoFocus required maxLength={32} value={learnerName} onChange={(event) => setLearnerName(event.target.value)} placeholder="Dein Name" /></label><fieldset className="goal-options"><legend className="field-label">Was möchtest du als Erstes erreichen?</legend>{goals.map(([value, description]) => <label className={`goal-option ${goal === value ? "selected" : ""}`} key={value}><input type="radio" name="learner-goal" value={value} checked={goal === value} onChange={() => setGoal(value)} /><span><strong>{value}</strong><small>{description}</small></span></label>)}</fieldset><label className="field-label">Wie viel Erfahrung hast du?<select className="text-input" value={experience} onChange={(event) => setExperience(event.target.value as DevPathState["experience"])}><option value="new">Ich fange gerade an</option><option value="some">Ich kenne schon Grundlagen</option><option value="experienced">Ich programmiere bereits regelmäßig</option></select></label><fieldset className="schedule-days"><legend className="field-label">An welchen Tagen passt Lernen für dich? <span className="field-note">{studyDays.length} {studyDays.length === 1 ? "Tag" : "Tage"} pro Woche ausgewählt</span></legend>{weekdays.map((day, index) => <label key={day}><input type="checkbox" checked={studyDays.includes(index)} disabled={studyDays.length === 1 && studyDays.includes(index)} onChange={() => toggleDay(index)} />{day}</label>)}</fieldset><div className="field-grid"><label className="field-label">Wann lernst du am liebsten?<select className="text-input" value={studyTime} onChange={(event) => setStudyTime(event.target.value)}><option value="08:00">Morgens · 08:00</option><option value="12:00">Mittags · 12:00</option><option value="16:00">Nachmittags · 16:00</option><option value="18:00">Abends · 18:00</option><option value="19:00">Abends · 19:00</option><option value="20:00">Abends · 20:00</option><option value="21:00">Später Abend · 21:00</option></select></label><label className="field-label">Wie lange passt eine Einheit?<select className="text-input" value={sessionMinutes} onChange={(event) => setSessionMinutes(Number(event.target.value))}>{[10,15,20,30,45,60].map((value) => <option key={value} value={value}>{value} Minuten</option>)}</select></label></div><p className="field-note">Die Uhrzeit ist nur eine Orientierung im Lehrplan. CodeZone schickt keine Benachrichtigungen.</p><div className="onboarding-actions"><button className="button primary" disabled={!learnerName.trim() || saving} onClick={() => void submit()}>{saving ? "Lernplan wird erstellt …" : "Meinen Lernplan erstellen →"}</button></div></section></div>;
 }
 
 export function Today({ state, progress, completedCount, recommendation, start, edit }: { state: DevPathState; progress: number; completedCount: number; recommendation: PlanRecommendation; start: () => void; edit: () => void }) {
   return <>
     <PageTitle eyebrow="MIT DEINEM LERNPFAD" title={`Schön, dass du da bist, ${state.learnerName}.`} subtitle="Ein kleiner Schritt bringt dich deinem Ziel näher." action={<button className="button secondary" onClick={edit}>Plan anpassen</button>} />
     <section className="hero-card"><div className="hero-copy"><div className="pill"><span className="pill-dot" /> {recommendation.isReview ? "KURZE WIEDERHOLUNG" : "DEIN NÄCHSTER SCHRITT"}</div><h2>{recommendation.lesson.title}</h2><p className="muted">{recommendation.lesson.language.toUpperCase()} · {recommendation.lesson.duration} Minuten</p><p className="objective">{recommendation.lesson.objective}</p><p className="recommendation-reason">Warum dieser Schritt? {recommendation.reason}</p><button className="button primary" onClick={start}>Lektion starten<span aria-hidden="true"> →</span></button></div><div className="hero-art" aria-hidden="true"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="code-tile">&lt;/&gt;</div><div className="spark spark-a">✦</div><div className="spark spark-b">✳</div></div></section>
-    <div className="dashboard-grid"><section className="panel plan-panel"><div className="panel-heading"><div><div className="eyebrow">DEIN RHYTHMUS</div><h2>Ein Plan, der zu dir passt</h2></div><span className="soft-icon">◷</span></div><p>Vorgeschlagen: <strong>{state.weeklySessions} Einheiten pro Woche</strong>, je etwa <strong>{state.sessionMinutes} Minuten</strong>.</p><div className="week-row">{["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, index) => <div className="day" key={day}><span>{day}</span><i className={state.studyDays.includes(index) ? "planned" : ""} /></div>)}</div><p className="field-note">Deine Lerntage: {state.studyDays.map((day) => weekdays[day].slice(0, 2)).join(", ")} · bevorzugt um {state.studyTime} Uhr. Es gibt keine Benachrichtigungen außerhalb der App.</p><button className="text-button" onClick={edit}>Lernrhythmus ändern <span>→</span></button></section>
+    <div className="dashboard-grid"><section className="panel plan-panel"><div className="panel-heading"><div><div className="eyebrow">DEIN RHYTHMUS</div><h2>Ein Plan, der zu dir passt</h2></div><span className="soft-icon">◷</span></div><p>Vorgeschlagen: <strong>{state.weeklySessions} Einheiten pro Woche</strong>, je etwa <strong>{state.sessionMinutes} Minuten</strong>.</p><div className="week-row">{["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((day, index) => <div className="day" key={day}><span>{day}</span><i className={state.studyDays.includes(index) ? "planned" : ""} /></div>)}</div><p className="field-note">Deine Lerntage: {state.studyDays.map((day) => weekdays[day].slice(0, 2)).join(", ")} · bevorzugt {studyTimeLabel(state.studyTime)}. Es gibt keine Benachrichtigungen außerhalb der App.</p><button className="text-button" onClick={edit}>Lernrhythmus ändern <span>→</span></button></section>
       <section className="panel progress-panel"><div className="panel-heading"><div><div className="eyebrow">DEIN FORTSCHRITT</div><h2>Du machst das in deinem Tempo</h2></div><span className="soft-icon">✦</span></div><div className="progress-line"><span style={{ width: `${progress}%` }} /></div><div className="progress-meta"><span>{completedCount} von 7 Lernzielen abgeschlossen</span><strong>{progress}%</strong></div><p className="small-note">Pausen sind Teil des Lernens. Dein Lernplan bleibt lokal und lässt sich jederzeit ändern.</p></section></div>
     <section className="section-block"><div className="section-heading"><div><div className="eyebrow">DEIN LERNZIEL</div><h2>{state.goal}</h2></div><span className="course-chip">{completedCount}/7 Schritte</span></div><div className="path-preview"><span className={`path-node ${completedCount ? "done" : "current"}`}>{completedCount ? "✓" : "1"}</span><div className="path-copy"><strong>{programmingCourse.title}</strong><span>JavaScript · sieben praktische Lernziele</span></div><span className="path-duration">7 Lernziele</span></div></section>
   </>;
@@ -108,9 +112,33 @@ export function CodeBase({ projects, activeProject, activeFile, versions, curren
   </>;
 }
 
-export function Settings({ state, update, storageWritable, accountEmail, exportData, importData, clearData, onOpenSupport, onSignOut, onDeleteAccount }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; storageWritable: boolean; accountEmail: string; exportData: () => void; importData: (file: File) => Promise<void>; clearData: () => void; onOpenSupport: () => void; onSignOut: () => void; onDeleteAccount: () => void }) {
+export function Settings({ state, update, storageWritable, accountEmail, exportData, importData, clearData, onOpenSupport, onSignOut, onDeleteAccount, onSetPassword }: { state: DevPathState; update: (patch: Partial<DevPathState>) => void; storageWritable: boolean; accountEmail: string; exportData: () => void; importData: (file: File) => Promise<void>; clearData: () => void; onOpenSupport: () => void; onSignOut: () => void; onDeleteAccount: () => void; onSetPassword: (password: string) => Promise<void> }) {
   const updateSettings = (patch: Partial<DevPathState["settings"]>) => update({ settings: { ...state.settings, ...patch } });
   const dataImportRef = useRef<HTMLInputElement>(null);
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const saveAccountPassword = async (event: FormEvent) => {
+    event.preventDefault();
+    if (password.length < 8 || password.length > 128 || password !== passwordConfirmation || passwordSaving) {
+      setPasswordError("Bitte gib zweimal dasselbe Passwort mit mindestens 8 Zeichen ein.");
+      setPasswordMessage("");
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordError("");
+    setPasswordMessage("");
+    try {
+      await onSetPassword(password);
+      setPassword("");
+      setPasswordConfirmation("");
+      setPasswordMessage("Passwort gespeichert. Du kannst dich abmelden und künftig auch mit E-Mail und Passwort anmelden.");
+    } catch {
+      setPasswordError("Das Passwort konnte gerade nicht gespeichert werden. Bitte versuche es erneut.");
+    } finally { setPasswordSaving(false); }
+  };
 
   return <>
     <div className="settings-layout">
@@ -121,6 +149,7 @@ export function Settings({ state, update, storageWritable, accountEmail, exportD
         <section className="panel settings-panel account-panel">
           <div className="eyebrow">CodeZone-Konto</div><h2>Dein Konto</h2>
           <p className="settings-description">Angemeldet als <strong>{accountEmail}</strong>. Anmeldung und E-Mail-Adresse werden von Supabase Auth verwaltet. Der Lernplan wird im CodeZone-Konto gespeichert; Lernstand, Code und Projekte bleiben vorerst auf diesem Gerät.</p>
+          <form className="account-password-form" onSubmit={(event) => void saveAccountPassword(event)}><div className="eyebrow">E-MAIL-ANMELDUNG</div><h3>Passwort festlegen oder ändern</h3><p className="field-note">Wenn dein Konto zuerst mit Google erstellt wurde, kannst du hier ein Passwort ergänzen und danach auch mit E-Mail und Passwort anmelden.</p><div className="field-grid"><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={passwordConfirmation} onChange={(event) => setPasswordConfirmation(event.target.value)} /></label></div>{passwordError && <p className="auth-message error" role="alert">{passwordError}</p>}{passwordMessage && <p className="auth-message" role="status">{passwordMessage}</p>}<button className="button secondary" disabled={passwordSaving}>{passwordSaving ? "Wird gespeichert …" : "Passwort speichern"}</button></form>
           <div className="privacy-actions"><button className="button secondary" onClick={onSignOut}>Abmelden</button><button className="button danger-outline" onClick={onDeleteAccount}>Konto dauerhaft löschen</button></div>
         </section>
         <section id="profil" className="panel settings-panel">
@@ -133,7 +162,7 @@ export function Settings({ state, update, storageWritable, accountEmail, exportD
           <div className="eyebrow">DEIN LERNRHYTHMUS</div><h2>Ein Plan, der zu deinem Alltag passt</h2>
           <fieldset className="schedule-days settings-schedule"><legend className="field-label">Deine Lerntage ({state.studyDays.length} pro Woche)</legend>{weekdays.map((day, index) => <label key={day}><input type="checkbox" checked={state.studyDays.includes(index)} disabled={state.studyDays.length === 1 && state.studyDays.includes(index)} onChange={(event) => { const next = event.target.checked ? [...state.studyDays, index].sort() : state.studyDays.filter((value) => value !== index); update({ studyDays: next, weeklySessions: next.length }); }} />{day}</label>)}</fieldset>
           <div className="field-grid">
-            <label className="field-label">Bevorzugte Uhrzeit<input className="text-input time-input" type="time" value={state.studyTime} onChange={(event) => update({ studyTime: event.target.value })} /></label>
+            <label className="field-label">Bevorzugte Tageszeit<select className="text-input" value={state.studyTime} onChange={(event) => update({ studyTime: event.target.value })}><option value="08:00">Morgens · 08:00</option><option value="12:00">Mittags · 12:00</option><option value="16:00">Nachmittags · 16:00</option><option value="18:00">Abends · 18:00</option><option value="19:00">Abends · 19:00</option><option value="20:00">Abends · 20:00</option><option value="21:00">Später Abend · 21:00</option></select></label>
             <label className="field-label">Zeit pro Einheit<select className="text-input" value={state.sessionMinutes} onChange={(event) => update({ sessionMinutes: Number(event.target.value) })}>{[10, 15, 20, 30, 45, 60].map((minutes) => <option key={minutes} value={minutes}>etwa {minutes} Minuten</option>)}</select></label>
           </div>
           <label className="field-label">Dein Lernziel<input className="text-input" value={state.goal} maxLength={100} onChange={(event) => update({ goal: event.target.value })} /></label>
@@ -141,7 +170,7 @@ export function Settings({ state, update, storageWritable, accountEmail, exportD
         </section>
         <section id="darstellung" className="panel settings-panel">
           <div className="eyebrow">DARSTELLUNG</div><h2>Ruhig und gut lesbar</h2>
-          <label className="field-label">Farbschema<select className="text-input" value={state.settings.theme} onChange={(event) => updateSettings({ theme: event.target.value as DevPathState["settings"]["theme"] })}><option value="light">Hell</option><option value="dark">Dunkel</option></select></label>
+          <label className="field-label">Farbschema<select className="text-input" value={state.settings.theme} onChange={(event) => updateSettings({ theme: event.target.value as DevPathState["settings"]["theme"] })}><option value="system">Wie auf diesem Gerät</option><option value="light">Hell</option><option value="dark">Dunkel</option></select></label>
           <Toggle label="Bewegung reduzieren" checked={state.settings.reducedMotion} onChange={(value) => updateSettings({ reducedMotion: value })} />
         </section>
         <section id="datenschutz" className="panel settings-panel">

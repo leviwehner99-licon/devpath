@@ -41,7 +41,13 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [accountReady, setAccountReady] = useState(false);
   const [accountIssue, setAccountIssue] = useState("");
+  const [authNotice, setAuthNotice] = useState("");
   const [passwordRecovery, setPasswordRecovery] = useState(false);
+  const [systemPrefersDark, setSystemPrefersDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  const effectiveTheme = state.settings.theme === "system"
+    ? systemPrefersDark ? "dark" : "light"
+    : state.settings.theme;
 
   const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
   const activeLesson = programmingCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
@@ -157,9 +163,17 @@ export default function App() {
   }, [session?.user.id, accountReady, storageWritable, state.onboardingCompleted, state.learnerName, state.goal, state.experience, state.weeklySessions, state.studyDays, state.studyTime, state.sessionMinutes]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = state.settings.theme;
+    const preference = window.matchMedia("(prefers-color-scheme: dark)");
+    const syncPreference = () => setSystemPrefersDark(preference.matches);
+    syncPreference();
+    preference.addEventListener("change", syncPreference);
+    return () => preference.removeEventListener("change", syncPreference);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = effectiveTheme;
     document.documentElement.dataset.motion = state.settings.reducedMotion ? "reduced" : "full";
-  }, [state.settings]);
+  }, [effectiveTheme, state.settings.reducedMotion]);
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
@@ -174,11 +188,25 @@ export default function App() {
     if (!session || !window.confirm("Dein CodeZone-Konto, das gespeicherte Lernplanprofil und die lokalen Lern- und Projektdaten dieses Kontos werden gelöscht. Fortfahren?")) return;
     try {
       await accountRequest(session, "DELETE");
-      await clearState();
-      await signOut();
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Das Konto konnte nicht gelöscht werden.");
+      let localDataRemoved = true;
+      try { await clearState(); } catch { localDataRemoved = false; }
+      await supabase?.auth.signOut().catch(() => undefined);
+      setSession(null);
+      setStorageWritable(false);
+      setState(initialState);
+      setShowOnboarding(false);
+      setAuthNotice(localDataRemoved
+        ? "Dein Konto wurde gelöscht."
+        : "Dein Konto wurde gelöscht, aber lokale Daten konnten nicht entfernt werden. Öffne Einstellungen und lösche die lokalen Daten auf diesem Gerät.");
+    } catch {
+      setNotice("Dein Konto konnte gerade nicht gelöscht werden. Bitte versuche es später erneut.");
     }
+  };
+
+  const setAccountPassword = async (password: string) => {
+    if (!supabase) throw new Error("Passwort konnte nicht geändert werden.");
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw new Error("Passwort konnte nicht geändert werden.");
   };
 
   const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
@@ -432,7 +460,7 @@ export default function App() {
   if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">CodeZone wird sicher gestartet …</div></div>;
   if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p className="auth-description">Bitte versuche es später erneut.</p></section></main>;
   if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
-  if (!session) return <AuthView callbackError={accountIssue} onAuthenticated={(authenticatedSession) => { setAccountIssue(""); setSession(authenticatedSession); }} />;
+  if (!session) return <AuthView callbackError={accountIssue} callbackNotice={authNotice} onAuthenticated={(authenticatedSession) => { setAccountIssue(""); setAuthNotice(""); setSession(authenticatedSession); }} />;
   if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein CodeZone-Konto wird geladen …</div></div>;
 
   return <div className="app-shell">
@@ -448,21 +476,21 @@ export default function App() {
     </aside>
 
     <main className="main-area">
-      <header className="topbar"><div className="breadcrumbs">CodeZone <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${state.settings.theme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: state.settings.theme === "dark" ? "light" : "dark" } })}>{state.settings.theme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
+      <header className="topbar"><div className="breadcrumbs">CodeZone <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${effectiveTheme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: effectiveTheme === "dark" ? "light" : "dark" } })}>{effectiveTheme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
         {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
         {stateLoaded && !storageIssue && view === "today" && <><Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
         {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openCourse={() => { setView("curriculum"); }} />}
-        {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum state={state} completedCount={completedCount} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
+        {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum state={state} completedCount={completedCount} recommendation={recommendation} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
         {stateLoaded && !storageIssue && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
         {stateLoaded && !storageIssue && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
-        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={programmingCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={state.settings.theme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
-        {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={state.settings.theme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={programmingCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={effectiveTheme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
-        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} accountEmail={session.user.email ?? ""} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} onSignOut={() => void signOut()} onDeleteAccount={() => void deleteAccount()} />}
+        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} accountEmail={session.user.email ?? ""} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} onSignOut={() => void signOut()} onDeleteAccount={() => void deleteAccount()} onSetPassword={setAccountPassword} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
       {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}

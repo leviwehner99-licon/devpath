@@ -15,7 +15,7 @@ function GoogleMark() {
   </svg>;
 }
 
-export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthenticated: (session: Session) => void; callbackError?: string }) {
+export function AuthView({ onAuthenticated, callbackError = "", callbackNotice = "" }: { onAuthenticated: (session: Session) => void; callbackError?: string; callbackNotice?: string }) {
   const [mode, setMode] = useState<AuthMode>("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -97,13 +97,15 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
       <h1 id="auth-title">{title}</h1>
       <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem CodeZone-Konto zugeordnet.</p>
       {callbackError && <p className="auth-message error" role="alert">{callbackError}</p>}
+      {callbackNotice && <p className="auth-message" role="status">{callbackNotice}</p>}
       {mode !== "reset" && <div className="auth-social">
         <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><GoogleMark /><span>Mit Google {mode === "register" ? "registrieren" : "anmelden"}</span></button>
       </div>}
       {mode !== "reset" && <div className="auth-divider"><span>oder mit E-Mail</span></div>}
+      {mode === "login" && <p className="auth-hint">Wurde dein Konto zuerst mit Google erstellt? Melde dich damit an und lege in <strong>Einstellungen → Passwort festlegen oder ändern</strong> ein Passwort für die E-Mail-Anmeldung fest.</p>}
       <form onSubmit={(event) => void submit(event)} className="auth-form">
         <label className="field-label">E-Mail-Adresse<input className="text-input" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@beispiel.de" /></label>
-        {mode !== "reset" && <label className="field-label">Passwort<input className="text-input" type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Mindestens 8 Zeichen" /></label>}
+        {mode !== "reset" && <label className="field-label">Passwort<input className="text-input" type="password" autoComplete={mode === "register" ? "new-password" : "current-password"} required minLength={mode === "register" ? 8 : undefined} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={mode === "register" ? "Mindestens 8 Zeichen" : "Dein Passwort"} /></label>}
         {error && <p className="auth-message error" role="alert">{error}</p>}
         {message && <p className="auth-message" role="status">{message}</p>}
         <button className="button primary auth-submit" type="submit" disabled={busy}>{busy ? "Einen Moment …" : mode === "register" ? "Konto erstellen" : mode === "login" ? "Anmelden" : "Link zum Zurücksetzen senden"}</button>

@@ -37,7 +37,7 @@ export type DevPathState = {
   activeProjectId: string;
   onboardingCompleted: boolean;
   courseCompletedAt?: string;
-  settings: { theme: "light" | "dark"; reducedMotion: boolean; sendDiagnostics: boolean; aiMode: "off" | "local" | "external" };
+  settings: { theme: "system" | "light" | "dark"; reducedMotion: boolean; sendDiagnostics: boolean; aiMode: "off" | "local" | "external" };
 };
 
 export const initialState: DevPathState = {
@@ -63,5 +63,5 @@ export const initialState: DevPathState = {
   }],
   activeProjectId: "starter-programming",
   onboardingCompleted: false,
-  settings: { theme: "light", reducedMotion: false, sendDiagnostics: false, aiMode: "off" },
+  settings: { theme: "system", reducedMotion: false, sendDiagnostics: false, aiMode: "off" },
 };

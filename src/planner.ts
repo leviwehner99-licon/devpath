@@ -5,6 +5,12 @@ export type PlanRecommendation = { lesson: CourseLesson; reason: string; isRevie
 
 export const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"] as const;
 
+export function studyTimeLabel(value: string): string {
+  const hour = Number(value.slice(0, 2));
+  const period = hour < 11 ? "morgens" : hour < 14 ? "mittags" : hour < 18 ? "nachmittags" : hour < 21 ? "abends" : "spät abends";
+  return `${period} (${value} Uhr)`;
+}
+
 export function defaultStudyDays(sessions: number): number[] {
   const schedules: Record<number, number[]> = {
     1: [2],
