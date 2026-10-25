@@ -1,4 +1,4 @@
-# DevPath – Phase-1-Implementierungsstand
+# CodeZone – Phase-1-Implementierungsstand
 
 **Stand:** 21. Oktober 2026  
 **Version:** 0.1  

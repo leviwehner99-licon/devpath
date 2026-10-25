@@ -42,7 +42,7 @@ export function parseProjectBundle(text: string): Omit<LocalProject, "id" | "cre
   try { value = JSON.parse(text); } catch { throw new Error("Die Projektdatei ist kein gültiges JSON."); }
   if (!value || typeof value !== "object") throw new Error("Das Dateiformat wird nicht erkannt.");
   const bundle = value as { format?: unknown; version?: unknown; project?: { name?: unknown; language?: unknown; files?: unknown } };
-  if (bundle.format !== PROJECT_BUNDLE_FORMAT || bundle.version !== 1 || !bundle.project) throw new Error("Das ist kein unterstützter devpath-Projektexport.");
+  if (bundle.format !== PROJECT_BUNDLE_FORMAT || bundle.version !== 1 || !bundle.project) throw new Error("Das ist kein unterstützter CodeZone-Projektexport.");
   const name = typeof bundle.project.name === "string" ? bundle.project.name.trim().slice(0, 80) : "Importiertes Projekt";
   const language = typeof bundle.project.language === "string" ? bundle.project.language.slice(0, 32) : "html";
   return { name: name || "Importiertes Projekt", language, files: validateProjectFiles(bundle.project.files) };
@@ -66,11 +66,11 @@ export function projectBundle(project: LocalProject): string {
 export function downloadProjectBundle(project: LocalProject): void {
   const contents = projectBundle(project);
   if (!contents) return;
-  const fileName = project.name.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, "-").replace(/^-|-$/g, "") || "devpath-projekt";
+  const fileName = project.name.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, "-").replace(/^-|-$/g, "") || "codezone-projekt";
   const url = URL.createObjectURL(new Blob([contents], { type: "application/json" }));
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${fileName}.devpath-project.json`;
+  anchor.download = `${fileName}.codezone-project.json`;
   anchor.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

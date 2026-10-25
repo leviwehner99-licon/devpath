@@ -36,6 +36,6 @@ jobs:
         run: cargo install cargo-audit --locked
       - name: Audit Rust lockfile
         # rsa is only a transitive dependency of sqlx-mysql, an optional SQLx driver
-        # not enabled by DevPath (the app uses SQLite). RustSec has no patched rsa
+        # not enabled by CodeZone (the app uses SQLite). RustSec has no patched rsa
         # release for RUSTSEC-2023-0071; remove this exception if MySQL/RSA is enabled.
         run: cargo audit --file src-tauri/Cargo.lock --ignore RUSTSEC-2023-0071

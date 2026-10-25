@@ -1,4 +1,4 @@
-# DevPath – Navigations-Wireframes und Design-Tokens
+# CodeZone – Navigations-Wireframes und Design-Tokens
 
 **Status:** Arbeitsgrundlage für Phase 1  
 **Version:** 0.1  
@@ -8,7 +8,7 @@
 
 ## 1. Gestaltungsziel
 
-DevPath soll freundlich, klar und modern wirken, ohne wie ein Kinderspiel oder eine Entwicklerkonsole auszusehen. Die visuelle Richtung ist expressiv, mit großzügigen Flächen, sanften Formen und gezielten Akzentfarben. Sie wird als eigenständige DevPath-Designsprache umgesetzt und an Desktop-Konventionen angepasst. „Android 17 Material Expressive 3“ ist eine Stilreferenz; dieses Dokument behauptet keine offizielle Designsystem-Konformität.
+CodeZone soll freundlich, klar und modern wirken, ohne wie ein Kinderspiel oder eine Entwicklerkonsole auszusehen. Die visuelle Richtung ist expressiv, mit großzügigen Flächen, sanften Formen und gezielten Akzentfarben. Sie wird als eigenständige CodeZone-Designsprache umgesetzt und an Desktop-Konventionen angepasst. „Android 17 Material Expressive 3“ ist eine Stilreferenz; dieses Dokument behauptet keine offizielle Designsystem-Konformität.
 
 **Prioritäten in Reihenfolge:** verständliche Orientierung, Lesbarkeit, zugängliche Bedienung, ruhige Lernumgebung, visuelle Eigenständigkeit.
 
@@ -48,7 +48,7 @@ DevPath soll freundlich, klar und modern wirken, ohne wie ein Kinderspiel oder e
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ [Fenstertitel / App-Menü]                         [Hilfe] [Profil/Einstellungen] │
 ├────────────────────┬────────────────────────────────────────────────────────┤
-│ DevPath            │ Bereichstitel                           Status/Sync     │
+│ CodeZone            │ Bereichstitel                           Status/Sync     │
 │                    ├────────────────────────────────────────────────────────┤
 │ ◉ Heute            │                                                        │
 │ ◌ Lernen           │                 Inhaltsfläche                         │
@@ -66,7 +66,7 @@ DevPath soll freundlich, klar und modern wirken, ohne wie ein Kinderspiel oder e
 - Standardfenster: Inhaltsbreite für angenehmes Lesen begrenzen; keine Vollbildpflicht.
 - Seitenleiste: auf breiten Fenstern mit Icon und Text; einklappbar, aber nie nur Icon ohne zugänglichen Namen.
 - Fenstergröße, Split-Ansichten und zuletzt geöffneter Bereich werden lokal gespeichert.
-- Systemrahmen und Fenstermenü respektieren Windows, macOS und Linux; DevPath-Komponenten bleiben plattformübergreifend konsistent.
+- Systemrahmen und Fenstermenü respektieren Windows, macOS und Linux; CodeZone-Komponenten bleiben plattformübergreifend konsistent.
 
 ## 4. Textuelle Wireframes
 
@@ -74,7 +74,7 @@ DevPath soll freundlich, klar und modern wirken, ohne wie ein Kinderspiel oder e
 
 ```text
 ┌───────────────────────────────────────────┐
-│ DevPath                              1/4   │
+│ CodeZone                              1/4   │
 │                                           │
 │ Was möchtest du lernen?                   │
 │ [ Webentwicklung                    ▾ ]   │
@@ -328,7 +328,7 @@ Die UI skaliert bis mindestens 200 %, ohne horizontalen Zwangs-Scroll in Standar
 | `border.width.default` | 1 px |
 | `border.width.focus` | 2 px |
 
-44 × 44 px ist das DevPath-Ziel für häufige interaktive Ziele; plattformtypische kleinere Controls müssen ausreichend große Hit-Areas erhalten. Rundungen dienen Gruppierung und Hierarchie, nicht dekorativer Überladung.
+44 × 44 px ist das CodeZone-Ziel für häufige interaktive Ziele; plattformtypische kleinere Controls müssen ausreichend große Hit-Areas erhalten. Rundungen dienen Gruppierung und Hierarchie, nicht dekorativer Überladung.
 
 ### 6.5 Bewegung und Tiefe
 
@@ -405,7 +405,7 @@ Die Website ist kein Ersatz für die Desktop-Lernoberfläche. Hauptnavigation: P
 
 | Entscheidung | Vorläufiger Vorschlag | Klärung vor Umsetzung |
 |---|---|---|
-| Produktname und Wort-/Bildmarke | DevPath als Arbeitsname | Marken-/Namensrecherche und Domainverfügbarkeit |
+| Produktname und Wort-/Bildmarke | CodeZone als Arbeitsname | Marken-/Namensrecherche und Domainverfügbarkeit |
 | Farbidentität | Indigo als Primärfarbe, Türkis als Lernakzent | Nutzertests, Kontrastmessung und Markenprüfung |
 | Seitenleistenverhalten | Dauerhaft sichtbar, einklappbar | Tests auf Windows/macOS/Linux und schmalen Fenstern |
 | Standard-Theme | Systemeinstellung folgen | Nutzertests und OS-Integrationsfähigkeit |

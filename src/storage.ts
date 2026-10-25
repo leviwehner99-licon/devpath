@@ -189,7 +189,7 @@ export async function loadState(): Promise<DevPathState> {
   const stored = rows[0]?.state_json;
   if (stored && stored !== "{}") {
     const parsed: unknown = JSON.parse(stored);
-    if (!isRecord(parsed)) throw new Error("Die lokalen SQLite-Daten enthalten kein gültiges devpath-Profil.");
+    if (!isRecord(parsed)) throw new Error("Die lokalen SQLite-Daten enthalten kein gültiges CodeZone-Profil.");
     return normalizeState(parsed);
   }
 
@@ -224,7 +224,7 @@ export function exportState(state: DevPathState): void {
   const url = URL.createObjectURL(data);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "devpath-datenexport.json";
+  anchor.download = "codezone-datenexport.json";
   anchor.click();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

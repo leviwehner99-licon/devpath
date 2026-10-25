@@ -49,7 +49,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev librsvg2-dev libayatana-appindicator3-dev patchelf
       - run: npm ci
-      - name: Require public DevPath auth configuration
+      - name: Require public CodeZone auth configuration
         shell: bash
         run: |
           test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
@@ -68,7 +68,7 @@ jobs:
       - name: Store unsigned CI package for review
         uses: actions/upload-artifact@v4
         with:
-          name: DevPath-${{ matrix.platform }}-${{ github.sha }}
+          name: CodeZone-${{ matrix.platform }}-${{ github.sha }}
           path: src-tauri/target/release/bundle/${{ matrix.bundle }}/*
           if-no-files-found: error
           retention-days: 14
@@ -91,7 +91,7 @@ jobs:
         with:
           workspaces: src-tauri -> target
       - run: npm ci
-      - name: Require public DevPath auth configuration
+      - name: Require public CodeZone auth configuration
         shell: bash
         run: |
           test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
@@ -104,7 +104,7 @@ jobs:
       - name: Store unsigned Intel Mac package for review
         uses: actions/upload-artifact@v4
         with:
-          name: DevPath-macos-x64-${{ github.sha }}
+          name: CodeZone-macos-x64-${{ github.sha }}
           path: src-tauri/target/release/bundle/dmg/*
           if-no-files-found: error
           retention-days: 14
@@ -119,19 +119,19 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/download-artifact@v5
         with:
-          name: DevPath-windows-x64-${{ github.sha }}
+          name: CodeZone-windows-x64-${{ github.sha }}
           path: installers/windows
       - uses: actions/download-artifact@v5
         with:
-          name: DevPath-macos-arm64-${{ github.sha }}
+          name: CodeZone-macos-arm64-${{ github.sha }}
           path: installers/macos-arm64
       - uses: actions/download-artifact@v5
         with:
-          name: DevPath-macos-x64-${{ github.sha }}
+          name: CodeZone-macos-x64-${{ github.sha }}
           path: installers/macos-x64
       - uses: actions/download-artifact@v5
         with:
-          name: DevPath-linux-x64-${{ github.sha }}
+          name: CodeZone-linux-x64-${{ github.sha }}
           path: installers/linux
       - name: Upload public installers and checksums to Supabase Storage
         env:
@@ -182,10 +182,10 @@ jobs:
             fi
           done
 
-          upload_asset "$windows_installer" 'DevPath-Windows-x64.exe' 'application/vnd.microsoft.portable-executable'
-          upload_asset "$mac_arm_installer" 'DevPath-macOS-arm64.dmg' 'application/x-apple-diskimage'
-          upload_asset "$mac_intel_installer" 'DevPath-macOS-x64.dmg' 'application/x-apple-diskimage'
-          upload_asset "$linux_installer" 'DevPath-Linux-x64.deb' 'application/vnd.debian.binary-package'
+          upload_asset "$windows_installer" 'CodeZone-Windows-x64.exe' 'application/vnd.microsoft.portable-executable'
+          upload_asset "$mac_arm_installer" 'CodeZone-macOS-arm64.dmg' 'application/x-apple-diskimage'
+          upload_asset "$mac_intel_installer" 'CodeZone-macOS-x64.dmg' 'application/x-apple-diskimage'
+          upload_asset "$linux_installer" 'CodeZone-Linux-x64.deb' 'application/vnd.debian.binary-package'
       - name: Enable verified download links in the website
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -198,6 +198,6 @@ jobs:
           if git diff --cached --quiet; then
             echo 'Public download links already point to the current storage location.'
           else
-            git commit -m 'Enable published cross-platform DevPath downloads'
+            git commit -m 'Enable published cross-platform CodeZone downloads'
             git push origin HEAD:main
           fi

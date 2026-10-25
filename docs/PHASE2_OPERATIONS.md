@@ -1,11 +1,11 @@
-# DevPath Phase 2 – Betriebsabläufe
+# CodeZone Phase 2 – Betriebsabläufe
 
 **Stand:** 22. Oktober 2026  
-**Status am 22. Oktober 2026:** Ein manueller Supabase-Dump wurde erstellt und mit `pg_restore --list` lesend geprüft. Das DevPath-`public`-Schema wurde erfolgreich in der lokalen Testdatenbank `devpath_restore_test` restauriert. Die Zähler ergaben `accounts=0`, `courses=1`, `course_releases=1`, `app_releases=0`. Migration 003 und `SET ROLE devpath_app` liefen erfolgreich; die Rolle las einen Kurs und eine Kursversion. Supabase-Systemschemata wie `auth` und `vault` wurden ausdrücklich nicht restauriert. Die Dump-Datei liegt vorübergehend auf C:, das nach der `manage-bde`-Prüfung unverschlüsselt ist; nach abgeschlossener Probe löschen. Ein Incident-Tabletop und Alpha-Betrieb sind nicht nachgewiesen.
+**Status am 22. Oktober 2026:** Ein manueller Supabase-Dump wurde erstellt und mit `pg_restore --list` lesend geprüft. Das CodeZone-`public`-Schema wurde erfolgreich in der lokalen Testdatenbank `devpath_restore_test` restauriert. Die Zähler ergaben `accounts=0`, `courses=1`, `course_releases=1`, `app_releases=0`. Migration 003 und `SET ROLE devpath_app` liefen erfolgreich; die Rolle las einen Kurs und eine Kursversion. Supabase-Systemschemata wie `auth` und `vault` wurden ausdrücklich nicht restauriert. Die Dump-Datei liegt vorübergehend auf C:, das nach der `manage-bde`-Prüfung unverschlüsselt ist; nach abgeschlossener Probe löschen. Ein Incident-Tabletop und Alpha-Betrieb sind nicht nachgewiesen.
 
 ## 0. Dependency-Audit-Ausnahme
 
-Der RustSec-Audit ignoriert ausschließlich `RUSTSEC-2023-0071` für `rsa`. Die aktuelle Abhängigkeitskette stammt aus `sqlx-mysql`, einem optionalen SQLx-Treiber, der im DevPath-App-Build nicht aktiviert ist; DevPath verwendet lokal SQLite. RustSec führt für den Marvin-Timing-Angriff derzeit keine gepatchte `rsa`-Version. Der CI-Befehl enthält die einzelne Advisory-ID sichtbar. Die Ausnahme muss entfernt werden, bevor MySQL oder Codepfade mit `rsa` aktiviert werden; sie ist keine Freigabe für betroffene Kryptografie. Zusätzlich wurde `tokio` von 1.54.0 auf die Fixversion 1.54.1 angehoben.
+Der RustSec-Audit ignoriert ausschließlich `RUSTSEC-2023-0071` für `rsa`. Die aktuelle Abhängigkeitskette stammt aus `sqlx-mysql`, einem optionalen SQLx-Treiber, der im CodeZone-App-Build nicht aktiviert ist; CodeZone verwendet lokal SQLite. RustSec führt für den Marvin-Timing-Angriff derzeit keine gepatchte `rsa`-Version. Der CI-Befehl enthält die einzelne Advisory-ID sichtbar. Die Ausnahme muss entfernt werden, bevor MySQL oder Codepfade mit `rsa` aktiviert werden; sie ist keine Freigabe für betroffene Kryptografie. Zusätzlich wurde `tokio` von 1.54.0 auf die Fixversion 1.54.1 angehoben.
 
 Dieses Dokument macht die noch offenen Betriebsarbeiten ausführbar. Es enthält keine produktiven Zugangsdaten. Die Produktionsdatenbank darf für eine Wiederherstellungsprobe niemals als Restore-Ziel verwendet werden.
 
@@ -13,8 +13,8 @@ Dieses Dokument macht die noch offenen Betriebsarbeiten ausführbar. Es enthält
 
 ### Vorbedingungen
 
-1. In der Supabase-Projektkonsole **Database → Backups** öffnen. Supabase dokumentiert tägliche automatische Backups für Pro/Team/Enterprise und empfiehlt für Free-Projekte regelmäßige eigene Exporte. Aufbewahrungsdauer, Backupart, PITR-Verfügbarkeit und Restoreberechtigte hängen vom Tarif und Projektzustand ab: [Supabase Backup-Dokumentation](https://supabase.com/docs/guides/platform/backups). Tatsächliche Werte für DevPath sind noch nicht nachgesehen.
-2. Für eine Restoreprobe eine **separate leere Testdatenbank oder ein separates Testprojekt** bereitstellen. Niemals `pg_restore --clean` gegen Production ausführen. Die am 22.10.2026 durchgeführte lokale Probe deckte nur DevPaths `public`-Schema ab; sie ist keine vollständige Wiederherstellungsprobe aller Supabase-Systemschemata.
+1. In der Supabase-Projektkonsole **Database → Backups** öffnen. Supabase dokumentiert tägliche automatische Backups für Pro/Team/Enterprise und empfiehlt für Free-Projekte regelmäßige eigene Exporte. Aufbewahrungsdauer, Backupart, PITR-Verfügbarkeit und Restoreberechtigte hängen vom Tarif und Projektzustand ab: [Supabase Backup-Dokumentation](https://supabase.com/docs/guides/platform/backups). Tatsächliche Werte für CodeZone sind noch nicht nachgesehen.
+2. Für eine Restoreprobe eine **separate leere Testdatenbank oder ein separates Testprojekt** bereitstellen. Niemals `pg_restore --clean` gegen Production ausführen. Die am 22.10.2026 durchgeführte lokale Probe deckte nur CodeZones `public`-Schema ab; sie ist keine vollständige Wiederherstellungsprobe aller Supabase-Systemschemata.
 3. `pg_dump` und `pg_restore` aus derselben oder einer kompatiblen PostgreSQL-Hauptversion wie der Server verwenden.
 4. Einen geschützten lokalen Ordner außerhalb des Repositorys wählen. Backups enthalten Datenbankinhalte und können vertrauliche Daten enthalten. Lokale Festplattenverschlüsselung aktivieren und eine zweite verschlüsselte Ablage mit begrenztem Zugriff festlegen. Für die am 22.10.2026 durchgeführte Probe war C: laut `manage-bde` vollständig entschlüsselt; den lokalen Dump daher nach Abschluss der Prüfung entfernen und nicht als dauerhaftes Backup behalten.
 
@@ -32,7 +32,7 @@ $secret = Read-Host 'Datenbankpasswort' -AsSecureString
 $secretPtr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secret)
 try {
   $env:PGPASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($secretPtr)
-  $backupDir = Join-Path $env:USERPROFILE 'DevPathBackups'
+  $backupDir = Join-Path $env:USERPROFILE 'CodeZoneBackups'
   New-Item -ItemType Directory -Force -Path $backupDir | Out-Null
 icacls $backupDir /inheritance:r | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Backupordner konnte nicht geschützt werden.' }
@@ -64,7 +64,7 @@ pg_dump --version
 pg_restore --version
 ```
 
-Falls PostgreSQL 18 an einem anderen Ort installiert ist, ändere nur den Pfad zum `bin`-Ordner. Für die Restore-RLS-Policies muss die lokale Serverrolle `devpath_app` existieren. Beim erneuten Restore eines bereits benutzten Testziels muss zuerst das `public`-Schema der lokalen Testdatenbank geleert und neu angelegt werden. Dieses Schema enthält dann nur DevPaths Anwendungstabellen; Supabase-Systemschemata werden ausgelassen. Führe den folgenden Rollenblock im Query Tool der **Datenbank `devpath_restore_test`** aus, nicht in Supabase Production:
+Falls PostgreSQL 18 an einem anderen Ort installiert ist, ändere nur den Pfad zum `bin`-Ordner. Für die Restore-RLS-Policies muss die lokale Serverrolle `devpath_app` existieren. Beim erneuten Restore eines bereits benutzten Testziels muss zuerst das `public`-Schema der lokalen Testdatenbank geleert und neu angelegt werden. Dieses Schema enthält dann nur CodeZones Anwendungstabellen; Supabase-Systemschemata werden ausgelassen. Führe den folgenden Rollenblock im Query Tool der **Datenbank `devpath_restore_test`** aus, nicht in Supabase Production:
 
 ```sql
 DO $$
@@ -99,7 +99,7 @@ try {
 if ($LASTEXITCODE -ne 0) { throw 'Restore fehlgeschlagen; Ursache prüfen und Testziel neu bereitstellen.' }
 ```
 
-Danach in pgAdmin **devpath_restore_test → Query Tool** öffnen und `server/migrations/003_runtime_course_catalog_access.sql` ausführen. So werden die Lesegrants und Policies auf die lokale Rolle angewandt; Production-Migrationen werden nicht verändert. Ein Backup stellt keine externen Storage-Objekte wieder her; DevPath verwendet aktuell keinen Supabase Storage für Nutzercode.
+Danach in pgAdmin **devpath_restore_test → Query Tool** öffnen und `server/migrations/003_runtime_course_catalog_access.sql` ausführen. So werden die Lesegrants und Policies auf die lokale Rolle angewandt; Production-Migrationen werden nicht verändert. Ein Backup stellt keine externen Storage-Objekte wieder her; CodeZone verwendet aktuell keinen Supabase Storage für Nutzercode.
 
 Danach im Testziel mindestens prüfen:
 
@@ -154,7 +154,7 @@ Vor jedem privaten Alpha-Release müssen Verantwortliche Evidenz oder eine bewus
 | Zielgruppe, Altersrahmen und Zielmarkt festgelegt |  |  | Offen |
 | Datenschutz-/Support-/Sicherheitskontakt freigegeben |  |  | Offen |
 | PostgreSQL-Backupanbieter, Aufbewahrung, RPO/RTO |  |  | Offen |
-| Restoreprobe für DevPath-`public`-Schema samt `devpath_app`-Leserechten | Ausgabe/Zählwerte vom 22.10.2026; vollständige Supabase-Systemwiederherstellung nicht umfasst | Betreiber | Bestanden (begrenzt) |
+| Restoreprobe für CodeZone-`public`-Schema samt `devpath_app`-Leserechten | Ausgabe/Zählwerte vom 22.10.2026; vollständige Supabase-Systemwiederherstellung nicht umfasst | Betreiber | Bestanden (begrenzt) |
 | OIDC-Anbieter und PKCE-Flow (oder Konto bleibt deaktiviert) |  |  | Offline-only |
 | Codeausführung je OS unabhängig geprüft (oder überall deaktiviert) |  |  | Deaktiviert |
 | Signaturprüfung für tatsächlich verteilte Pakete |  |  | Offen |
@@ -172,8 +172,8 @@ $base = 'https://HIER_DIE_PROJECT_DOMAIN_EINTRAGEN'
 $paths = @(
   '/',
   '/download/',
-  '/downloads/DevPath_0.1.0_x64-setup.exe',
-  '/downloads/DevPath_0.1.0_x64-setup.exe.sha256',
+  '/downloads/CodeZone_0.1.0_x64-setup.exe',
+  '/downloads/CodeZone_0.1.0_x64-setup.exe.sha256',
   '/api/health/live',
   '/api/health/ready',
   '/api/v1/courses'

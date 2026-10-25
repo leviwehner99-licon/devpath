@@ -1,4 +1,4 @@
-# DevPath – vollständiger Plan für Phase 2
+# CodeZone – vollständiger Plan für Phase 2
 
 **Status:** Produkt- und Umsetzungsplan  
 **Version:** 0.1  
@@ -8,7 +8,7 @@
 
 ## 1. Ziel und Ergebnis
 
-Phase 2 verwandelt das technische Fundament in eine **private, installierbare Alpha von DevPath**, die einen vollständigen Lernablauf von der Zielwahl bis zum überprüfbaren Kursabschluss bietet. Lernen und private Projekte funktionieren lokal; Konto, Update und Kurskatalog stehen als abgesicherte Onlinefunktionen bereit. Externe KI, Sync und öffentliche Community werden nicht stillschweigend vorausgesetzt.
+Phase 2 verwandelt das technische Fundament in eine **private, installierbare Alpha von CodeZone**, die einen vollständigen Lernablauf von der Zielwahl bis zum überprüfbaren Kursabschluss bietet. Lernen und private Projekte funktionieren lokal; Konto, Update und Kurskatalog stehen als abgesicherte Onlinefunktionen bereit. Externe KI, Sync und öffentliche Community werden nicht stillschweigend vorausgesetzt.
 
 ### Zielzustand am Ende
 
@@ -52,7 +52,7 @@ Ein beschränkter, eingeladener Personenkreis testet ein funktionsfähiges Produ
 - Staatlich oder beruflich anerkannte Zertifikate.
 - Produktions-SLA oder uneingeschränkter öffentlicher Betrieb.
 
-Der Umfang ist bewusst ein vertikaler Ausschnitt des späteren DevPath-Produkts. Neue Wünsche werden priorisiert, indem andere Arbeit aus Phase 2 herausgenommen wird.
+Der Umfang ist bewusst ein vertikaler Ausschnitt des späteren CodeZone-Produkts. Neue Wünsche werden priorisiert, indem andere Arbeit aus Phase 2 herausgenommen wird.
 
 ## 3. Nutzergruppen und Alpha-Personas
 
@@ -138,7 +138,7 @@ Phase 2 liefert eine lokale, nachvollziehbare Versionierung. Vor Implementierung
 ```mermaid
 flowchart LR
   subgraph PC[Lokaler Rechner]
-    UI[DevPath UI]
+    UI[CodeZone UI]
     CORE[Begrenzter nativer Core]
     DB[(Versionierte lokale SQLite-Daten)]
     PROJECT[Projektverzeichnisse und lokale Versionen]

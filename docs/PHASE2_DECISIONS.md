@@ -1,4 +1,4 @@
-# DevPath Phase 2 – Entscheidungsregister
+# CodeZone Phase 2 – Entscheidungsregister
 
 **Stand:** 22. Oktober 2026. Dieses Register trennt bestätigte Projektentscheidungen von Punkten, die externe Informationen oder eine verantwortliche Freigabe erfordern.
 

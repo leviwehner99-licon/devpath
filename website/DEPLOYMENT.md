@@ -1,4 +1,4 @@
-# DevPath auf EdgeOne Makers vorbereiten
+# CodeZone auf EdgeOne Makers vorbereiten
 
 ## GitHub-Projekt
 
@@ -43,7 +43,7 @@ Ohne Datenbankkonfiguration antworten Datenbankrouten mit `503`. Das ist beabsic
 
 Vor dem Setzen von `DATABASE_URL` eine **dedizierte, gehostete** PostgreSQL-Datenbank in einer EU-Region (bevorzugt Frankfurt, falls verfügbar) erstellen. Lokal laufendes PostgreSQL auf dem Entwickler-PC ist kein Cloud-Backend. Port 5432 nicht am Router oder PC ins Internet freigeben.
 
-Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Für die bereits verwendete DevPath-Datenbank zusätzlich einmalig `../server/migrations/004_replace_html_css_with_programming_intro.sql` und `../server/migrations/005_account_profiles.sql` ausführen. Migration 005 erweitert die vorhandene `accounts`-Tabelle um das Startprofil und erteilt der Serverrolle kontoindividuelle Rechte über transaktionsgebundene OIDC-Claims und RLS. Bereits ausgeführte Migrationen 001 bis 004 nicht wiederholen.
+Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`, danach `../server/migrations/002_publish_html_css_pilot.sql` und zuletzt `../server/migrations/003_runtime_course_catalog_access.sql` ausführen. Für die bereits verwendete CodeZone-Datenbank zusätzlich einmalig `../server/migrations/004_replace_html_css_with_programming_intro.sql` und `../server/migrations/005_account_profiles.sql` ausführen. Migration 005 erweitert die vorhandene `accounts`-Tabelle um das Startprofil und erteilt der Serverrolle kontoindividuelle Rechte über transaktionsgebundene OIDC-Claims und RLS. Bereits ausgeführte Migrationen 001 bis 004 nicht wiederholen.
 
 Migration 004 in Supabase unter **SQL Editor → New query** öffnen, vollständig ausführen und auf `COMMIT` ohne Fehler warten. Danach `GET /api/v1/courses` prüfen: die Antwort soll `programming-intro` enthalten und `pilot-html-css` nicht mehr enthalten. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
 

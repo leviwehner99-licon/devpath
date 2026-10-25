@@ -1,11 +1,11 @@
-# DevPath Phase 2 – Datenschutz- und Supportentwurf
+# CodeZone Phase 2 – Datenschutz- und Supportentwurf
 
 **Stand:** 22. Oktober 2026  
 **Status:** Interner Arbeitsentwurf. Nicht als vollständige Datenschutzerklärung oder Teilnahmebedingung veröffentlichen, bevor Betreiberangaben, Hostingdetails und Rechtsprüfung ergänzt sind.
 
 ## 1. Aktueller Umfang
 
-DevPath ist derzeit eine Windows-Desktop-Alpha ohne Nutzerkonto. Die App speichert Daten auf dem Gerät in ihrer SQLite-Datenbank. Im Browser-/Entwicklungsmodus gibt es zusätzlich einen lokalen Speicher-Fallback. Gespeichert werden:
+CodeZone ist derzeit eine Windows-Desktop-Alpha ohne Nutzerkonto. Die App speichert Daten auf dem Gerät in ihrer SQLite-Datenbank. Im Browser-/Entwicklungsmodus gibt es zusätzlich einen lokalen Speicher-Fallback. Gespeichert werden:
 
 - selbst angegebener Anzeigename, Lernziel, Vorerfahrung, gewünschte Lerntage, Uhrzeit und Dauer;
 - Lernfortschritt, Übungscode, Fehlversuche, angeforderte Hinweise, Selbsteinschätzung und Wiederholungstermine;
@@ -14,11 +14,11 @@ DevPath ist derzeit eine Windows-Desktop-Alpha ohne Nutzerkonto. Die App speiche
 
 Die App hat aktuell keine Anmeldung, Synchronisierung, Community-Veröffentlichung, externe KI-Anbindung und keine Übermittlung von Code, Lernverhalten oder Diagnoseberichten. Der Kurs ist in der Desktop-App enthalten. Die App-Einstellungen müssen deshalb Diagnoseberichte als deaktiviert anzeigen; eine anklickbare Einwilligung für eine nicht vorhandene Übermittlung wäre irreführend.
 
-Die Datenbankdatei wird von DevPath nicht zusätzlich anwendungsspezifisch verschlüsselt. Der Schutz ruhender Daten hängt damit von Windows-Konto- und Geräteverschlüsselung sowie Dateizugriffen ab. Für dieses Gerät wurde in der bisherigen Prüfung bestätigt, dass Laufwerk C: nicht mit BitLocker verschlüsselt war. Das muss als offener Schutzpunkt vor einer Alpha mit echten persönlichen Daten behandelt werden; das Deaktivieren von Konten und Cloudübertragung verhindert keinen lokalen Zugriff auf eine ungeschützte Gerätedatei.
+Die Datenbankdatei wird von CodeZone nicht zusätzlich anwendungsspezifisch verschlüsselt. Der Schutz ruhender Daten hängt damit von Windows-Konto- und Geräteverschlüsselung sowie Dateizugriffen ab. Für dieses Gerät wurde in der bisherigen Prüfung bestätigt, dass Laufwerk C: nicht mit BitLocker verschlüsselt war. Das muss als offener Schutzpunkt vor einer Alpha mit echten persönlichen Daten behandelt werden; das Deaktivieren von Konten und Cloudübertragung verhindert keinen lokalen Zugriff auf eine ungeschützte Gerätedatei.
 
 Die Präsentations- und Downloadwebsite ist statisch. Die beobachtete Website-Konfiguration lädt keine Analysebibliotheken, Tracking-Skripte, externen Schriftarten oder Formulare. EdgeOne hostet die Website und Makers-Funktionen. In den vom Betreiber vorgelegten Makers-Protokollen waren Zeit, Anfrage-ID, Domain, Pfad, Quelle, Status, Laufzeit, Speicherverbrauch und Runtime sichtbar. Die aktuelle Makers-Dokumentation sagt, dass Cloud-Function-Protokolle standardmäßig 24 Stunden aufbewahrt werden. Separat dazu sind EdgeOne-Offlinelogs für Websitezugriffe standardmäßig nicht aktiviert; laut EdgeOne-Dokumentation werden sie erst nach manueller Aktivierung gespeichert. Vor Veröffentlichung muss die konkrete Projekteinstellung geprüft werden.
 
-Die öffentliche Kurs-API liest veröffentlichte Kurs- und Versionsmetadaten aus Supabase in `eu-west-1`. Sie erhält keine lokalen App-Projekte oder Lernstände. Die Datenbank enthält DevPath-Katalogdaten; laut letzter Prüfung waren in `accounts` keine Einträge. Für den vom Betreiber bestätigten Supabase-Free-Tarif weist Supabase aktuell eine eintägige Log-Aufbewahrung aus. Das ist die zugängliche Log-Historie, keine vollständige Auskunft über alle internen Sicherheits-/Betriebsdaten des Anbieters. Supabase weist darauf hin, dass begrenzte Betriebsmetadaten/Logs auch außerhalb der gewählten Datenbankregion verarbeitet werden können. Anbieterunterlagen und Projektkonfiguration sind vor Veröffentlichung zu prüfen.
+Die öffentliche Kurs-API liest veröffentlichte Kurs- und Versionsmetadaten aus Supabase in `eu-west-1`. Sie erhält keine lokalen App-Projekte oder Lernstände. Die Datenbank enthält CodeZone-Katalogdaten; laut letzter Prüfung waren in `accounts` keine Einträge. Für den vom Betreiber bestätigten Supabase-Free-Tarif weist Supabase aktuell eine eintägige Log-Aufbewahrung aus. Das ist die zugängliche Log-Historie, keine vollständige Auskunft über alle internen Sicherheits-/Betriebsdaten des Anbieters. Supabase weist darauf hin, dass begrenzte Betriebsmetadaten/Logs auch außerhalb der gewählten Datenbankregion verarbeitet werden können. Anbieterunterlagen und Projektkonfiguration sind vor Veröffentlichung zu prüfen.
 
 ## 2. Datenschutzmaßnahmen für die Alpha
 
@@ -27,7 +27,7 @@ Die öffentliche Kurs-API liest veröffentlichte Kurs- und Versionsmetadaten aus
 - Vor Tests mit echten persönlichen Inhalten eine unterstützte Geräteverschlüsselung und ein geschütztes Windows-Konto sicherstellen; auf diesem Gerät ist Laufwerk C: laut bisheriger Prüfung unverschlüsselt.
 - Support zunächst über einen manuell ausgewählten Kontaktweg abwickeln; Betroffene sollen selbst entscheiden, welche Angaben sie teilen.
 - Supportfälle auf Version, Betriebssystem, kurze Fehlerbeschreibung und reproduzierbare Schritte begrenzen. Vor dem Teilen Code, Namen, lokale Pfade, Tokens, Passwörter und andere personenbezogene Inhalte entfernen.
-- Anhänge nur bei konkretem Bedarf erfragen. Projektdateien und DevPath-Datenexporte können privaten Quelltext und Lerninformationen enthalten.
+- Anhänge nur bei konkretem Bedarf erfragen. Projektdateien und CodeZone-Datenexporte können privaten Quelltext und Lerninformationen enthalten.
 - Zugriff auf eingehende Supportanfragen auf die zuständige Person begrenzen. Lösch- und Aufbewahrungsfrist vor dem Start festlegen und in der Information nennen.
 - Für Datenschutzanfragen und Sicherheitsmeldungen einen erreichbaren Kontakt und eine Vertretung festlegen.
 
@@ -35,7 +35,7 @@ Die öffentliche Kurs-API liest veröffentlichte Kurs- und Versionsmetadaten aus
 
 1. Person meldet ein Problem über den vom Betreiber veröffentlichten Supportkontakt.
 2. Support bestätigt den Eingang und vergibt intern eine Fallnummer; keine automatischen Diagnoseuploads.
-3. Zuerst werden DevPath-Version, Windows-Version, erwartetes und tatsächliches Verhalten sowie kurze Reproduktionsschritte erfragt.
+3. Zuerst werden CodeZone-Version, Windows-Version, erwartetes und tatsächliches Verhalten sowie kurze Reproduktionsschritte erfragt.
 4. Falls ein Datenexport zur Wiederherstellung benötigt wird, wird ausdrücklich darauf hingewiesen, dass er Profil, Lernstand, Projekte und Quellcode enthält. Der Export wird nur über einen vorher freigegebenen, zugriffsbeschränkten Weg angefordert und nach Abschluss entsprechend der festgelegten Frist gelöscht.
 5. Bei Datenschutz- oder Sicherheitsvorfällen wird der Fall unverzüglich an den benannten Verantwortlichen eskaliert. Entscheidungen zu gesetzlichen Meldepflichten trifft der Verantwortliche mit qualifizierter Beratung.
 

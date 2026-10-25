@@ -1,4 +1,4 @@
-# DevPath API and PostgreSQL schema
+# CodeZone API and PostgreSQL schema
 
 This is the Phase-2 backend starting point. It serves public course/release metadata and provides OIDC-protected idempotent account provisioning and deletion. It never accepts email, lesson progress, project files, source code, or AI prompts.
 
@@ -22,6 +22,6 @@ npm install
 Copy-Item .env.example .env
 ```
 
-Set `DATABASE_URL`, then set issuer, audience, and JWKS URL from the identity provider chosen for DevPath. Do not use the example `.invalid` values in a running deployment. Start with `npm start` and confirm `/health/live` and `/health/ready`.
+Set `DATABASE_URL`, then set issuer, audience, and JWKS URL from the identity provider chosen for CodeZone. Do not use the example `.invalid` values in a running deployment. Start with `npm start` and confirm `/health/live` and `/health/ready`.
 
 Production deployment must use HTTPS at a trusted reverse proxy, `DATABASE_SSL=true` where required, explicit `CORS_ORIGINS`, non-superuser DB credentials, and a secret manager. Never commit `.env`.

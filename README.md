@@ -1,4 +1,4 @@
-# DevPath – Phase-1-Fundament und Phase-2-Alphaaufbau
+# CodeZone – Phase-1-Fundament und Phase-2-Alphaaufbau
 
 Der Repositorystand enthält ein lokales Desktop-Alpha-Grundgerüst. Ein Windows-x64-NSIS-Installer wurde erstellt. Das Projekt ist **noch nicht sicherheitsgeprüft oder für öffentliche Verteilung freigegeben**.
 
@@ -30,5 +30,5 @@ Die PostgreSQL-Migration wird nicht automatisch ausgeführt. Das API-Grundgerüs
 
 - Lernstand, Code und Versionen bleiben im aktuellen Stand lokal; keine Zugangsdaten oder Lernprofile werden an den Server gesendet.
 - Appcode wird nicht ausgeführt und nicht an KI gesendet.
-- Der NSIS-Build ist unsigniert und dient nur der lokalen Alphaerprobung. Vor Installation eigene DevPath-Daten sichern; nicht öffentlich verteilen.
+- Der NSIS-Build ist unsigniert und dient nur der lokalen Alphaerprobung. Vor Installation eigene CodeZone-Daten sichern; nicht öffentlich verteilen.
 - Veröffentlichung setzt unabhängige Sicherheits-, Datenschutz-, Accessibility- und Lerninhaltsreviews, Signierung, Updatebetrieb und die offenen Punkte aus [DEVPATH_PHASE2_IMPLEMENTATION.md](DEVPATH_PHASE2_IMPLEMENTATION.md) voraus.

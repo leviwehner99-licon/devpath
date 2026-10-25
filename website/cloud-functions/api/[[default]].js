@@ -124,7 +124,7 @@ export async function onRequest({ request, env = {}, uuid }) {
                  EXISTS (SELECT 1 FROM public.courses WHERE id = 'programming-intro' AND published = TRUE) AS intro_course_visible,
                  EXISTS (SELECT 1 FROM public.course_releases WHERE course_id = 'programming-intro' AND published_at IS NOT NULL) AS intro_release_visible
         `);
-        console.warn("DevPath published catalog is empty", {
+        console.warn("CodeZone published catalog is empty", {
           requestId: request?.requestId ?? uuid ?? "unavailable",
           courseCount: result.rowCount,
           ...diagnostic.rows[0],
@@ -228,7 +228,7 @@ export async function onRequest({ request, env = {}, uuid }) {
     // Use Makers' request UUID so this failure can be found in Log Analysis.
     const requestId = request?.requestId ?? uuid ?? randomUUID();
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("DevPath API request failed", {
+    console.error("CodeZone API request failed", {
       requestId,
       errorName: error instanceof Error ? error.name : "UnknownError",
       errorCode: error?.code,

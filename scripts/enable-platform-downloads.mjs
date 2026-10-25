@@ -9,10 +9,10 @@ if (!supabaseUrl || !/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(supabaseUrl)) 
 const file = resolve(process.env.DEVPATH_DOWNLOAD_PAGE ?? "website/download/index.html");
 let html = await readFile(file, "utf8");
 const assets = {
-  "windows-x64": { name: "DevPath-Windows-x64.exe", label: "Windows-Installer herunterladen" },
-  "macos-arm64": { name: "DevPath-macOS-arm64.dmg", label: "macOS-Installer herunterladen · Apple Silicon" },
-  "macos-x64": { name: "DevPath-macOS-x64.dmg", label: "macOS-Installer herunterladen · Intel" },
-  "linux-x64": { name: "DevPath-Linux-x64.deb", label: "Linux-Paket für Ubuntu/Debian herunterladen" },
+  "windows-x64": { name: "CodeZone-Windows-x64.exe", label: "Windows-Installer herunterladen" },
+  "macos-arm64": { name: "CodeZone-macOS-arm64.dmg", label: "macOS-Installer herunterladen · Apple Silicon" },
+  "macos-x64": { name: "CodeZone-macOS-x64.dmg", label: "macOS-Installer herunterladen · Intel" },
+  "linux-x64": { name: "CodeZone-Linux-x64.deb", label: "Linux-Paket für Ubuntu/Debian herunterladen" },
 };
 
 function replaceTaggedElement(markup, attribute, id, replacement) {

@@ -14,7 +14,7 @@ function GoogleMark() {
   </svg>;
 }
 
-export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
+export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthenticated: () => void; callbackError?: string }) {
   const [mode, setMode] = useState<AuthMode>("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,15 +36,15 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       if (mode === "register") {
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: authRedirectUrl } });
         if (error) throw error;
-        if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. devpath öffnet sich danach automatisch wieder.");
+        if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. CodeZone öffnet sich danach automatisch wieder.");
         else onAuthenticated();
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
         onAuthenticated();
       }
-    } catch {
-      setError("Die Anmeldung konnte nicht abgeschlossen werden. Prüfe deine Eingaben oder versuche es später erneut.");
+    } catch (cause) {
+      setError(readableAuthError(cause));
     } finally { setBusy(false); }
   };
 
@@ -59,19 +59,20 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
       if (authError) throw authError;
       if (!data.url) throw new Error("Die Google-Anmeldung ist derzeit nicht verfügbar.");
       await openUrl(data.url);
-      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich devpath automatisch.");
-    } catch {
-      setError("Die Google-Anmeldung konnte nicht geöffnet werden. Bitte versuche es erneut.");
+      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich CodeZone automatisch.");
+    } catch (cause) {
+      setError(readableAuthError(cause));
     } finally { setBusy(false); }
   };
 
   const title = mode === "register" ? "Dein Lernweg beginnt hier." : mode === "login" ? "Willkommen zurück." : "Passwort zurücksetzen.";
   return <main className="auth-screen">
     <section className="auth-card" aria-labelledby="auth-title">
-      <div className="auth-brand"><LogoMark /><span>devpath</span></div>
+      <div className="auth-brand"><LogoMark /><span>CodeZone</span></div>
       <div className="eyebrow">DEIN PERSÖNLICHER LERNPLATZ</div>
       <h1 id="auth-title">{title}</h1>
-      <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem devpath-Konto zugeordnet.</p>
+      <p className="auth-description">Erstelle ein Konto oder melde dich an. Dein Lernplan wird anschließend deinem CodeZone-Konto zugeordnet.</p>
+      {callbackError && <p className="auth-message error" role="alert">{callbackError}</p>}
       {mode !== "reset" && <div className="auth-social">
         <button className="button secondary auth-provider" disabled={busy} onClick={() => void social()}><GoogleMark /><span>Mit Google {mode === "register" ? "registrieren" : "anmelden"}</span></button>
       </div>}
@@ -87,9 +88,22 @@ export function AuthView({ onAuthenticated }: { onAuthenticated: () => void }) {
         {mode === "register" ? <><span>Schon ein Konto?</span><button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Anmelden</button></> : mode === "login" ? <><span>Noch kein Konto?</span><button className="text-button" onClick={() => { setMode("register"); setError(""); setMessage(""); }}>Konto erstellen</button></> : <button className="text-button" onClick={() => { setMode("login"); setError(""); setMessage(""); }}>Zurück zur Anmeldung</button>}
         {mode === "login" && <button className="text-button" onClick={() => { setMode("reset"); setError(""); setMessage(""); }}>Passwort vergessen?</button>}
       </div>
-      <p className="auth-privacy">E-Mail und Anbieter-Identität verwaltet Supabase Auth. Dein devpath-Konto speichert die Verknüpfung und deinen Lernplan. Lerncode bleibt lokal auf diesem Gerät.</p>
+      <p className="auth-privacy">E-Mail und Anbieter-Identität verwaltet Supabase Auth. Dein CodeZone-Konto speichert die Verknüpfung und deinen Lernplan. Lerncode bleibt lokal auf diesem Gerät.</p>
     </section>
   </main>;
+}
+
+function readableAuthError(cause: unknown): string {
+  const message = cause instanceof Error ? cause.message.toLowerCase() : "";
+  if (message.includes("invalid login credentials") || message.includes("invalid_credentials")) return "E-Mail-Adresse oder Passwort stimmen nicht. Bei Google-Konten ist ein Passwort-Login erst möglich, nachdem für diese Adresse ein Passwortkonto eingerichtet wurde.";
+  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) return "Bitte bestätige zuerst deine E-Mail-Adresse über den Link in der Nachricht.";
+  if (message.includes("user already registered") || message.includes("user_already_exists")) return "Für diese E-Mail-Adresse gibt es bereits ein Konto. Wechsle zu „Anmelden“ oder setze dein Passwort zurück.";
+  if (message.includes("weak password") || message.includes("password should be")) return "Das Passwort erfüllt die Sicherheitsanforderungen von Supabase nicht. Verwende ein längeres Passwort.";
+  if (message.includes("provider is not enabled") || message.includes("unsupported provider")) return "Google-Anmeldung ist in Supabase noch nicht aktiviert. Prüfe Authentication → Sign In / Providers → Google.";
+  if (message.includes("rate limit") || message.includes("too many requests")) return "Supabase hat zu viele Anmeldeversuche erkannt. Warte einige Minuten und versuche es dann erneut.";
+  if (message.includes("redirect") || message.includes("url not allowed")) return "Die Rückleitungsadresse wurde von Supabase abgelehnt. Prüfe Authentication → URL Configuration → Redirect URLs.";
+  if (message.includes("failed to fetch") || message.includes("network")) return "CodeZone konnte Supabase nicht erreichen. Prüfe die Internetverbindung und die Supabase-Konfiguration des installierten Builds.";
+  return "Die Anmeldung konnte nicht abgeschlossen werden. Prüfe E-Mail-Adresse, Passwort und Supabase-Anmeldestatus; versuche es anschließend erneut.";
 }
 
 export function PasswordRecoveryView({ onFinished }: { onFinished: () => void }) {
@@ -110,5 +124,5 @@ export function PasswordRecoveryView({ onFinished }: { onFinished: () => void })
     } catch { setError("Das Passwort konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut."); }
     finally { setBusy(false); }
   };
-  return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>devpath</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst devpath jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu devpath</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;
+  return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst CodeZone jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu CodeZone</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;
 }

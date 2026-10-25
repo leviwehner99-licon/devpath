@@ -55,7 +55,7 @@ export const initialState: DevPathState = {
     name: "Mein erstes JavaScript-Programm",
     language: "javascript",
     files: {
-      "index.js": "// Dein erstes Programm\nconsole.log(\"Hallo devpath\");\n",
+      "index.js": "// Dein erstes Programm\nconsole.log(\"Hallo CodeZone\");\n",
     },
     activeFile: "index.js",
     createdAt: "2026-10-21T00:00:00.000Z",

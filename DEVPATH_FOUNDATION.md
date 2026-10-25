@@ -1,4 +1,4 @@
-# DevPath – Produktanforderungen, Datenschutz und Design
+# CodeZone – Produktanforderungen, Datenschutz und Design
 
 **Status:** Arbeitsgrundlage für Phase 1  
 **Version:** 0.1  
@@ -6,9 +6,9 @@
 
 ## 1. Produktziel
 
-DevPath ist eine Desktop-Lernumgebung für Softwareentwicklung auf Windows, macOS und Linux. Sie unterstützt Einsteiger und erfahrene Lernende jeden Alters mit verständlichen Kursen, praktischen Programmieraufgaben und einem individuellen Lernpfad. Eine begleitende Website dient zunächst der Kontoerstellung, dem Download und den nötigen Informationsseiten.
+CodeZone ist eine Desktop-Lernumgebung für Softwareentwicklung auf Windows, macOS und Linux. Sie unterstützt Einsteiger und erfahrene Lernende jeden Alters mit verständlichen Kursen, praktischen Programmieraufgaben und einem individuellen Lernpfad. Eine begleitende Website dient zunächst der Kontoerstellung, dem Download und den nötigen Informationsseiten.
 
-**Produktversprechen:** DevPath hilft Menschen, Softwareentwicklung im eigenen Tempo zu lernen. Die Lernplanung passt sich an verfügbare Zeit, Ziele und beobachtbaren Lernfortschritt an. KI-Unterstützung erklärt und gibt Hinweise; sie verändert Nutzercode nicht ohne Zustimmung.
+**Produktversprechen:** CodeZone hilft Menschen, Softwareentwicklung im eigenen Tempo zu lernen. Die Lernplanung passt sich an verfügbare Zeit, Ziele und beobachtbaren Lernfortschritt an. KI-Unterstützung erklärt und gibt Hinweise; sie verändert Nutzercode nicht ohne Zustimmung.
 
 ## 2. Grundsätze
 
@@ -59,7 +59,7 @@ Die App leitet Lernniveau nicht allein aus Alter ab. Bei Minderjährigen sind Ko
 2. App zeigt Zweck, lokale Datenverarbeitung und Onlinefunktionen in knapper Sprache.
 3. Nutzer kann ein lokales Profil anlegen; Konto ist nur für ausdrücklich kontogebundene Funktionen nötig.
 4. Eine optionale Startabfrage erfasst Ziel, Vorkenntnisse und realistische Lernzeit.
-5. DevPath schlägt einen anpassbaren Lernplan vor und erklärt, warum die nächsten Schritte empfohlen werden.
+5. CodeZone schlägt einen anpassbaren Lernplan vor und erklärt, warum die nächsten Schritte empfohlen werden.
 6. Nutzer kann eine Lektion offline öffnen, soweit der Kursinhalt lokal verfügbar ist.
 
 ## 5. Funktionale Anforderungen
@@ -148,7 +148,7 @@ Konkrete Anbieter und Technologien werden erst nach Plattform-, Lizenz-, Datensc
 
 ## 9. Designregeln
 
-Die visuelle Richtung ist eine klare, expressive Material-inspirierte Oberfläche, angepasst an Desktopbedienung und die Konventionen der Zielbetriebssysteme. Android-Begriffe dienen als Stilreferenz; DevPath übernimmt kein fremdes Branding und behauptet keine offizielle Designsystem-Konformität.
+Die visuelle Richtung ist eine klare, expressive Material-inspirierte Oberfläche, angepasst an Desktopbedienung und die Konventionen der Zielbetriebssysteme. Android-Begriffe dienen als Stilreferenz; CodeZone übernimmt kein fremdes Branding und behauptet keine offizielle Designsystem-Konformität.
 
 - Primäre Navigation dauerhaft sichtbar und auf wenige Hauptbereiche begrenzt.
 - Lernplan, Kursbibliothek und Code Studio haben eindeutige Namen und konsistente Positionen.
@@ -189,7 +189,7 @@ Phase 1 gilt als abgeschlossen, wenn:
 | KI-Ausführung | Lokal bevorzugen, externe Anbieter pro Funktion transparent machen | Vorschlag |
 | Minderjährigenzugang | Altersgerechte Regeln und Rechtsprüfung vor Communitystart | Offen |
 | Lizenzierung der Kurse und Editor-Komponenten | Lizenzinventar vor Technologieauswahl | Offen |
-| Marken- und Designreferenz | Eigenständige DevPath-Komponentenbibliothek erstellen | Offen |
+| Marken- und Designreferenz | Eigenständige CodeZone-Komponentenbibliothek erstellen | Offen |
 
 ## 12. Nächste Arbeitsschritte
 

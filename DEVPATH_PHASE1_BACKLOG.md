@@ -1,4 +1,4 @@
-# DevPath – Phase-1-Backlog und erster vertikaler Produktumfang
+# CodeZone – Phase-1-Backlog und erster vertikaler Produktumfang
 
 **Status:** Arbeitsplan  
 **Version:** 0.1  
@@ -49,7 +49,7 @@ Schätzungen sind **grobe Teamaufwände in Personenwochen (PW)**, keine Kalender
 
 ### EPIC 1 – Produktumfang und Lernerlebnis
 
-**Ziel:** Ein kleines, vollständiges Nutzererlebnis definieren, das den Wert von DevPath zeigt, ohne spätere Funktionen vorzutäuschen.
+**Ziel:** Ein kleines, vollständiges Nutzererlebnis definieren, das den Wert von CodeZone zeigt, ohne spätere Funktionen vorzutäuschen.
 
 | ID | Priorität | Arbeitspaket | Akzeptanzkriterien | Abhängigkeiten | Schätzung |
 |---|---|---|---|---|---:|

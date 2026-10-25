@@ -31,5 +31,5 @@ pub fn run() {
         )
         .invoke_handler(tauri::generate_handler![app_version])
         .run(tauri::generate_context!())
-        .expect("DevPath konnte nicht gestartet werden");
+        .expect("CodeZone konnte nicht gestartet werden");
 }

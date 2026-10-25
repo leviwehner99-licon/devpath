@@ -1,8 +1,8 @@
 [package]
 name = "devpath"
 version = "0.1.0"
-description = "DevPath Desktop"
-authors = ["DevPath"]
+description = "CodeZone Desktop"
+authors = ["CodeZone"]
 edition = "2021"
 
 [lib]

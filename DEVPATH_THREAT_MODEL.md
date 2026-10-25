@@ -1,4 +1,4 @@
-# DevPath – Bedrohungsmodell und Datenflüsse
+# CodeZone – Bedrohungsmodell und Datenflüsse
 
 **Status:** Arbeitsgrundlage für Phase 1  
 **Version:** 0.1  
@@ -10,7 +10,7 @@
 
 ## 1. Zweck und Sicherheitsziele
 
-Das Modell legt fest, welche Informationen DevPath verarbeitet, wo Vertrauensgrenzen liegen, was geschützt werden muss und welche Architekturregeln aus den Bedrohungen folgen. Es ist so formuliert, dass spätere Dienste ergänzt werden können, ohne lokale Lern- und Codefunktionen unnötig vom Backend abhängig zu machen.
+Das Modell legt fest, welche Informationen CodeZone verarbeitet, wo Vertrauensgrenzen liegen, was geschützt werden muss und welche Architekturregeln aus den Bedrohungen folgen. Es ist so formuliert, dass spätere Dienste ergänzt werden können, ohne lokale Lern- und Codefunktionen unnötig vom Backend abhängig zu machen.
 
 ### Sicherheitsziele
 
@@ -75,7 +75,7 @@ Das Modell legt fest, welche Informationen DevPath verarbeitet, wo Vertrauensgre
 2. **T2 – Client zu API:** Der Client ist nicht vertrauenswürdig. API-Parameter können gefälscht, wiederholt oder automatisiert gesendet werden.
 3. **T3 – Clientprozess zu lokalem Nutzercode:** Nutzercode ist nicht vertrauenswürdig und darf nicht mit Rechten des App-Prozesses ausgeführt werden.
 4. **T4 – Backenddienst zu Backenddienst:** Dienstidentität und minimale Berechtigung sind erforderlich; internes Netzwerk gilt nicht automatisch als vertrauenswürdig.
-5. **T5 – DevPath zu externem KI-Anbieter:** Nutzerinhalt verlässt den kontrollierten Bereich. Anbieter, Datenverwendung, Aufbewahrung und Region müssen vor der Anfrage benannt sein.
+5. **T5 – CodeZone zu externem KI-Anbieter:** Nutzerinhalt verlässt den kontrollierten Bereich. Anbieter, Datenverwendung, Aufbewahrung und Region müssen vor der Anfrage benannt sein.
 6. **T6 – privat zu öffentlich in Community:** Veröffentlichung ist ein expliziter Zustandswechsel mit Vorschau, Metadatenprüfung und klarer Sichtbarkeit.
 7. **T7 – Nutzergerät zu synchronisiertem Cloudspeicher:** Synchronisierung schafft eine zusätzliche Kopie und ein weiteres Angriffsziel.
 8. **T8 – Build-/Releaseumgebung zu Updatekanal:** Buildsystem, Freigabe und Signierung bilden eine besonders kritische Vertrauenskette.
@@ -87,7 +87,7 @@ Das Modell legt fest, welche Informationen DevPath verarbeitet, wo Vertrauensgre
 ```mermaid
 flowchart LR
     U[Lernende Person] -->|HTTPS: Seiten, Download, Konto| W[Website]
-    U --> A[DevPath Desktop-App]
+    U --> A[CodeZone Desktop-App]
     A --> L[(Lokale Daten: Profil, Lernstand, Projekte, Code Base)]
     A --> S[Isolierte Code-Sandbox]
     A -->|TLS: Anmeldung, Katalog, Update-Metadaten| G[API-Gateway]

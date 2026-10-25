@@ -1,4 +1,4 @@
-# DevPath – Technologievergleich und Architekturentscheidung
+# CodeZone – Technologievergleich und Architekturentscheidung
 
 **Status:** Architekturvorschlag für Phase 1  
 **Version:** 0.1  
@@ -10,7 +10,7 @@
 
 ### Vorläufige Empfehlung
 
-Für die DevPath-Desktop-App wird **Tauri 2 mit TypeScript/React als UI und Rust als eng begrenzter nativer Diensteschicht** empfohlen. Das passt zur geplanten Web-ähnlichen Oberfläche und einem integrierten Editor, erlaubt eine kleine native Kontrollfläche und vermeidet, dass ein umfassender Node.js-Laufzeitkontext standardmäßig in der App verfügbar ist.
+Für die CodeZone-Desktop-App wird **Tauri 2 mit TypeScript/React als UI und Rust als eng begrenzter nativer Diensteschicht** empfohlen. Das passt zur geplanten Web-ähnlichen Oberfläche und einem integrierten Editor, erlaubt eine kleine native Kontrollfläche und vermeidet, dass ein umfassender Node.js-Laufzeitkontext standardmäßig in der App verfügbar ist.
 
 Diese Empfehlung ist **keine Sicherheitsgarantie**. Tauri reduziert bestimmte Angriffsflächen, liefert aber keine sichere Ausführungsumgebung für beliebigen Lerncode. Nutzer-Code muss in einer separaten, plattformspezifisch abgesicherten Sandbox laufen. Die Empfehlung gilt nur, wenn der Phase-1-Prototyp Updateverhalten, Editorleistung, Barrierefreiheit, Pluginreife und Builds auf allen Zielbetriebssystemen bestätigt.
 
@@ -31,7 +31,7 @@ Diese Empfehlung ist **keine Sicherheitsgarantie**. Tauri reduziert bestimmte An
 
 ## 2. Bewertungsmaßstab
 
-Kriterien werden nach DevPath-Anforderungen gewichtet. Bewertung von 1 (ungünstig) bis 5 (günstig) ist eine qualitative Architekturabschätzung, kein Benchmark und keine Aussage zur Sicherheit einzelner Versionen.
+Kriterien werden nach CodeZone-Anforderungen gewichtet. Bewertung von 1 (ungünstig) bis 5 (günstig) ist eine qualitative Architekturabschätzung, kein Benchmark und keine Aussage zur Sicherheit einzelner Versionen.
 
 | Kriterium | Gewicht | Warum es wichtig ist |
 |---|---:|---|
@@ -46,12 +46,12 @@ Kriterien werden nach DevPath-Anforderungen gewichtet. Bewertung von 1 (ungünst
 
 ## 3. Desktop-Framework-Vergleich
 
-| Option | Stärken für DevPath | Kosten/Risiken | Einschätzung |
+| Option | Stärken für CodeZone | Kosten/Risiken | Einschätzung |
 |---|---|---|---|
 | **Tauri 2** | TypeScript-Web-UI plus native Rust-Schicht; granulare Capabilities; kleinerer Basiskern; passt zu Monaco und bestehender Webkompetenz. | WebView unterscheidet sich je OS; Linux-/Plugin- und Updatepfad müssen praktisch geprüft werden; Rust-Brücke ist sicherheitskritisch; Community-/Pluginqualität variiert. | **Empfohlen**, wenn Prototyp und sichere Sandboxlösung die Anforderungen erfüllen. |
 | **Electron** | Reifes Web-Ökosystem, Chromium konsistent über Plattformen, viele Editor-/IDE-Beispiele und klare Sicherheitsdokumentation. | Größere Laufzeit und Angriffsfläche; Linux-Updatepfad muss separat gelöst werden; unsichere IPC-Konfiguration kann privilegierte Prozesse exponieren. | Starke Ausweichoption, falls Tauri-WebView oder Pluginreife die UX-/Accessibility-Ziele nicht erfüllt. |
 | **Flutter Desktop** | Einheitliche gerenderte Oberfläche, offizielle Desktop-Zielplattformen und gute Kontrolle über visuelle Tokens. | Editorintegration und native Entwicklerwerkzeuge benötigen Zusatzarbeit; Pluginabdeckung unterscheidet sich je Betriebssystem; Team braucht Dart/Flutter-Kompetenz. | Geeignet, wenn konsistente Produktoberfläche wichtiger wird als Web-Editor-Ökosystem. |
-| **Native App je OS** | Beste Plattformintegration und volle Kontrolle über OS-Funktionen. | Drei Implementierungen erhöhen Kosten, Funktionsabweichungen und Wartungsaufwand erheblich. | Für DevPaths erste Version nicht empfohlen. |
+| **Native App je OS** | Beste Plattformintegration und volle Kontrolle über OS-Funktionen. | Drei Implementierungen erhöhen Kosten, Funktionsabweichungen und Wartungsaufwand erheblich. | Für CodeZones erste Version nicht empfohlen. |
 
 ### Qualitative Nutzwertwertung
 

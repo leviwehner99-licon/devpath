@@ -43,7 +43,7 @@ function getDatabaseCa(env, production) {
 
 export function logHealthFailure(error, uuid) {
   const message = error instanceof Error ? error.message : String(error);
-  console.error("DevPath health check failed", {
+  console.error("CodeZone health check failed", {
     requestId: uuid,
     errorName: error instanceof Error ? error.name : "UnknownError",
     errorCode: error?.code,

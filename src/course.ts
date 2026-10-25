@@ -22,7 +22,7 @@ export const programmingCourse = {
       concepts: [{ tag: "console.log()", description: "Gibt einen Wert in der Entwicklerkonsole aus." }, { tag: "Anweisung", description: "Eine einzelne Anweisung beschreibt einen Arbeitsschritt." }],
       explanation: "Programme bestehen aus Anweisungen, die der Reihe nach ausgeführt werden. Mit console.log() kannst du einen Text oder Wert in der Konsole sichtbar machen.",
       starterCode: "// Gib eine Begrüßung aus\n",
-      task: "Gib mit console.log() den Text Hallo devpath aus.", successPattern: /console\s*\.\s*log\s*\(\s*[\"'`]Hallo devpath[\"'`]\s*\)/i,
+      task: "Gib mit console.log() den Text Hallo CodeZone aus.", successPattern: /console\s*\.\s*log\s*\(\s*[\"'`]Hallo CodeZone[\"'`]\s*\)/i,
     },
     {
       id: "program-variables", title: "Werte in Variablen speichern", objective: "Du kannst einen Wert mit const oder let benennen und wiederverwenden.", duration: 15, language: "javascript",
