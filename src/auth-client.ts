@@ -35,16 +35,35 @@ export async function openAuthCallback(url: string): Promise<Session | null> {
     throw new Error("Die Anmelde-Rückleitung ist ungültig.");
   }
   const fragmentParams = new URLSearchParams(callback.hash.replace(/^#/, ""));
+  const errorCode = callback.searchParams.get("error_code")
+    ?? fragmentParams.get("error_code");
   const error = callback.searchParams.get("error_description")
     ?? callback.searchParams.get("error")
     ?? fragmentParams.get("error_description")
     ?? fragmentParams.get("error");
-  if (error) throw new Error("Supabase konnte die Anmeldung nicht bestätigen. Bitte starte sie erneut.");
+  if (error || errorCode) throw new Error(readableCallbackError(`${errorCode ?? ""} ${error ?? ""}`));
   const code = callback.searchParams.get("code") ?? fragmentParams.get("code");
   if (!code) throw new Error("Der Anmelde-Code fehlt. Bitte starte die Anmeldung erneut.");
   const result = await supabase.auth.exchangeCodeForSession(code);
-  if (result.error) throw new Error("Die Anmeldebestätigung ist abgelaufen oder wurde bereits verwendet. Bitte starte sie erneut.");
+  if (result.error) throw new Error(readableCallbackError(`${result.error.code ?? ""} ${result.error.message}`));
   return result.data.session;
+}
+
+function readableCallbackError(reason: string): string {
+  const normalized = reason.toLowerCase();
+  if (normalized.includes("code_verifier") || normalized.includes("code verifier") || normalized.includes("flow_state") || normalized.includes("flow state")) {
+    return "CodeZone hat den Rückruf geöffnet, aber der Sicherheitsnachweis passt nicht zu diesem App-Fenster. Starte Google-Anmeldung erneut aus genau diesem CodeZone-Fenster und schließe es bis zur Rückkehr nicht.";
+  }
+  if (normalized.includes("access_denied") || normalized.includes("user_cancelled") || normalized.includes("user canceled")) {
+    return "Die Anmeldung wurde im Google-Fenster abgebrochen. Du kannst sie erneut starten.";
+  }
+  if (normalized.includes("expired") || normalized.includes("invalid_grant") || normalized.includes("already used")) {
+    return "Der einmalige Anmeldecode ist abgelaufen oder wurde schon verwendet. Starte Google-Anmeldung erneut und öffne den Rückruf nur einmal.";
+  }
+  if (normalized.includes("fetch") || normalized.includes("network") || normalized.includes("timeout")) {
+    return "CodeZone hat den Rückruf erhalten, konnte Supabase aber nicht erreichen. Prüfe die Internetverbindung und starte die Anmeldung erneut.";
+  }
+  return "CodeZone hat den Rückruf erhalten, aber Supabase konnte ihn nicht bestätigen. Starte die Anmeldung erneut.";
 }
 
 export async function accountRequest<T>(session: Session, method: "GET" | "PUT" | "PATCH" | "DELETE", body?: unknown): Promise<T> {
