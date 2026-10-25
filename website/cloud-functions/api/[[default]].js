@@ -53,7 +53,15 @@ function json(body, status = 200, headers = {}) {
 function corsHeaders(request, env) {
   const origin = request.headers.get("origin");
   if (!origin) return {};
-  const allowed = new Set((env.CORS_ORIGINS ?? "").split(",").map((value) => value.trim()).filter(Boolean));
+  // Tauri's WebView uses one of these fixed local origins. Allow them here by
+  // default so a missing Makers variable cannot make OAuth succeed and then
+  // hide the account API response behind a browser-level "Failed to fetch".
+  const allowed = new Set([
+    "http://tauri.localhost",
+    "https://tauri.localhost",
+    "tauri://localhost",
+    ...(env.CORS_ORIGINS ?? "").split(",").map((value) => value.trim()).filter(Boolean),
+  ]);
   if (origin === new URL(request.url).origin || allowed.has(origin)) {
     return {
       "Access-Control-Allow-Origin": origin,

@@ -36,7 +36,7 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
       if (mode === "register") {
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: authRedirectUrl } });
         if (error) throw error;
-        if (!data.session) setMessage("Bitte bestätige deine E-Mail über den Link. CodeZone öffnet sich danach automatisch wieder.");
+        if (!data.session) setMessage("Supabase verlangt für neue Konten noch eine E-Mail-Bestätigung. Damit du sofort angemeldet wirst, muss im Supabase-Dashboard die E-Mail-Bestätigung ausgeschaltet werden. Danach kannst du dieses Konto direkt erstellen.");
         else {
           setMessage("Konto erstellt und angemeldet. Für dieses Konto ist keine E-Mail-Bestätigung erforderlich.");
           onAuthenticated();
@@ -122,7 +122,7 @@ function readableAuthError(cause: unknown): string {
   if (message.includes("email address not authorized") || message.includes("email_address_not_authorized")) return "Supabase hat den E-Mail-Versand für diese Adresse abgelehnt. Der eingebaute Testversand erreicht nur vorab zugelassene Projekt-Teamadressen; für andere Nutzer muss ein SMTP-Maildienst eingerichtet sein.";
   if (message.includes("over_email_send_rate_limit") || message.includes("email rate limit") || message.includes("email rate limit exceeded")) return "Supabase hat den E-Mail-Versand vorübergehend begrenzt. Warte mindestens eine Minute; der eingebaute Testversand hat zusätzlich ein niedriges Stundenlimit.";
   if (message.includes("invalid login credentials") || message.includes("invalid_credentials")) return "E-Mail-Adresse oder Passwort stimmen nicht. Bei Google-Konten ist ein Passwort-Login erst möglich, nachdem für diese Adresse ein Passwortkonto eingerichtet wurde.";
-  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) return "Bitte bestätige zuerst deine E-Mail-Adresse über den Link in der Nachricht.";
+  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) return "Supabase verlangt noch eine E-Mail-Bestätigung. Schalte sie in Supabase unter Authentication → Sign In / Providers → Email → Confirm email aus, damit du nach der Registrierung sofort angemeldet wirst.";
   if (message.includes("user already registered") || message.includes("user_already_exists")) return "Für diese E-Mail-Adresse gibt es bereits ein Konto. Wechsle zu „Anmelden“ oder setze dein Passwort zurück.";
   if (message.includes("weak password") || message.includes("password should be")) return "Das Passwort erfüllt die Sicherheitsanforderungen von Supabase nicht. Verwende ein längeres Passwort.";
   if (message.includes("provider is not enabled") || message.includes("unsupported provider")) return "Google-Anmeldung ist in Supabase noch nicht aktiviert. Prüfe Authentication → Sign In / Providers → Google.";

@@ -8,7 +8,7 @@ Die Desktop-App verwendet Supabase Auth für E-Mail/Passwort und Google. Google-
 2. Gehe zu **Authentication → URL Configuration**.
 3. Setze die **Site URL** auf die aktuelle CodeZone-Präsentationsdomain.
 4. Füge unter **Redirect URLs** genau `codezone://auth/callback` hinzu und speichere. Die alte `devpath://auth/callback`-Adresse darf während der Übergangszeit zusätzlich eingetragen bleiben, damit ältere App-Versionen noch zurückkehren können.
-5. Gehe zu **Authentication → Sign In / Providers → Email** und aktiviere E-Mail-Anmeldung. Lass E-Mail-Bestätigung eingeschaltet, damit ein neues Konto erst nach bestätigter Adresse verwendet wird.
+5. Gehe zu **Authentication → Sign In / Providers → Email** und aktiviere E-Mail-Anmeldung. Schalte **Confirm email** aus, wenn neue Nutzer nach der Registrierung sofort angemeldet werden sollen. Supabase muss diese Einstellung serverseitig ändern; die App kann eine Bestätigung nicht sicher umgehen. Registrierte Nutzer können danach direkt ein Konto erstellen und ihre Kontodaten werden im CodeZone-Kontodienst in `public.accounts` gespeichert.
 
 ## 2. Google-Provider
 
@@ -88,6 +88,6 @@ Dann **Actions → Desktop build matrix → Run workflow → Branch `main` → R
 3. Die App sollte das Startprofil anzeigen und es nach „Meinen Lernplan erstellen“ speichern.
 4. In Supabase **Table Editor → public → accounts** muss eine Zeile mit `oidc_issuer`, `oidc_subject` und gefülltem `profile` erscheinen. Keine Tokens oder Passwörter dort eintragen.
 5. Abmelden und erneut mit Google anmelden. Das Profil sollte für dasselbe Konto wieder geladen werden.
-6. E-Mail/Passwort separat prüfen: Bestätigungslink öffnen, zur App zurückkehren, abmelden und wieder anmelden.
+6. E-Mail/Passwort separat prüfen: ein neues Konto erstellen, prüfen, dass die App ohne Bestätigungslink angemeldet bleibt, und anschließend abmelden und wieder anmelden.
 
 Für produktive Freigabe müssen Google-OAuth-Rückleitung, Kontoanlage, Profilabruf, Abmelden, Passwortwiederherstellung und Kontolöschung in der installierten App erfolgreich geprüft werden.

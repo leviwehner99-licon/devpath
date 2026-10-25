@@ -67,14 +67,19 @@ function readableCallbackError(reason: string): string {
 }
 
 export async function accountRequest<T>(session: Session, method: "GET" | "PUT" | "PATCH" | "DELETE", body?: unknown): Promise<T> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/me`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${session.access_token}`,
-      ...(body === undefined ? {} : { "Content-Type": "application/json" }),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiBaseUrl}/api/v1/me`, {
+      method,
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        ...(body === undefined ? {} : { "Content-Type": "application/json" }),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  } catch {
+    throw new Error(`Du bist bei Supabase angemeldet. Der CodeZone-Kontodienst unter ${new URL(apiBaseUrl).host} hat aber keine Verbindung angenommen. Die Anmeldung selbst war erfolgreich; Kontodaten konnten noch nicht geladen oder gespeichert werden. Starte CodeZone nach dem nächsten Makers-Deployment erneut.`);
+  }
   if (!response.ok) {
     if (response.status === 401) throw new Error("Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.");
     if (response.status === 403) throw new Error("Dieses CodeZone-Konto ist deaktiviert.");
