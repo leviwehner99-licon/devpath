@@ -36,9 +36,9 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
       if (mode === "register") {
         const { data, error } = await supabase.auth.signUp({ email: email.trim(), password, options: { emailRedirectTo: authRedirectUrl } });
         if (error) throw error;
-        if (!data.session) setMessage("Supabase verlangt für neue Konten noch eine E-Mail-Bestätigung. Damit du sofort angemeldet wirst, muss im Supabase-Dashboard die E-Mail-Bestätigung ausgeschaltet werden. Danach kannst du dieses Konto direkt erstellen.");
+        if (!data.session) setMessage("Die Anfrage wurde verarbeitet. Bitte folge gegebenenfalls den weiteren Schritten und versuche es anschließend erneut.");
         else {
-          setMessage("Konto erstellt und angemeldet. Für dieses Konto ist keine E-Mail-Bestätigung erforderlich.");
+          setMessage("Konto erstellt.");
           onAuthenticated();
         }
       } else {
@@ -54,7 +54,7 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
   const sendMagicLink = async () => {
     if (!supabase || busy) return;
     if (!email.trim()) {
-      setError("Gib zuerst deine E-Mail-Adresse ein.");
+      setError(AUTH_FAILURE_MESSAGE);
       return;
     }
     setBusy(true); setMessage(""); setError("");
@@ -64,7 +64,7 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
         options: { emailRedirectTo: authRedirectUrl, shouldCreateUser: false },
       });
       if (error) throw error;
-      setMessage("Wenn diese Adresse zu einem CodeZone-Konto gehört, wurde ein Anmeldelink gesendet. Öffne ihn auf diesem Gerät, während CodeZone geöffnet ist.");
+      setMessage("Falls die Anfrage verarbeitet werden kann, erhältst du eine Nachricht mit den nächsten Schritten.");
     } catch (cause) {
       setError(readableAuthError(cause));
     } finally { setBusy(false); }
@@ -79,9 +79,9 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
         options: { redirectTo: authRedirectUrl, skipBrowserRedirect: true, scopes: "openid email profile" },
       });
       if (authError) throw authError;
-      if (!data.url) throw new Error("Die Google-Anmeldung ist derzeit nicht verfügbar.");
+      if (!data.url) throw new Error(AUTH_FAILURE_MESSAGE);
       await openUrl(data.url);
-      setMessage("Die Anmeldung wurde im Browser geöffnet. Nach der Bestätigung öffnet sich CodeZone automatisch.");
+      setMessage("Die Anfrage wurde verarbeitet.");
     } catch (cause) {
       setError(readableAuthError(cause));
     } finally { setBusy(false); }
@@ -117,20 +117,13 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
 }
 
 function readableAuthError(cause: unknown): string {
-  const message = cause instanceof Error ? cause.message.toLowerCase() : "";
-  if (message.includes("invalid api key") || message.includes("invalid_api_key") || message.includes("apikey")) return "Diese CodeZone-Version enthält keinen gültigen öffentlichen Supabase-Schlüssel. Trage den öffentlichen Schlüssel lokal ein und starte die App danach neu.";
-  if (message.includes("email address not authorized") || message.includes("email_address_not_authorized")) return "Supabase hat den E-Mail-Versand für diese Adresse abgelehnt. Der eingebaute Testversand erreicht nur vorab zugelassene Projekt-Teamadressen; für andere Nutzer muss ein SMTP-Maildienst eingerichtet sein.";
-  if (message.includes("over_email_send_rate_limit") || message.includes("email rate limit") || message.includes("email rate limit exceeded")) return "Supabase hat den E-Mail-Versand vorübergehend begrenzt. Warte mindestens eine Minute; der eingebaute Testversand hat zusätzlich ein niedriges Stundenlimit.";
-  if (message.includes("invalid login credentials") || message.includes("invalid_credentials")) return "E-Mail-Adresse oder Passwort stimmen nicht. Bei Google-Konten ist ein Passwort-Login erst möglich, nachdem für diese Adresse ein Passwortkonto eingerichtet wurde.";
-  if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) return "Supabase verlangt noch eine E-Mail-Bestätigung. Schalte sie in Supabase unter Authentication → Sign In / Providers → Email → Confirm email aus, damit du nach der Registrierung sofort angemeldet wirst.";
-  if (message.includes("user already registered") || message.includes("user_already_exists")) return "Für diese E-Mail-Adresse gibt es bereits ein Konto. Wechsle zu „Anmelden“ oder setze dein Passwort zurück.";
-  if (message.includes("weak password") || message.includes("password should be")) return "Das Passwort erfüllt die Sicherheitsanforderungen von Supabase nicht. Verwende ein längeres Passwort.";
-  if (message.includes("provider is not enabled") || message.includes("unsupported provider")) return "Google-Anmeldung ist in Supabase noch nicht aktiviert. Prüfe Authentication → Sign In / Providers → Google.";
-  if (message.includes("rate limit") || message.includes("too many requests")) return "Supabase hat zu viele Anmeldeversuche erkannt. Warte einige Minuten und versuche es dann erneut.";
-  if (message.includes("redirect") || message.includes("url not allowed")) return "Die Rückleitungsadresse wurde von Supabase abgelehnt. Prüfe Authentication → URL Configuration → Redirect URLs.";
-  if (message.includes("failed to fetch") || message.includes("network")) return "CodeZone konnte Supabase nicht erreichen. Prüfe die Internetverbindung und die Supabase-Konfiguration des installierten Builds.";
-  return "Die Anmeldung konnte nicht abgeschlossen werden. Prüfe E-Mail-Adresse, Passwort und Supabase-Anmeldestatus; versuche es anschließend erneut.";
+  // Never show provider, account-existence, endpoint, or configuration details
+  // in the public UI. Keep actionable diagnostics in protected server logs.
+  void cause;
+  return AUTH_FAILURE_MESSAGE;
 }
+
+const AUTH_FAILURE_MESSAGE = "Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.";
 
 export function PasswordRecoveryView({ onFinished }: { onFinished: () => void }) {
   const [password, setPassword] = useState("");
@@ -141,13 +134,13 @@ export function PasswordRecoveryView({ onFinished }: { onFinished: () => void })
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!supabase || busy) return;
-    if (password !== confirmation) { setError("Die Passwörter stimmen nicht überein."); return; }
+    if (password !== confirmation) { setError(AUTH_FAILURE_MESSAGE); return; }
     setBusy(true); setError("");
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
       setDone(true);
-    } catch { setError("Das Passwort konnte nicht aktualisiert werden. Bitte prüfe deine Verbindung und versuche es erneut."); }
+    } catch { setError(AUTH_FAILURE_MESSAGE); }
     finally { setBusy(false); }
   };
   return <main className="auth-screen"><section className="auth-card" aria-labelledby="password-recovery-title"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><div className="eyebrow">KONTO-SICHERHEIT</div><h1 id="password-recovery-title">Neues Passwort festlegen.</h1>{done ? <><p className="auth-description">Dein Passwort wurde aktualisiert. Du kannst CodeZone jetzt weiterverwenden.</p><button className="button primary auth-submit" onClick={onFinished}>Weiter zu CodeZone</button></> : <form className="auth-form" onSubmit={(event) => void submit(event)}><label className="field-label">Neues Passwort<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={password} onChange={(event) => setPassword(event.target.value)} /></label><label className="field-label">Passwort wiederholen<input className="text-input" type="password" autoComplete="new-password" required minLength={8} maxLength={128} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="auth-message error" role="alert">{error}</p>}<button className="button primary auth-submit" disabled={busy}>{busy ? "Wird gespeichert …" : "Passwort aktualisieren"}</button></form>}</section></main>;

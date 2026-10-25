@@ -7,7 +7,7 @@ import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, 
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
 import { Icon, LogoMark } from "./ui";
 import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
-import { authConfigured, authConfigurationIssue, accountRequest, openAuthCallback, supabase } from "./auth-client";
+import { authConfigured, accountRequest, openAuthCallback, supabase } from "./auth-client";
 import { AuthView, PasswordRecoveryView } from "./auth-view";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl, register } from "@tauri-apps/plugin-deep-link";
@@ -425,11 +425,11 @@ export default function App() {
   };
 
   if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">CodeZone wird sicher gestartet …</div></div>;
-  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><h1>Die Kontoanmeldung ist nicht eingerichtet.</h1><p className="auth-description">{authConfigurationIssue || "Bitte wende dich an den CodeZone-Support."}</p></section></main>;
+  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p className="auth-description">Bitte versuche es später erneut.</p></section></main>;
   if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
   if (!session) return <AuthView callbackError={accountIssue} onAuthenticated={() => { void supabase?.auth.getSession().then(({ data }) => setSession(data.session)); }} />;
   if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein CodeZone-Konto wird geladen …</div></div>;
-  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">ANMELDUNG ERFOLGREICH · KONTO-SYNC AUSSTEHEND</div><h1>Du bist angemeldet.</h1><p>{accountIssue}</p><p>Deine Supabase-Anmeldung bleibt erhalten. Sobald der Kontodienst erreichbar ist, kannst du es hier erneut versuchen.</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button><button className="button secondary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button></div></section></div>;
+  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO</div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p>Bitte versuche es später erneut.</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button><button className="button secondary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button></div></section></div>;
   if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
 
   return <div className="app-shell">
