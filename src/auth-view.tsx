@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { authRedirectUrl, supabase } from "./auth-client";
 import { LogoMark } from "./ui";
+import type { Session } from "@supabase/supabase-js";
 
 type AuthMode = "login" | "register" | "reset";
 
@@ -14,7 +15,7 @@ function GoogleMark() {
   </svg>;
 }
 
-export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthenticated: () => void; callbackError?: string }) {
+export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthenticated: (session: Session) => void; callbackError?: string }) {
   const [mode, setMode] = useState<AuthMode>("register");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,12 +40,13 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
         if (!data.session) setMessage("Die Anfrage wurde verarbeitet. Bitte folge gegebenenfalls den weiteren Schritten und versuche es anschließend erneut.");
         else {
           setMessage("Konto erstellt.");
-          onAuthenticated();
+          onAuthenticated(data.session);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
-        onAuthenticated();
+        if (!data.session) throw new Error(AUTH_FAILURE_MESSAGE);
+        onAuthenticated(data.session);
       }
     } catch (cause) {
       setError(readableAuthError(cause));

@@ -41,7 +41,6 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false);
   const [accountReady, setAccountReady] = useState(false);
   const [accountIssue, setAccountIssue] = useState("");
-  const [accountRetry, setAccountRetry] = useState(0);
   const [passwordRecovery, setPasswordRecovery] = useState(false);
 
   const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
@@ -62,7 +61,7 @@ export default function App() {
     if (!authConfigured || !supabase) { setAuthReady(true); return; }
     let alive = true;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (alive) setSession(nextSession);
+      if (alive) { setSession(nextSession); if (nextSession) setAccountIssue(""); }
       if (alive && event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
     });
     void supabase.auth.getSession().then(({ data }) => { if (alive) { setSession(data.session); setAuthReady(true); } });
@@ -71,7 +70,9 @@ export default function App() {
       if (!alive || handledAuthUrls.has(url)) return;
       handledAuthUrls.add(url);
       if (handledAuthUrls.size > 8) handledAuthUrls.delete(handledAuthUrls.values().next().value as string);
-      void openAuthCallback(url).catch(() => {
+      void openAuthCallback(url).then((callbackSession) => {
+        if (alive && callbackSession) setSession(callbackSession);
+      }).catch(() => {
         if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
       });
     };
@@ -94,41 +95,38 @@ export default function App() {
   useEffect(() => {
     if (!authReady) return;
     setAccountReady(false);
-    setAccountIssue("");
     setStorageWritable(false);
     if (!session || !supabase) { setAccountReady(true); return; }
     let alive = true;
     void (async () => {
       try {
-        const { data } = await supabase!.auth.getSession();
-        const currentSession = data.session;
-        if (!currentSession) return;
-        const account = await accountRequest<{ id: string; profile: Record<string, unknown> }>(currentSession, "PUT");
-        await setStorageProfileId(account.id);
+        await setStorageProfileId(session.user.id);
         const localState = await loadState();
-        const remoteProfile = account.profile ?? {};
-        const completed = remoteProfile.onboardingCompleted === true;
+        const metadata = session.user.user_metadata ?? {};
+        const completed = metadata.onboardingCompleted === true;
         const hydrated = completed ? {
           ...localState,
-          learnerName: typeof remoteProfile.learnerName === "string" ? remoteProfile.learnerName : localState.learnerName,
-          goal: typeof remoteProfile.goal === "string" ? remoteProfile.goal : localState.goal,
-          experience: (remoteProfile.experience === "some" || remoteProfile.experience === "experienced" ? remoteProfile.experience : "new") as DevPathState["experience"],
-          weeklySessions: Number.isInteger(remoteProfile.weeklySessions) ? Number(remoteProfile.weeklySessions) : localState.weeklySessions,
-          studyDays: Array.isArray(remoteProfile.studyDays) ? remoteProfile.studyDays.filter((day): day is number => Number.isInteger(day) && Number(day) >= 0 && Number(day) <= 6) : localState.studyDays,
-          studyTime: typeof remoteProfile.studyTime === "string" ? remoteProfile.studyTime : localState.studyTime,
-          sessionMinutes: Number.isInteger(remoteProfile.sessionMinutes) ? Number(remoteProfile.sessionMinutes) : localState.sessionMinutes,
+          learnerName: typeof metadata.learnerName === "string" ? metadata.learnerName : localState.learnerName,
+          goal: typeof metadata.goal === "string" ? metadata.goal : localState.goal,
+          experience: (metadata.experience === "some" || metadata.experience === "experienced" ? metadata.experience : "new") as DevPathState["experience"],
+          weeklySessions: Number.isInteger(metadata.weeklySessions) ? Number(metadata.weeklySessions) : localState.weeklySessions,
+          studyDays: Array.isArray(metadata.studyDays) ? metadata.studyDays.filter((day): day is number => Number.isInteger(day) && Number(day) >= 0 && Number(day) <= 6) : localState.studyDays,
+          studyTime: typeof metadata.studyTime === "string" ? metadata.studyTime : localState.studyTime,
+          sessionMinutes: Number.isInteger(metadata.sessionMinutes) ? Number(metadata.sessionMinutes) : localState.sessionMinutes,
           onboardingCompleted: true,
-        } : { ...localState, onboardingCompleted: false, learnerName: initialState.learnerName };
+        } : localState;
         if (!alive) return;
         setState(hydrated);
-        setShowOnboarding(!completed);
+        setShowOnboarding(!completed && !localState.onboardingCompleted);
         setStorageWritable(true);
+        setAccountReady(true);
+        void accountRequest<{ id: string; profile: Record<string, unknown> }>(session, "PUT").catch(() => {});
       } catch {
-        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
-      } finally { if (alive) setAccountReady(true); }
+        if (alive) { setStorageWritable(true); setAccountReady(true); }
+      }
     })();
     return () => { alive = false; };
-  }, [authReady, session?.user.id, accountRetry]);
+  }, [authReady, session?.user.id]);
 
   useEffect(() => {
     if (!stateLoaded || !storageWritable) return;
@@ -141,14 +139,19 @@ export default function App() {
   useEffect(() => {
     if (!session || !accountReady || !storageWritable || !state.onboardingCompleted) return;
     const timer = window.setTimeout(() => {
-      void supabase?.auth.getSession().then(({ data }) => {
+      void (async () => {
+        const { data } = await supabase!.auth.getSession();
         if (!data.session) return;
-        return accountRequest(data.session, "PATCH", { profile: {
+        const profile = {
           learnerName: state.learnerName, goal: state.goal, experience: state.experience,
           weeklySessions: state.weeklySessions, studyDays: state.studyDays,
           studyTime: state.studyTime, sessionMinutes: state.sessionMinutes, onboardingCompleted: true,
-        } });
-      }).catch(() => setNotice("Dein Lernplanprofil konnte gerade nicht mit deinem Konto gespeichert werden."));
+        };
+        const { error } = await supabase!.auth.updateUser({ data: profile });
+        if (error) throw error;
+        await accountRequest(data.session, "PUT");
+        await accountRequest(data.session, "PATCH", { profile });
+      })().catch(() => setNotice("Dein Lernplan bleibt verfügbar und wird später mit deinem Konto synchronisiert."));
     }, 800);
     return () => window.clearTimeout(timer);
   }, [session?.user.id, accountReady, storageWritable, state.onboardingCompleted, state.learnerName, state.goal, state.experience, state.weeklySessions, state.studyDays, state.studyTime, state.sessionMinutes]);
@@ -180,16 +183,18 @@ export default function App() {
 
   const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
     const nextState = { ...state, ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
-    try {
-      if (!session) throw new Error("Bitte melde dich an, bevor du deinen Lernplan speicherst.");
-      await saveState(nextState);
-      await accountRequest(session, "PATCH", { profile: { ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true } });
-      setState(nextState);
-      setStorageWritable(true);
-      setShowOnboarding(false);
-    } catch {
-      setNotice("Dein Lernplan konnte noch nicht gespeichert werden. Bitte versuche es erneut; die Startabfrage bleibt geöffnet.");
-    }
+    setState(nextState);
+    setStorageWritable(true);
+    setShowOnboarding(false);
+    void saveState(nextState).catch(() => setNotice("Dein Lernplan konnte lokal nicht gespeichert werden."));
+    if (!session || !supabase) return;
+    const profile = { ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
+    void (async () => {
+      const { error } = await supabase!.auth.updateUser({ data: profile });
+      if (error) throw error;
+      await accountRequest(session, "PUT");
+      await accountRequest(session, "PATCH", { profile });
+    })().catch(() => setNotice("Dein Lernplan bleibt verfügbar und wird später mit deinem Konto synchronisiert."));
   };
 
   const saveCode = (lessonId: string, value: string | undefined) => setState((current) => {
@@ -427,10 +432,8 @@ export default function App() {
   if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">CodeZone wird sicher gestartet …</div></div>;
   if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p className="auth-description">Bitte versuche es später erneut.</p></section></main>;
   if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
-  if (!session) return <AuthView callbackError={accountIssue} onAuthenticated={() => { void supabase?.auth.getSession().then(({ data }) => setSession(data.session)); }} />;
+  if (!session) return <AuthView callbackError={accountIssue} onAuthenticated={(authenticatedSession) => { setAccountIssue(""); setSession(authenticatedSession); }} />;
   if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein CodeZone-Konto wird geladen …</div></div>;
-  if (accountIssue) return <div className="first-run-shell"><section className="panel auth-config-error"><div className="eyebrow">KONTO</div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p>Bitte versuche es später erneut.</p><div className="auth-recovery-actions"><button className="button primary" onClick={() => { setAccountIssue(""); setAccountReady(false); setAccountRetry((value) => value + 1); }}>Erneut versuchen</button><button className="button secondary" onClick={() => { setSession(null); void supabase?.auth.signOut(); }}>Abmelden</button></div></section></div>;
-  if (!storageIssue && showOnboarding) return <div className="first-run-shell"><Onboarding onFinish={finishOnboarding} /></div>;
 
   return <div className="app-shell">
     <aside className="sidebar" aria-label="Hauptnavigation">
