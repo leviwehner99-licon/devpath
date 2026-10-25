@@ -71,8 +71,8 @@ export default function App() {
       if (!alive || handledAuthUrls.has(url)) return;
       handledAuthUrls.add(url);
       if (handledAuthUrls.size > 8) handledAuthUrls.delete(handledAuthUrls.values().next().value as string);
-      void openAuthCallback(url).catch((error) => {
-        if (alive) setAccountIssue(error instanceof Error ? error.message : "Die Anmeldung konnte nicht abgeschlossen werden. Bitte starte sie erneut.");
+      void openAuthCallback(url).catch(() => {
+        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
       });
     };
     let unlistenDeepLink: (() => void) | undefined;
@@ -85,7 +85,7 @@ export default function App() {
         const initialUrls = await getCurrent();
         initialUrls?.forEach(acceptUrl);
       })().catch(() => {
-        if (alive) setAccountIssue("CodeZone konnte den Anmelde-Rückkanal nicht initialisieren. Installiere die aktuelle App-Version erneut und prüfe, dass der Rücklink codezone://auth/callback registriert ist.");
+        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
       });
     }
     return () => { alive = false; subscription.unsubscribe(); unlistenDeepLink?.(); };
@@ -123,8 +123,8 @@ export default function App() {
         setState(hydrated);
         setShowOnboarding(!completed);
         setStorageWritable(true);
-      } catch (error) {
-        if (alive) setAccountIssue(error instanceof Error ? error.message : "Das Konto konnte nicht geladen werden.");
+      } catch {
+        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
       } finally { if (alive) setAccountReady(true); }
     })();
     return () => { alive = false; };

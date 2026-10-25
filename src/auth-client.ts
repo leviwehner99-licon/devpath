@@ -14,7 +14,6 @@ try {
 }
 
 export const authConfigured = validSupabaseUrl && !placeholderKey;
-export const authConfigurationIssue = authConfigured ? "" : "Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.";
 export const authRedirectUrl = "codezone://auth/callback";
 export const apiBaseUrl = (import.meta.env.VITE_DEVPATH_API_URL?.trim() || "https://devpath-dpxzcux4g6bz.edgeone.dev").replace(/\/$/, "");
 
@@ -26,7 +25,9 @@ export const supabase = authConfigured
 
 export async function openAuthCallback(url: string): Promise<Session | null> {
   if (!supabase) throw new Error("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
-  const callback = new URL(url);
+  let callback: URL;
+  try { callback = new URL(url); }
+  catch { throw new Error("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut."); }
   if (callback.protocol !== "codezone:" || callback.hostname !== "auth" || callback.pathname !== "/callback") {
     throw new Error("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
   }
