@@ -54,6 +54,7 @@ jobs:
         run: |
           test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
           test -n "$VITE_SUPABASE_ANON_KEY" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_ANON_KEY'; exit 1; }
+          case "$VITE_SUPABASE_ANON_KEY" in HIER_DEN_*|your_*|replace_*|changeme*|placeholder*) echo 'VITE_SUPABASE_ANON_KEY is still an example placeholder'; exit 1 ;; esac
           test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run build
         env:
@@ -96,6 +97,7 @@ jobs:
         run: |
           test -n "$VITE_SUPABASE_URL" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_URL'; exit 1; }
           test -n "$VITE_SUPABASE_ANON_KEY" || { echo 'Missing GitHub Actions variable VITE_SUPABASE_ANON_KEY'; exit 1; }
+          case "$VITE_SUPABASE_ANON_KEY" in HIER_DEN_*|your_*|replace_*|changeme*|placeholder*) echo 'VITE_SUPABASE_ANON_KEY is still an example placeholder'; exit 1 ;; esac
           test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run build
         env:

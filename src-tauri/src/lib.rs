@@ -21,7 +21,10 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
+        // Use the plugin's default callback: with the `deep-link` feature enabled it forwards
+        // Windows/Linux second-instance command-line URLs to the deep-link plugin. A custom
+        // empty callback here silently discarded OAuth callbacks while CodeZone was already open.
+        .plugin(tauri_plugin_single_instance::Builder::new().build())
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(

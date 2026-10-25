@@ -95,6 +95,7 @@ export function AuthView({ onAuthenticated, callbackError = "" }: { onAuthentica
 
 function readableAuthError(cause: unknown): string {
   const message = cause instanceof Error ? cause.message.toLowerCase() : "";
+  if (message.includes("invalid api key") || message.includes("invalid_api_key") || message.includes("apikey")) return "Diese CodeZone-Version enthält keinen gültigen öffentlichen Supabase-Schlüssel. Trage den öffentlichen Schlüssel lokal ein und starte die App danach neu.";
   if (message.includes("invalid login credentials") || message.includes("invalid_credentials")) return "E-Mail-Adresse oder Passwort stimmen nicht. Bei Google-Konten ist ein Passwort-Login erst möglich, nachdem für diese Adresse ein Passwortkonto eingerichtet wurde.";
   if (message.includes("email not confirmed") || message.includes("email_not_confirmed")) return "Bitte bestätige zuerst deine E-Mail-Adresse über den Link in der Nachricht.";
   if (message.includes("user already registered") || message.includes("user_already_exists")) return "Für diese E-Mail-Adresse gibt es bereits ein Konto. Wechsle zu „Anmelden“ oder setze dein Passwort zurück.";

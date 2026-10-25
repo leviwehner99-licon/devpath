@@ -3,7 +3,22 @@ import { createClient, type Session } from "@supabase/supabase-js";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
-export const authConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+const placeholderKey = !supabaseAnonKey
+  || /^(hier_den_|your[_ -]|replace[_ -]|changeme|placeholder)/i.test(supabaseAnonKey);
+let validSupabaseUrl = false;
+try {
+  const parsedUrl = new URL(supabaseUrl ?? "");
+  validSupabaseUrl = parsedUrl.protocol === "https:" && parsedUrl.hostname.endsWith(".supabase.co");
+} catch {
+  validSupabaseUrl = false;
+}
+
+export const authConfigured = validSupabaseUrl && !placeholderKey;
+export const authConfigurationIssue = !validSupabaseUrl
+  ? "Die Anmeldung ist auf diesem Gerät nicht verfügbar. Die CodeZone-App benötigt eine gültige Projektverbindung."
+  : placeholderKey
+    ? "Die Anmeldung ist auf diesem Gerät noch nicht eingerichtet. Für den Start der App muss der Beispielwert durch den öffentlichen Supabase-Schlüssel ersetzt und die App danach neu gebaut werden."
+    : "";
 export const authRedirectUrl = "codezone://auth/callback";
 export const apiBaseUrl = (import.meta.env.VITE_DEVPATH_API_URL?.trim() || "https://devpath-dpxzcux4g6bz.edgeone.dev").replace(/\/$/, "");
 
@@ -44,6 +59,8 @@ export async function accountRequest<T>(session: Session, method: "GET" | "PUT" 
   if (!response.ok) {
     if (response.status === 401) throw new Error("Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.");
     if (response.status === 403) throw new Error("Dieses CodeZone-Konto ist deaktiviert.");
+    if (response.status === 404) throw new Error("Die Anmeldung war erfolgreich, aber der CodeZone-Kontodienst ist unter der eingestellten Projektadresse nicht erreichbar (HTTP 404).");
+    if (response.status >= 500) throw new Error(`Die Anmeldung war erfolgreich, aber der CodeZone-Kontodienst ist vorübergehend nicht verfügbar (HTTP ${response.status}).`);
     throw new Error("Deine Kontodaten sind derzeit nicht verfügbar. Bitte prüfe deine Internetverbindung und versuche es erneut.");
   }
   return await response.json() as T;
