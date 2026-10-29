@@ -119,19 +119,19 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: CodeZone-windows-x64-${{ github.sha }}
           path: installers/windows
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: CodeZone-macos-arm64-${{ github.sha }}
           path: installers/macos-arm64
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: CodeZone-macos-x64-${{ github.sha }}
           path: installers/macos-x64
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: CodeZone-linux-x64-${{ github.sha }}
           path: installers/linux
