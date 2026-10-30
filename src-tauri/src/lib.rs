@@ -7,21 +7,6 @@ fn app_version() -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = vec![
-        tauri_plugin_sql::Migration {
-            version: 1,
-            description: "initial_local_learning_schema",
-            sql: include_str!("../migrations/001_initial.sql"),
-            kind: tauri_plugin_sql::MigrationKind::Up,
-        },
-        tauri_plugin_sql::Migration {
-            version: 2,
-            description: "account_scoped_local_learning_state",
-            sql: include_str!("../migrations/002_account_scoped_state.sql"),
-            kind: tauri_plugin_sql::MigrationKind::Up,
-        },
-    ];
-
     tauri::Builder::default()
         // The builder forwards Windows/Linux second-instance URLs to the deep-link plugin
         // before this callback. Bring the original window forward after the browser returns.
@@ -37,11 +22,9 @@ pub fn run() {
         )
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(
-            tauri_plugin_sql::Builder::default()
-                .add_migrations("sqlite:devpath.db", migrations)
-                .build(),
-        )
+        // The frontend performs an idempotent, data-preserving app_state schema
+        // upgrade. This avoids SQLx checksum locks on existing local databases.
+        .plugin(tauri_plugin_sql::Builder::default().build())
         .invoke_handler(tauri::generate_handler![app_version])
         .run(tauri::generate_context!())
         .expect("CodeZone konnte nicht gestartet werden");

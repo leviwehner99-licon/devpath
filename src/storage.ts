@@ -22,8 +22,55 @@ type LocalDatabase = import("@tauri-apps/plugin-sql").default;
 let databasePromise: Promise<LocalDatabase> | undefined;
 
 async function getDatabase(): Promise<LocalDatabase> {
-  databasePromise ??= import("@tauri-apps/plugin-sql").then(({ default: Database }) => Database.load(DATABASE_URL));
+  databasePromise ??= (async () => {
+    const { default: Database } = await import("@tauri-apps/plugin-sql");
+    const db = await Database.load(DATABASE_URL);
+    await ensureStateSchema(db);
+    return db;
+  })().catch((error: unknown) => {
+    databasePromise = undefined;
+    throw error;
+  });
   return databasePromise;
+}
+
+async function ensureStateSchema(db: LocalDatabase): Promise<void> {
+  const tables = await db.select<{ name: string }[]>("SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('app_state', 'app_state_legacy')");
+  let hasState = tables.some((table) => table.name === "app_state");
+  let hasLegacy = tables.some((table) => table.name === "app_state_legacy");
+
+  if (hasState) {
+    const columns = await db.select<{ name: string; pk: number }[]>("PRAGMA table_info(app_state)");
+    const columnNames = new Set(columns.map((column) => column.name));
+    if (!columnNames.has("state_json")) throw new Error("Die lokale app_state-Tabelle besitzt keine state_json-Spalte.");
+    if (!columnNames.has("account_id")) {
+      if (!columnNames.has("id") || hasLegacy) throw new Error("Die lokale Lernstandstabelle hat ein unerwartetes Format.");
+      // Preserve the old table as-is. Rebuilding avoids its legacy id=1
+      // constraint preventing a second local profile from being saved.
+      await db.execute("ALTER TABLE app_state RENAME TO app_state_legacy");
+      hasState = false;
+      hasLegacy = true;
+    } else {
+      if (!columnNames.has("updated_at")) {
+        await db.execute("ALTER TABLE app_state ADD COLUMN updated_at TEXT");
+        await db.execute("UPDATE app_state SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL");
+      }
+      if (!columns.some((column) => column.name === "account_id" && column.pk > 0)) {
+        await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS app_state_account_id_unique ON app_state(account_id)");
+      }
+    }
+  }
+
+  if (!hasState) {
+    await db.execute("CREATE TABLE app_state (account_id TEXT PRIMARY KEY, state_json TEXT NOT NULL, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)");
+  }
+  if (hasLegacy) {
+    const legacyColumns = await db.select<{ name: string }[]>("PRAGMA table_info(app_state_legacy)");
+    const legacyNames = new Set(legacyColumns.map((column) => column.name));
+    if (!legacyNames.has("state_json") || !legacyNames.has("id")) throw new Error("Der bisherige Lernstand konnte nicht sicher übernommen werden.");
+    const updatedAt = legacyNames.has("updated_at") ? "COALESCE(updated_at, CURRENT_TIMESTAMP)" : "CURRENT_TIMESTAMP";
+    await db.execute(`INSERT OR IGNORE INTO app_state (account_id, state_json, updated_at) SELECT CASE WHEN id = 1 THEN 'local' ELSE 'legacy-' || id END, state_json, ${updatedAt} FROM app_state_legacy`);
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
