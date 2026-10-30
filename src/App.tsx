@@ -31,6 +31,7 @@ export default function App() {
   const [stateLoaded, setStateLoaded] = useState(false);
   const [storageWritable, setStorageWritable] = useState(false);
   const [storageIssue, setStorageIssue] = useState("");
+  const [storageIssueDetails, setStorageIssueDetails] = useState("");
   const [view, setView] = useState<View>("today");
   const [notice, setNotice] = useState("");
   const [runRequested, setRunRequested] = useState(false);
@@ -55,9 +56,25 @@ export default function App() {
   const completedCount = activeCourse.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
   const progressPercent = Math.round(completedCount / activeCourse.lessons.length * 100);
 
-  useEffect(() => {
-    loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); setStorageWritable(true); }).catch(() => setStorageIssue("CodeZone konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
-  }, []);
+  const loadLocalState = async () => {
+    setStorageIssue("");
+    setStorageIssueDetails("");
+    try {
+      const loaded = await loadState();
+      setState(loaded);
+      setShowOnboarding(!loaded.onboardingCompleted);
+      setStorageWritable(true);
+    } catch (error) {
+      console.error("CodeZone could not load its local learning database.", error);
+      setStorageWritable(false);
+      setStorageIssue("CodeZone konnte den lokalen Lernstand nicht öffnen. Die App überschreibt gespeicherte Daten nicht, solange dieser Hinweis angezeigt wird.");
+      setStorageIssueDetails(error instanceof Error ? error.message.slice(0, 500) : "Unbekannter lokaler Speicherfehler.");
+    } finally {
+      setStateLoaded(true);
+    }
+  };
+
+  useEffect(() => { void loadLocalState(); }, []);
 
   useEffect(() => {
     if (!stateLoaded || !storageWritable) return;
@@ -340,7 +357,7 @@ export default function App() {
     <main className="main-area">
       <header className="topbar"><div className="breadcrumbs">CodeZone <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${effectiveTheme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: effectiveTheme === "dark" ? "light" : "dark" } })}>{effectiveTheme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
-        {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
+        {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lernstand konnte nicht geöffnet werden</strong><p>{storageIssue}</p><div className="recovery-actions"><button className="button secondary" onClick={() => { setStateLoaded(false); void loadLocalState(); }}>Erneut versuchen</button><button className="button secondary" onClick={() => setView("settings")}>Einstellungen und Datenimport öffnen</button></div>{storageIssueDetails && <details className="storage-error-details"><summary>Lokale Fehlerdetails anzeigen</summary><code>{storageIssueDetails}</code></details>}</section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
         {stateLoaded && !storageIssue && view === "today" && <><Today courseTitle={activeCourse.title} courseLessonCount={activeCourse.lessons.length} state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover course={activeCourse} state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
