@@ -105,6 +105,13 @@ const lessonStages = [
   { id:"project", title:"Werkzeug und Mini-Projekt", objective:"Du kombinierst die Grundlagen in einem kleinen, nachvollziehbaren Beispiel.", method:{title:"In kleinen Schleifen arbeiten",description:"Baue einen kleinen Schritt, probiere ihn aus, lies die Ausgabe und verbessere dann gezielt."}, visual:["Plan","Prototyp","Prüfen","Verbessern"] },
 ];
 
+const lessonTasks = [
+  "Schreibe ein eigenes kleines Beispiel für {topic}. Nutze den Baustein aus dem Beispiel und ändere mindestens einen Namen oder Wert. Ergänze einen Kommentar, der die Aufgabe des Codes in einem Satz beschreibt.",
+  "Erweitere dein Beispiel um einen zweiten Fall. Nutze eine Bedingung, Auswahl oder Regel, damit unterschiedliche Eingaben nachvollziehbar unterschiedliche Ergebnisse liefern. Notiere als Kommentar, welche Fälle du abdeckst.",
+  "Trenne einen sinnvollen Arbeitsschritt ab und gib ihm einen eindeutigen Namen: als Funktion, Methode, benannten Abschnitt oder Abfrage. Übergib Werte, wo es passt, und prüfe das Ergebnis mit einem zweiten Beispiel.",
+  "Mini-Projekt: Baue eine kleine Lösung für {topic}. Verbinde mindestens zwei zuvor gelernte Ideen, füge einen eigenen Beispielwert und einen einfachen Prüf- oder Testschritt hinzu und erkläre eine wichtige Entscheidung als Kommentar.",
+];
+
 function buildCourse(definition: typeof courseDefinitions[number]): LearningCourse {
   return { id: definition.id, version:"1.0.0", title:definition.title, category:definition.category, lessons: lessonStages.map((stage, index) => {
     const exampleCode = definition.examples[index].replaceAll("\\n", "\n");
@@ -115,7 +122,7 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       concepts:[{tag:definition.title,description:definition.intro},{tag:stage.method.title,description:stage.method.description}],
       explanation:`${definition.intro} ${stage.objective} Als Beispiel kannst du diesen Code lesen und danach selbst verändern. ${index === 3 ? "Am Ende prüfst du dein Ergebnis mit einem kleinen Test oder einer Vorschau." : "Verändere nur einen Teil auf einmal; so erkennst du Ursache und Wirkung."}`,
       starterCode:`// ${stage.title}: probiere den Beispielbaustein aus\n// Schreibe deinen eigenen Versuch hierhin\n`, exampleCode,
-      task:`Übertrage den Kern aus dem Beispiel in deinen eigenen Code. Nutze dabei ${definition.topic.toLowerCase()} und prüfe, ob dein Ergebnis verständlich ist.`,
+      task:lessonTasks[index].replace("{topic}", definition.topic.toLowerCase()),
       successPattern:new RegExp(escaped,"i"), visualSteps:stage.visual,
       method:stage.method, framework:{title:definition.framework,description:`Einordnung: ${definition.framework} baut auf diesen Grundlagen auf. Lerne zuerst das Sprachkonzept; danach kannst du das Werkzeug passend zum Projekt einsetzen.`},
     };
