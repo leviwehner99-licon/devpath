@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { clearState, exportState, loadState, parseDataExport, saveState, setStorageProfileId } from "./storage";
+import { clearState, exportState, loadState, parseDataExport, saveState } from "./storage";
 import { recommendNextLesson, reviewDate } from "./planner";
-import { programmingCourse, type CourseLesson } from "./course";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
 import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, Today } from "./views";
 import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
 import { Icon, LogoMark } from "./ui";
 import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
-import { authConfigured, accountRequest, openAuthCallback, supabase } from "./auth-client";
-import { AuthView, PasswordRecoveryView } from "./auth-view";
-import { isTauri } from "@tauri-apps/api/core";
-import { getCurrent, onOpenUrl, register } from "@tauri-apps/plugin-deep-link";
-import type { Session } from "@supabase/supabase-js";
+import { learningCourses, programmingCourse, type CourseLesson } from "./course";
+import { recommendedCourse } from "./catalog";
 
 const navigation: { id: View; label: string; icon: "today" | "learn" | "library" | "curriculum" | "studio" | "projects" | "community" | "base" | "diploma" }[] = [
   { id: "today", label: "Heute", icon: "today" },
@@ -25,6 +21,11 @@ const navigation: { id: View; label: string; icon: "today" | "learn" | "library"
   { id: "diploma", label: "Diplom", icon: "diploma" },
 ];
 
+function lessonFileName(language: string): string {
+  const extensions: Record<string, string> = { html: "html", css: "css", javascript: "js", typescript: "ts", java: "java", python: "py", php: "php", cpp: "cpp", csharp: "cs", rust: "rs", sql: "sql", c: "c", kotlin: "kt", swift: "swift", plaintext: "md" };
+  return `index.${extensions[language] ?? "txt"}`;
+}
+
 export default function App() {
   const [state, setState] = useState<DevPathState>(initialState);
   const [stateLoaded, setStateLoaded] = useState(false);
@@ -37,102 +38,26 @@ export default function App() {
   const [showCompletion, setShowCompletion] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
-  const [authReady, setAuthReady] = useState(false);
-  const [accountReady, setAccountReady] = useState(false);
-  const [accountIssue, setAccountIssue] = useState("");
-  const [authNotice, setAuthNotice] = useState("");
-  const [passwordRecovery, setPasswordRecovery] = useState(false);
   const [systemPrefersDark, setSystemPrefersDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   const effectiveTheme = state.settings.theme === "system"
     ? systemPrefersDark ? "dark" : "light"
     : state.settings.theme;
 
-  const recommendation = useMemo(() => recommendNextLesson(programmingCourse.lessons, state.progress), [state.progress]);
-  const activeLesson = programmingCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
+  const activeCourse = learningCourses.find((course) => course.id === state.activeCourseId) ?? programmingCourse;
+  const recommendation = useMemo(() => recommendNextLesson(activeCourse.lessons, state.progress), [activeCourse, state.progress]);
+  const activeLesson = activeCourse.lessons.find((lesson) => lesson.id === selectedLessonId) ?? recommendation.lesson;
   const lessonProgress = state.progress[activeLesson.id];
   const code = lessonProgress?.code ?? activeLesson.starterCode;
   const activeProject = state.projects.find((project) => project.id === state.activeProjectId) ?? state.projects[0];
   const activeFilePath = activeProject?.files[activeProject.activeFile] !== undefined ? activeProject.activeFile : Object.keys(activeProject?.files ?? {})[0] ?? "index.js";
   const projectCode = activeProject?.files[activeFilePath] ?? "";
-  const completedCount = programmingCourse.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
-  const progressPercent = Math.round(completedCount / programmingCourse.lessons.length * 100);
+  const completedCount = activeCourse.lessons.filter((lesson) => state.progress[lesson.id]?.completed).length;
+  const progressPercent = Math.round(completedCount / activeCourse.lessons.length * 100);
 
   useEffect(() => {
-    loadState().then((loaded) => { setState(loaded); }).catch(() => setStorageIssue("CodeZone konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
+    loadState().then((loaded) => { setState(loaded); setShowOnboarding(!loaded.onboardingCompleted); setStorageWritable(true); }).catch(() => setStorageIssue("CodeZone konnte die gespeicherten Daten nicht lesen. Es werden keine Standarddaten darübergeschrieben. Öffne Einstellungen → Datenschutz und stelle einen zuvor erstellten Datenexport wieder her.")).finally(() => setStateLoaded(true));
   }, []);
-
-  useEffect(() => {
-    if (!authConfigured || !supabase) { setAuthReady(true); return; }
-    let alive = true;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, nextSession) => {
-      if (alive) { setSession(nextSession); if (nextSession) setAccountIssue(""); }
-      if (alive && event === "PASSWORD_RECOVERY") setPasswordRecovery(true);
-    });
-    void supabase.auth.getSession().then(({ data }) => { if (alive) { setSession(data.session); setAuthReady(true); } });
-    const handledAuthUrls = new Set<string>();
-    const acceptUrl = (url: string) => {
-      if (!alive || handledAuthUrls.has(url)) return;
-      handledAuthUrls.add(url);
-      if (handledAuthUrls.size > 8) handledAuthUrls.delete(handledAuthUrls.values().next().value as string);
-      void openAuthCallback(url).then((callbackSession) => {
-        if (alive && callbackSession) setSession(callbackSession);
-      }).catch(() => {
-        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
-      });
-    };
-    let unlistenDeepLink: (() => void) | undefined;
-    if (isTauri()) {
-      void (async () => {
-        await register("codezone").catch(() => {});
-        const unlisten = await onOpenUrl((urls) => urls.forEach(acceptUrl));
-        if (!alive) { unlisten(); return; }
-        unlistenDeepLink = unlisten;
-        const initialUrls = await getCurrent();
-        initialUrls?.forEach(acceptUrl);
-      })().catch(() => {
-        if (alive) setAccountIssue("Die Anmeldung ist derzeit nicht möglich. Bitte versuche es später erneut.");
-      });
-    }
-    return () => { alive = false; subscription.unsubscribe(); unlistenDeepLink?.(); };
-  }, []);
-
-  useEffect(() => {
-    if (!authReady) return;
-    setAccountReady(false);
-    setStorageWritable(false);
-    if (!session || !supabase) { setAccountReady(true); return; }
-    let alive = true;
-    void (async () => {
-      try {
-        await setStorageProfileId(session.user.id);
-        const localState = await loadState();
-        const metadata = session.user.user_metadata ?? {};
-        const completed = metadata.onboardingCompleted === true;
-        const hydrated = completed ? {
-          ...localState,
-          learnerName: typeof metadata.learnerName === "string" ? metadata.learnerName : localState.learnerName,
-          goal: typeof metadata.goal === "string" ? metadata.goal : localState.goal,
-          experience: (metadata.experience === "some" || metadata.experience === "experienced" ? metadata.experience : "new") as DevPathState["experience"],
-          weeklySessions: Number.isInteger(metadata.weeklySessions) ? Number(metadata.weeklySessions) : localState.weeklySessions,
-          studyDays: Array.isArray(metadata.studyDays) ? metadata.studyDays.filter((day): day is number => Number.isInteger(day) && Number(day) >= 0 && Number(day) <= 6) : localState.studyDays,
-          studyTime: typeof metadata.studyTime === "string" ? metadata.studyTime : localState.studyTime,
-          sessionMinutes: Number.isInteger(metadata.sessionMinutes) ? Number(metadata.sessionMinutes) : localState.sessionMinutes,
-          onboardingCompleted: true,
-        } : localState;
-        if (!alive) return;
-        setState(hydrated);
-        setShowOnboarding(!completed && !localState.onboardingCompleted);
-        setStorageWritable(true);
-        setAccountReady(true);
-        void accountRequest<{ id: string; profile: Record<string, unknown> }>(session, "PUT").catch(() => {});
-      } catch {
-        if (alive) { setStorageWritable(true); setAccountReady(true); }
-      }
-    })();
-    return () => { alive = false; };
-  }, [authReady, session?.user.id]);
 
   useEffect(() => {
     if (!stateLoaded || !storageWritable) return;
@@ -142,25 +67,6 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [state, stateLoaded, storageWritable]);
 
-  useEffect(() => {
-    if (!session || !accountReady || !storageWritable || !state.onboardingCompleted) return;
-    const timer = window.setTimeout(() => {
-      void (async () => {
-        const { data } = await supabase!.auth.getSession();
-        if (!data.session) return;
-        const profile = {
-          learnerName: state.learnerName, goal: state.goal, experience: state.experience,
-          weeklySessions: state.weeklySessions, studyDays: state.studyDays,
-          studyTime: state.studyTime, sessionMinutes: state.sessionMinutes, onboardingCompleted: true,
-        };
-        const { error } = await supabase!.auth.updateUser({ data: profile });
-        if (error) throw error;
-        await accountRequest(data.session, "PUT");
-        await accountRequest(data.session, "PATCH", { profile });
-      })().catch(() => setNotice("Dein Lernplan bleibt verfügbar und wird später mit deinem Konto synchronisiert."));
-    }, 800);
-    return () => window.clearTimeout(timer);
-  }, [session?.user.id, accountReady, storageWritable, state.onboardingCompleted, state.learnerName, state.goal, state.experience, state.weeklySessions, state.studyDays, state.studyTime, state.sessionMinutes]);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-color-scheme: dark)");
@@ -177,52 +83,13 @@ export default function App() {
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
-  const signOut = async () => {
-    await supabase?.auth.signOut();
-    setSession(null);
-    setStorageWritable(false);
-    setState(initialState);
-  };
-
-  const deleteAccount = async () => {
-    if (!session || !window.confirm("Dein CodeZone-Konto, das gespeicherte Lernplanprofil und die lokalen Lern- und Projektdaten dieses Kontos werden gelöscht. Fortfahren?")) return;
-    try {
-      await accountRequest(session, "DELETE");
-      let localDataRemoved = true;
-      try { await clearState(); } catch { localDataRemoved = false; }
-      await supabase?.auth.signOut().catch(() => undefined);
-      setSession(null);
-      setStorageWritable(false);
-      setState(initialState);
-      setShowOnboarding(false);
-      setAuthNotice(localDataRemoved
-        ? "Dein Konto wurde gelöscht."
-        : "Dein Konto wurde gelöscht, aber lokale Daten konnten nicht entfernt werden. Öffne Einstellungen und lösche die lokalen Daten auf diesem Gerät.");
-    } catch {
-      setNotice("Dein Konto konnte gerade nicht gelöscht werden. Bitte versuche es später erneut.");
-    }
-  };
-
-  const setAccountPassword = async (password: string) => {
-    if (!supabase) throw new Error("Passwort konnte nicht geändert werden.");
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) throw new Error("Passwort konnte nicht geändert werden.");
-  };
-
   const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
-    const nextState = { ...state, ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
+    const profile = { ...state, ...values, learnerName: values.learnerName.trim() };
+    const nextState = { ...profile, activeCourseId: recommendedCourse(profile).id, onboardingCompleted: true };
     setState(nextState);
     setStorageWritable(true);
     setShowOnboarding(false);
     void saveState(nextState).catch(() => setNotice("Dein Lernplan konnte lokal nicht gespeichert werden."));
-    if (!session || !supabase) return;
-    const profile = { ...values, learnerName: values.learnerName.trim(), onboardingCompleted: true };
-    void (async () => {
-      const { error } = await supabase!.auth.updateUser({ data: profile });
-      if (error) throw error;
-      await accountRequest(session, "PUT");
-      await accountRequest(session, "PATCH", { profile });
-    })().catch(() => setNotice("Dein Lernplan bleibt verfügbar und wird später mit deinem Konto synchronisiert."));
   };
 
   const saveCode = (lessonId: string, value: string | undefined) => setState((current) => {
@@ -262,7 +129,7 @@ export default function App() {
     if (linked) {
       setState((current) => ({ ...current, activeProjectId: linked.id, projects: current.projects.map((project) => project.id === linked.id && linked.linkedLessonFile ? { ...project, files: { ...project.files, [linked.linkedLessonFile]: code }, updatedAt: new Date().toISOString() } : project) }));
     } else {
-      const path = "index.js";
+      const path = lessonFileName(activeLesson.language);
       const project = createLocalProject(`Lektion · ${activeLesson.title}`, { [path]: code });
       project.language = activeLesson.language;
       project.linkedLessonId = activeLesson.id;
@@ -352,10 +219,10 @@ export default function App() {
     }
     const now = new Date();
     const confidence = Math.max(1, 5 - hintCount);
-    const courseFinished = programmingCourse.lessons.every((item) => item.id === lesson.id || state.progress[item.id]?.completed);
+    const courseFinished = activeCourse.lessons.every((item) => item.id === lesson.id || state.progress[item.id]?.completed);
     setState((current) => ({
       ...current,
-      ...(courseFinished ? { courseCompletedAt: current.courseCompletedAt ?? now.toISOString() } : {}),
+      ...(courseFinished ? { courseCompletedAt: current.courseCompletedAt ?? now.toISOString(), courseCompletions: { ...current.courseCompletions, [activeCourse.id]: current.courseCompletions[activeCourse.id] ?? now.toISOString() } } : {}),
       progress: {
         ...current.progress,
         [lesson.id]: {
@@ -372,7 +239,7 @@ export default function App() {
     setSelectedLessonId(null);
     if (courseFinished) {
       setShowCompletion(true);
-      setNotice("Du hast alle Lernziele des Einstiegskurses erreicht. Dein lokales Diplom ist freigeschaltet.");
+      setNotice(`Du hast alle Lernziele von „${activeCourse.title}“ erreicht. Dein lokales Diplom ist freigeschaltet.`);
     } else setNotice("Lernziel abgeschlossen. Der Lernplan hat deinen nächsten Schritt ausgewählt.");
   };
 
@@ -457,11 +324,7 @@ export default function App() {
     }
   };
 
-  if (!stateLoaded || (authConfigured && !authReady)) return <div className="first-run-shell"><div className="loading-note" role="status">CodeZone wird sicher gestartet …</div></div>;
-  if (!authConfigured) return <main className="auth-screen"><section className="auth-card"><div className="auth-brand"><LogoMark /><span>CodeZone</span></div><h1>Die Anmeldung ist derzeit nicht möglich.</h1><p className="auth-description">Bitte versuche es später erneut.</p></section></main>;
-  if (passwordRecovery) return <PasswordRecoveryView onFinished={() => setPasswordRecovery(false)} />;
-  if (!session) return <AuthView callbackError={accountIssue} callbackNotice={authNotice} onAuthenticated={(authenticatedSession) => { setAccountIssue(""); setAuthNotice(""); setSession(authenticatedSession); }} />;
-  if (!accountReady) return <div className="first-run-shell"><div className="loading-note" role="status">Dein CodeZone-Konto wird geladen …</div></div>;
+  if (!stateLoaded) return <div className="first-run-shell"><div className="loading-note" role="status">CodeZone wird gestartet …</div></div>;
 
   return <div className="app-shell">
     <aside className="sidebar" aria-label="Hauptnavigation">
@@ -471,7 +334,6 @@ export default function App() {
       <div className="sidebar-spacer" />
       <div className="local-state"><span className="status-dot" /> Lokal auf diesem Gerät</div>
       <button className={`nav-item ${view === "settings" ? "active" : ""}`} onClick={() => setView("settings")}><span className="nav-icon"><Icon name="settings"/></span>Einstellungen</button>
-      <button className="nav-item account-signout" onClick={() => void signOut()}><span className="nav-icon"><Icon name="settings"/></span>Abmelden</button>
       <div className="sidebar-footer">CodeZone · Phase 2 Alpha</div>
     </aside>
 
@@ -481,26 +343,26 @@ export default function App() {
         {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lokale Daten nicht geladen</strong><p>{storageIssue}</p><button className="button secondary" onClick={() => setView("settings")}>Datenwiederherstellung öffnen</button></section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
-        {stateLoaded && !storageIssue && view === "today" && <><Today state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
-        {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openCourse={() => { setView("curriculum"); }} />}
-        {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum state={state} completedCount={completedCount} recommendation={recommendation} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
+        {stateLoaded && !storageIssue && view === "today" && <><Today courseTitle={activeCourse.title} courseLessonCount={activeCourse.lessons.length} state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover course={activeCourse} state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
+        {stateLoaded && !storageIssue && view === "library" && <CourseLibrary openCourse={(courseId) => { update({ activeCourseId: courseId }); setSelectedLessonId(null); setView("curriculum"); }} />}
+        {stateLoaded && !storageIssue && view === "curriculum" && <Curriculum course={activeCourse} state={state} completedCount={completedCount} recommendation={recommendation} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
         {stateLoaded && !storageIssue && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
         {stateLoaded && !storageIssue && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
-        {stateLoaded && !storageIssue && view === "learn" && <Learn lessons={programmingCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
+        {stateLoaded && !storageIssue && view === "learn" && <Learn courseTitle={activeCourse.title} lessons={activeCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
         {stateLoaded && !storageIssue && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={effectiveTheme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && !storageIssue && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
-        {stateLoaded && !storageIssue && view === "diploma" && <Diploma completedAt={state.courseCompletedAt} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
-        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} accountEmail={session.user.email ?? ""} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} onSignOut={() => void signOut()} onDeleteAccount={() => void deleteAccount()} onSetPassword={setAccountPassword} />}
+        {stateLoaded && !storageIssue && view === "diploma" && <Diploma course={activeCourse} completedAt={state.courseCompletions[activeCourse.id] ?? (activeCourse.id === "programming-intro" ? state.courseCompletedAt : undefined)} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
+        {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
-      {showCompletion && <CompletionDialog reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}
+      {showCompletion && <CompletionDialog courseTitle={activeCourse.title} lessonCount={activeCourse.lessons.length} reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}
       {showSupport && <SupportDialog learnerName={state.learnerName} onClose={() => setShowSupport(false)} onNotice={setNotice} />}
       {stateLoaded && showOnboarding && <Onboarding onFinish={finishOnboarding} />}
     </main>
   </div>;
 }
 
-function CompletionDialog({ reducedMotion, onClose }: { reducedMotion: boolean; onClose: () => void }) {
+function CompletionDialog({ courseTitle, lessonCount, reducedMotion, onClose }: { courseTitle: string; lessonCount: number; reducedMotion: boolean; onClose: () => void }) {
   const [seconds, setSeconds] = useState(10);
   useEffect(() => {
     if (reducedMotion) return;
@@ -508,5 +370,5 @@ function CompletionDialog({ reducedMotion, onClose }: { reducedMotion: boolean; 
     return () => window.clearInterval(timer);
   }, [reducedMotion]);
   useEffect(() => { if (seconds === 0 || reducedMotion) onClose(); }, [seconds, reducedMotion, onClose]);
-  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle sieben Lektionen im Einstiegskurs abgeschlossen.</p><div className="diploma-preview"><span>CodeZone · Lernerfolg</span><strong>Programmier-<br />grundlagen</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
+  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle {lessonCount} Lektionen im Kurs „{courseTitle}“ abgeschlossen.</p><div className="diploma-preview"><span>CodeZone · Lernerfolg</span><strong>{courseTitle}</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
 }

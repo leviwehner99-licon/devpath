@@ -35,8 +35,10 @@ export type DevPathState = {
   versions: SavedVersion[];
   projects: LocalProject[];
   activeProjectId: string;
+  activeCourseId: string;
   onboardingCompleted: boolean;
   courseCompletedAt?: string;
+  courseCompletions: Record<string, string>;
   settings: { theme: "system" | "light" | "dark"; reducedMotion: boolean; sendDiagnostics: boolean; aiMode: "off" | "local" | "external" };
 };
 
@@ -62,6 +64,8 @@ export const initialState: DevPathState = {
     updatedAt: "2026-10-21T00:00:00.000Z",
   }],
   activeProjectId: "starter-programming",
+  activeCourseId: "programming-intro",
   onboardingCompleted: false,
+  courseCompletions: {},
   settings: { theme: "system", reducedMotion: false, sendDiagnostics: false, aiMode: "off" },
 };

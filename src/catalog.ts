@@ -1,20 +1,29 @@
 import type { DevPathState } from "./types";
+import { learningCourses } from "./course";
 
-export type CatalogCourse = { id: string; title: string; description: string; category: string; icon: string; status: "available" | "planned"; tags: string[] };
+export type CatalogCourse = { id: string; title: string; description: string; category: string; icon: string; status: "available" | "planned"; tags: string[]; lessonCount?: number };
 
-export const courseCatalog: CatalogCourse[] = [
-  { id: "programming-intro", title: "Einstieg in die Programmierung", description: "Lerne JavaScript-Grundlagen in sieben Lektionen mit eigenen Code-Aufgaben und einem kleinen Abschlussprojekt.", category: "Programmiergrundlagen", icon: "01", status: "available", tags: ["Anfänger", "Grundlagen", "JavaScript", "Programmierung"] },
-  ...[
-    ["javascript", "JavaScript", "Interaktive Webseiten und die Grundlagen moderner Webanwendungen.", "JS"], ["java", "Java", "Objektorientierte Programme mit einer vielseitigen Sprache entwickeln.", "Ja"], ["python", "Python", "Ein klarer Einstieg in Programmierung, Automatisierung und Daten.", "Py"], ["php", "PHP", "Dynamische Webanwendungen und serverseitige Logik verstehen.", "PHP"], ["typescript", "TypeScript", "JavaScript-Projekte mit statischen Typen sicherer gestalten.", "TS"], ["cpp", "C++", "Leistungsfähige Programme und zentrale Systemkonzepte kennenlernen.", "C++"], ["csharp", "C#", "Moderne Anwendungen und Spiele im .NET-Ökosystem entwickeln.", "C#"], ["rust", "Rust", "Speichersichere Programme mit Ownership und klaren Typen erstellen.", "Rs"], ["sql", "SQL", "Relationale Daten abfragen, verändern und strukturiert modellieren.", "SQL"], ["c", "C", "Grundlagen von Speicher, Datenstrukturen und systemnaher Entwicklung.", "C"], ["kotlin", "Kotlin", "Ausdrucksstarke Anwendungen für JVM und Android schreiben.", "Kt"], ["swift", "Swift", "Moderne Apps und Programme mit Apples Sprache entwickeln.", "Sw"],
-    ["web-development", "Webentwicklung", "Von Layout und Browser bis zu modernen Webprojekten.", "Web"], ["backend", "Backendentwicklung", "APIs, Serverlogik, Datenbanken und sichere Schnittstellen.", "API"], ["security", "IT-Sicherheit", "Sichere Grundlagen, Bedrohungsmodelle und defensive Praxis.", "Sec"], ["ai", "Künstliche Intelligenz", "KI-Grundlagen, Daten, Modelle und verantwortungsvolle Anwendungen.", "AI"], ["game-development", "Spieleentwicklung", "Spielschleifen, Eingaben, Grafik und Projektaufbau.", "Game"], ["career", "Auf dem Weg zum Job", "Portfolio, Zusammenarbeit, Bewerbungen und technische Interviews.", "Job"],
-  ].map(([id, title, description, icon]) => ({ id, title, description, category: ["javascript", "java", "python", "php", "typescript", "cpp", "csharp", "rust", "sql", "c", "kotlin", "swift"].includes(id) ? "Programmiersprache" : "Themenkurs", icon, status: "planned" as const, tags: [title] })),
-];
+const descriptions: Record<string, string> = {
+  "programming-intro": "Ein verständlicher Start mit sieben JavaScript-Lektionen, Codeübungen und Mini-Projekt.",
+  javascript: "Daten, Funktionen und Browser-Interaktionen für dynamische Anwendungen verbinden.", java: "Typen, Klassen und objektorientierte Grundlagen mit kleinen Programmen üben.", python: "Lesbare Programme, Funktionen und Sammlungen für Automatisierung und Daten lernen.", php: "Serverseitige Logik, Formulare und sichere Webantworten verstehen.", typescript: "JavaScript mit Typen, Schnittstellen und überprüfbaren Datenstrukturen absichern.", cpp: "C++-Grundlagen, Funktionen, Standardbibliothek und Systemnähe kennenlernen.", csharp: ".NET-Grundlagen, Typen, Methoden und praktische Anwendungen entwickeln.", rust: "Ownership, Typen und Cargo als Basis sicherer Rust-Programme verstehen.", sql: "Daten auswählen, filtern, gruppieren und relational sauber modellieren.", c: "Kontrollfluss, Funktionen und systemnahe Grundlagen verständlich erarbeiten.", kotlin: "Kompakte JVM-Syntax, Null-Sicherheit und Collections praktisch einsetzen.", swift: "Typen, Funktionen, Collections und moderne Swift-Werkzeuge kennenlernen.",
+  "web-development": "Von Struktur und Layout über Interaktion bis zu einem kleinen Webprojekt.", backend: "APIs, Eingabevalidierung, Datenbanken und sichere Serverabläufe verstehen.", security: "Bedrohungen erkennen und mit konkreten defensiven Methoden abwehren.", ai: "Daten, Modelle, Bewertung und verantwortungsvolle KI-Anwendungen einordnen.", "game-development": "Spielschleife, Eingaben, Bewegung und Prototypen Schritt für Schritt bauen.", career: "Portfolio, Versionsverwaltung, Code Review und Bewerbungspraxis vorbereiten.",
+};
+export const courseCatalog: CatalogCourse[] = learningCourses.map((course, index) => ({
+  id: course.id, title: course.title, description: descriptions[course.id] ?? `Lerne ${course.title} mit verständlichen Erklärungen und praktischen Beispielen.`,
+  category: course.category, icon: String(index + 1).padStart(2, "0"), status: "available", lessonCount: course.lessons.length, tags: [course.title, course.category, ...course.lessons.map((lesson) => lesson.language)],
+}));
 
 export function recommendedCourse(state: DevPathState): CatalogCourse {
   const intro = courseCatalog.find((course) => course.id === "programming-intro") ?? courseCatalog[0];
-  if (!state.courseCompletedAt) return intro;
   const goal = state.goal.toLowerCase();
-  const match = goal.includes("grund") ? "python" : goal.includes("web") ? "javascript" : goal.includes("software") ? (state.experience === "experienced" ? "typescript" : "java") : "web-development";
-  const candidate = courseCatalog.find((course) => course.id === match && course.status === "available");
+  const match = goal.includes("grund") && state.experience === "new" ? "programming-intro"
+    : goal.includes("web") ? "web-development"
+      : goal.includes("beruf") || goal.includes("job") ? "career"
+        : goal.includes("ki") || goal.includes("künstliche") ? "ai"
+          : goal.includes("sicher") ? "security"
+            : goal.includes("spiel") ? "game-development"
+              : goal.includes("software") ? (state.experience === "experienced" ? "typescript" : "javascript")
+                : state.experience === "new" ? "programming-intro" : "python";
+  const candidate = courseCatalog.find((course) => course.id === match);
   return candidate ?? intro;
 }

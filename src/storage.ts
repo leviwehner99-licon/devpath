@@ -119,8 +119,10 @@ function normalizeState(value: unknown): DevPathState {
     versions: safeVersions,
     projects,
     activeProjectId: projects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : projects[0].id,
+    activeCourseId: typeof parsed.activeCourseId === "string" && /^[a-z0-9-]{1,80}$/.test(parsed.activeCourseId) ? parsed.activeCourseId : initialState.activeCourseId,
     onboardingCompleted: hasCompletedOnboarding,
     ...(typeof parsed.courseCompletedAt === "string" ? { courseCompletedAt: parsed.courseCompletedAt.slice(0, 40) } : {}),
+    courseCompletions: isRecord(parsed.courseCompletions) ? Object.fromEntries(Object.entries(parsed.courseCompletions).filter(([key, date]) => /^[a-z0-9-]{1,80}$/.test(key) && typeof date === "string").slice(0, 100)) as Record<string, string> : {},
     settings: {
       theme,
       reducedMotion: rawSettings.reducedMotion === true,
