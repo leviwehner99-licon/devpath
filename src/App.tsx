@@ -212,7 +212,7 @@ export default function App() {
 
   const markComplete = (lesson: CourseLesson, hintCount: number, passed: boolean) => {
     const currentCode = state.progress[lesson.id]?.code ?? lesson.starterCode;
-    if (!passed || !lesson.successPattern.test(currentCode)) {
+    if (!passed || (lesson.practice !== false && !lesson.successPattern.test(currentCode))) {
       recordAttempt(lesson.id);
       setNotice("Prüfe dein Ergebnis noch einmal. Das Lernziel ist im Code noch nicht erkennbar.");
       return;

@@ -16,26 +16,44 @@
   "lessons": [
     {
       "id": "program-output",
-      "title": "Dein erstes Programm",
-      "objective": "Du kannst einen Wert mit JavaScript ausgeben.",
+      "title": "Was ist Programmieren?",
+      "objective": "Du kannst erklären, wie ein Programm aus einer Anweisung ein Ergebnis macht.",
       "duration": 10,
       "language": "javascript",
+      "practice": false,
       "concepts": [
         {
-          "tag": "console.log()",
-          "description": "Gibt einen Wert in der Entwicklerkonsole aus."
+          "tag": "Programm",
+          "description": "Eine nachvollziehbare Folge von Anweisungen, die ein Computer ausführt."
         },
         {
-          "tag": "Anweisung",
-          "description": "Eine einzelne Anweisung beschreibt einen Arbeitsschritt."
+          "tag": "Laufzeit",
+          "description": "Ein Programm wird von einer passenden Umgebung ausgeführt, zum Beispiel einem Browser oder Node.js."
         }
       ],
-      "explanation": "Programme bestehen aus Anweisungen, die der Reihe nach ausgeführt werden. Mit console.log() kannst du einen Text oder Wert in der Konsole sichtbar machen.",
-      "starterCode": "// Gib eine Begrüßung aus\n",
-      "task": "Gib mit console.log() den Text Hallo CodeZone aus.",
+      "explanation": "Programmieren heißt, ein Problem in klare Schritte zu zerlegen und diese Schritte in einer Sprache aufzuschreiben, die eine Laufzeitumgebung ausführen kann. JavaScript ist eine solche Sprache: Im Browser kann sie auf Ereignisse reagieren und Webseiten verändern; mit Node.js kann sie auch außerhalb des Browsers laufen. Der Computer errät nicht, was gemeint ist: Reihenfolge, Werte und Regeln müssen ausdrücklich beschrieben werden. In diesem Kurs liest du zuerst kleine Beispiele und schreibst danach eigene Schritte.",
+      "starterCode": "",
+      "exampleCode": "Menschliche Idee → JavaScript-Anweisungen → Browser oder Node.js → sichtbares Ergebnis",
+      "visualSteps": [
+        "Problem verstehen",
+        "Schritte beschreiben",
+        "JavaScript schreiben",
+        "Ergebnis prüfen"
+      ],
+      "task": "Wissenscheck: Was braucht JavaScript, damit ein Programm ausgeführt wird?",
+      "knowledgeCheck": {
+        "question": "Welche Aussage beschreibt ein Programm am besten?",
+        "options": [
+          "Eine Folge klarer Anweisungen, die eine Laufzeit ausführt",
+          "Ein Bild, das ein Computer von selbst versteht",
+          "Eine Programmiersprache ist immer an einen einzigen Browser gebunden"
+        ],
+        "correctIndex": 0,
+        "explanation": "Richtig: Ein Programm beschreibt Schritte. Eine passende Laufzeit, zum Beispiel ein Browser oder Node.js, führt JavaScript aus."
+      },
       "successPattern": {
-        "source": "console\\s*\\.\\s*log\\s*\\(\\s*[\\\"'`]Hallo CodeZone[\\\"'`]\\s*\\)",
-        "flags": "i"
+        "source": "(?:)",
+        "flags": ""
       }
     },
     {
