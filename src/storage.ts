@@ -4,7 +4,16 @@ import { validateProjectFiles } from "./projects";
 import { defaultStudyDays } from "./planner";
 
 const STORAGE_KEY = "devpath.local.v1";
-let activeProfileId = "local";
+const ACTIVE_PROFILE_KEY = "devpath.active-profile.v1";
+function readActiveProfileId(): string {
+  try {
+    const saved = window.localStorage.getItem(ACTIVE_PROFILE_KEY);
+    return saved && /^[a-zA-Z0-9_-]{1,128}$/.test(saved) ? saved : "local";
+  } catch {
+    return "local";
+  }
+}
+let activeProfileId = readActiveProfileId();
 const DATABASE_URL = "sqlite:devpath.db";
 const DATA_EXPORT_FORMAT = "devpath-data";
 const DATA_EXPORT_VERSION = 1;
@@ -227,6 +236,7 @@ async function persistSqliteState(state: DevPathState, existingDb?: LocalDatabas
 
 export async function setStorageProfileId(accountId: string): Promise<void> {
   if (!/^[a-zA-Z0-9_-]{1,128}$/.test(accountId)) throw new Error("Die Konto-ID für den lokalen Speicher ist ungültig.");
+  window.localStorage.setItem(ACTIVE_PROFILE_KEY, accountId);
   activeProfileId = accountId;
 }
 

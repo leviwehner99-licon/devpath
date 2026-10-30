@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { clearState, exportState, loadState, parseDataExport, saveState } from "./storage";
+import { clearState, exportState, loadState, parseDataExport, saveState, setStorageProfileId } from "./storage";
 import { recommendNextLesson, reviewDate } from "./planner";
 import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
 import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, Today } from "./views";
@@ -69,6 +69,9 @@ export default function App() {
       setStorageWritable(false);
       setStorageIssue("CodeZone konnte den lokalen Lernstand nicht öffnen. Die Daten werden nicht überschrieben. Du kannst zwischen den Menüs wechseln; Änderungen bleiben jedoch ungespeichert, bis der Speicher wieder geöffnet wurde.");
       setStorageIssueDetails(error instanceof Error ? error.message.slice(0, 500) : "Unbekannter lokaler Speicherfehler.");
+      // The old profile remains untouched. Immediately open the questionnaire
+      // against a separate local profile so the learner can recover gracefully.
+      void startFreshOnboarding(false);
     } finally {
       setStateLoaded(true);
     }
@@ -103,10 +106,42 @@ export default function App() {
   const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
     const profile = { ...state, ...values, learnerName: values.learnerName.trim() };
     const nextState = { ...profile, activeCourseId: recommendedCourse(profile).id, onboardingCompleted: true };
-    setState(nextState);
+    try {
+      await saveState(nextState);
+      setState(nextState);
+      setStorageWritable(true);
+      setStorageIssue("");
+      setStorageIssueDetails("");
+      setShowOnboarding(false);
+    } catch {
+      setStorageWritable(false);
+      setNotice("Dein Lernplan konnte noch nicht gespeichert werden. Die Abfrage bleibt geöffnet; versuche es erneut, sobald der lokale Speicher wieder erreichbar ist.");
+    }
+  };
+
+  const startFreshOnboarding = async (clearIssue = true) => {
+    const freshId = `local-${crypto.randomUUID()}`;
+    try {
+      await setStorageProfileId(freshId);
+    } catch {
+      setNotice("Die neue Abfrage konnte nicht gestartet werden. Bitte starte die App neu und versuche es erneut.");
+      return;
+    }
+    setState(initialState);
+    setView("today");
+    if (clearIssue) {
+      setStorageIssue("");
+      setStorageIssueDetails("");
+    }
+    setShowOnboarding(true);
     setStorageWritable(true);
-    setShowOnboarding(false);
-    void saveState(nextState).catch(() => setNotice("Dein Lernplan konnte lokal nicht gespeichert werden."));
+    setStateLoaded(true);
+    try {
+      await saveState(initialState);
+    } catch {
+      setStorageWritable(false);
+      setNotice("Die neue Abfrage ist geöffnet. Der Speicher ist noch nicht erreichbar; Antworten werden erst nach erfolgreichem Speichern übernommen.");
+    }
   };
 
   const saveCode = (lessonId: string, value: string | undefined) => setState((current) => {
@@ -357,7 +392,7 @@ export default function App() {
     <main className="main-area">
       <header className="topbar"><div className="breadcrumbs">CodeZone <span>/</span> {navigation.find((item) => item.id === view)?.label ?? "Einstellungen"}</div><div className="topbar-right"><span className="connection"><span className="status-dot" /> Lokal zuerst</span><button className="theme-switch" aria-label={`Zum ${effectiveTheme === "dark" ? "hellen" : "dunklen"} Farbschema wechseln`} onClick={() => update({ settings: { ...state.settings, theme: effectiveTheme === "dark" ? "light" : "dark" } })}>{effectiveTheme === "dark" ? "☀ Hell" : "◐ Dunkel"}</button><button className="avatar" aria-label="Profilname ändern" onClick={() => setView("settings")}>{state.learnerName.slice(0, 1).toUpperCase()}</button></div></header>
       <div className="page-content">
-        {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lernstand konnte nicht geöffnet werden</strong><p>{storageIssue}</p><div className="recovery-actions"><button className="button secondary" onClick={() => { setStateLoaded(false); void loadLocalState(); }}>Erneut versuchen</button><button className="button secondary" onClick={() => setView("settings")}>Einstellungen und Datenimport öffnen</button></div>{storageIssueDetails && <details className="storage-error-details"><summary>Lokale Fehlerdetails anzeigen</summary><code>{storageIssueDetails}</code></details>}</section>}
+        {storageIssue && <section className="panel recovery-panel" role="alert"><strong>Lernstand konnte nicht geöffnet werden</strong><p>{storageIssue}</p><div className="recovery-actions"><button className="button secondary" onClick={() => { setStateLoaded(false); void loadLocalState(); }}>Erneut versuchen</button><button className="button secondary" onClick={() => setView("settings")}>Einstellungen und Datenimport öffnen</button><button className="button primary" onClick={() => { void startFreshOnboarding(); }}>Neue Startabfrage beginnen</button></div>{storageIssueDetails && <details className="storage-error-details"><summary>Lokale Fehlerdetails anzeigen</summary><code>{storageIssueDetails}</code></details>}</section>}
         {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} aria-label="Meldung schließen">×</button></div>}
         {!stateLoaded && <div className="loading-note" role="status">Dein Lernraum wird geöffnet …</div>}
         {stateLoaded && view === "today" && <><Today courseTitle={activeCourse.title} courseLessonCount={activeCourse.lessons.length} state={state} progress={progressPercent} completedCount={completedCount} recommendation={recommendation} start={() => { setSelectedLessonId(recommendation.lesson.id); setView("learn"); }} edit={() => setView("settings")} /><DashboardDiscover course={activeCourse} state={state} completedCount={completedCount} openLibrary={() => setView("library")} openCurriculum={() => setView("curriculum")} /></>}
