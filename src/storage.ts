@@ -197,6 +197,19 @@ export async function loadState(): Promise<DevPathState> {
     return normalizeState(parsed);
   }
 
+  // When moving away from account sign-in, safely adopt a single prior local profile.
+  // Keep its old row intact; if several profiles exist, never guess which belongs here.
+  if (activeProfileId === "local") {
+    const legacyProfiles = await db.select<{ state_json: string }[]>("SELECT state_json FROM app_state WHERE account_id <> $1 ORDER BY updated_at DESC LIMIT 2", [activeProfileId]);
+    if (legacyProfiles.length === 1 && legacyProfiles[0].state_json && legacyProfiles[0].state_json !== "{}") {
+      const parsed: unknown = JSON.parse(legacyProfiles[0].state_json);
+      if (!isRecord(parsed)) throw new Error("Das bisherige lokale Profil enthält kein gültiges CodeZone-Datenformat.");
+      const adopted = normalizeState(parsed);
+      await persistSqliteState(adopted, db);
+      return adopted;
+    }
+  }
+
   // Import prototype data once; only remove the old copy after SQLite accepted it.
   const oldState = loadBrowserState();
   await persistSqliteState(oldState, db);
