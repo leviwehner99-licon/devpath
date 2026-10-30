@@ -22,6 +22,9 @@ export type CourseLesson = {
   retrievalAnswer?: string;
   projectSteps?: string[];
   acceptanceCriteria?: string[];
+  relatedCourses?: { id: string; title: string; reason: string }[];
+  resources?: { label: string; url: string }[];
+  resultPreview?: { title: string; summary: string; checks: string[] };
   practice?: boolean;
   knowledgeCheck?: { question: string; options: string[]; correctIndex: number; explanation: string };
 };
@@ -156,6 +159,8 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       : blueprint.id;
     return {
       ...blueprint,
+      relatedCourses: courseConnections[definition.id] ?? [],
+      resources: courseResources[definition.id] ?? [],
       id: `${definition.id}-${stableId}`,
       concepts: [],
       exampleCode: blueprint.examples[0]?.code,
@@ -163,6 +168,50 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
   });
   return { id: definition.id, version: "3.0.0", title: definition.title, category: definition.category, lessons };
 }
+
+// Explicit lesson-to-lesson paths. Links open the first relevant lesson in the selected course.
+const courseConnections: Record<string, { id: string; title: string; reason: string }[]> = {
+  javascript: [{ id: "web-development", title: "Webentwicklung", reason: "DOM, Gestaltung und Browserprojekt vertiefen" }, { id: "backend", title: "Backendentwicklung", reason: "JavaScript mit Node.js auf dem Server anwenden" }, { id: "typescript", title: "TypeScript", reason: "JavaScript-Projekte statisch typisieren" }],
+  java: [{ id: "backend", title: "Backendentwicklung", reason: "APIs und Datenbanken ergänzen" }, { id: "kotlin", title: "Kotlin", reason: "JVM-Grundlagen auf eine moderne Sprache übertragen" }],
+  python: [{ id: "ai", title: "Künstliche Intelligenz", reason: "Python für Daten und Modelle praktisch einsetzen" }, { id: "backend", title: "Backendentwicklung", reason: "Python-APIs mit FastAPI bauen" }, { id: "sql", title: "SQL", reason: "Daten für Programme und Modelle speichern" }],
+  php: [{ id: "web-development", title: "Webentwicklung", reason: "PHP mit Formularen und Browseroberflächen verbinden" }, { id: "backend", title: "Backendentwicklung", reason: "API- und Serverkonzepte ausbauen" }, { id: "sql", title: "SQL", reason: "Datenbankabfragen sicher anwenden" }],
+  typescript: [{ id: "javascript", title: "JavaScript", reason: "Die Laufzeit- und Sprachgrundlagen nachschlagen" }, { id: "web-development", title: "Webentwicklung", reason: "Typisierte Oberflächen erstellen" }, { id: "backend", title: "Backendentwicklung", reason: "Typisierte APIs mit Node.js entwickeln" }],
+  cpp: [{ id: "c", title: "C", reason: "Speicher- und Systemgrundlagen vergleichen" }, { id: "game-development", title: "Spieleentwicklung", reason: "Spielmechaniken und Engines anwenden" }],
+  csharp: [{ id: "game-development", title: "Spieleentwicklung", reason: "C# in Unity-Projekten praktisch einsetzen" }, { id: "backend", title: "Backendentwicklung", reason: "APIs und persistente Daten ergänzen" }],
+  rust: [{ id: "c", title: "C", reason: "Systemnahe Programmierung vergleichen" }, { id: "backend", title: "Backendentwicklung", reason: "Rust-Services und API-Konzepte vertiefen" }],
+  sql: [{ id: "backend", title: "Backendentwicklung", reason: "SQL in eine echte API integrieren" }, { id: "ai", title: "Künstliche Intelligenz", reason: "Trainingsdaten speichern und auswerten" }],
+  c: [{ id: "cpp", title: "C++", reason: "Systemnahe Grundlagen in größere Abstraktionen übertragen" }, { id: "security", title: "IT-Sicherheit", reason: "Speicherfehler und sichere Entwicklung verstehen" }],
+  kotlin: [{ id: "java", title: "Java", reason: "JVM-Grundlagen ergänzen" }, { id: "career", title: "Auf dem Weg zum Job", reason: "Projekte dokumentieren und präsentieren" }],
+  swift: [{ id: "career", title: "Auf dem Weg zum Job", reason: "App-Projekte als Portfolio aufbereiten" }],
+  "web-development": [{ id: "javascript", title: "JavaScript", reason: "Interaktionen und Logik systematisch lernen" }, { id: "typescript", title: "TypeScript", reason: "Webanwendungen mit Typen absichern" }, { id: "backend", title: "Backendentwicklung", reason: "Frontend mit APIs und Daten verbinden" }],
+  backend: [{ id: "javascript", title: "JavaScript", reason: "Die Sprache hinter Node.js festigen" }, { id: "sql", title: "SQL", reason: "Abfragen, Constraints und Transaktionen üben" }, { id: "security", title: "IT-Sicherheit", reason: "API-Schutz und Bedrohungsmodellierung vertiefen" }],
+  security: [{ id: "backend", title: "Backendentwicklung", reason: "Sichere Regeln in API und Datenbank umsetzen" }, { id: "web-development", title: "Webentwicklung", reason: "Browserrisiken wie XSS praktisch nachvollziehen" }, { id: "career", title: "Auf dem Weg zum Job", reason: "Sicherheitsarbeit verständlich dokumentieren" }],
+  ai: [{ id: "python", title: "Python", reason: "Modelle mit der Programmiersprache umsetzen" }, { id: "sql", title: "SQL", reason: "Datensätze speichern, abfragen und prüfen" }, { id: "security", title: "IT-Sicherheit", reason: "Datenschutz und Modellrisiken einordnen" }],
+  "game-development": [{ id: "csharp", title: "C#", reason: "Unity-Skripte und Spielzustände programmieren" }, { id: "javascript", title: "JavaScript", reason: "Kleine browserbasierte Spiele umsetzen" }],
+  career: [{ id: "javascript", title: "JavaScript", reason: "Ein Portfolio-Projekt mit Code vertiefen" }, { id: "python", title: "Python", reason: "Ein zweites Projekt samt Tests aufbauen" }, { id: "security", title: "IT-Sicherheit", reason: "Sicherheitsentscheidungen im Portfolio belegen" }],
+};
+
+// Official documentation for the tools actually practiced in each course.
+const courseResources: Record<string, { label: string; url: string }[]> = {
+  javascript: [{ label: "MDN JavaScript Guide", url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide" }, { label: "React: Erste Schritte", url: "https://react.dev/learn" }, { label: "Node.js lernen", url: "https://nodejs.org/en/learn" }],
+  java: [{ label: "Java Tutorials", url: "https://dev.java/learn/" }, { label: "JUnit 5 User Guide", url: "https://junit.org/junit5/docs/current/user-guide/" }, { label: "Spring Boot Referenz", url: "https://docs.spring.io/spring-boot/reference/" }],
+  python: [{ label: "Python-Tutorial", url: "https://docs.python.org/3/tutorial/" }, { label: "pytest Einstieg", url: "https://docs.pytest.org/en/stable/getting-started.html" }, { label: "FastAPI Tutorial", url: "https://fastapi.tiangolo.com/tutorial/" }],
+  php: [{ label: "PHP-Handbuch", url: "https://www.php.net/manual/en/" }, { label: "Laravel Dokumentation", url: "https://laravel.com/docs" }, { label: "PHPUnit Handbuch", url: "https://docs.phpunit.de/en/" }],
+  typescript: [{ label: "TypeScript Handbook", url: "https://www.typescriptlang.org/docs/handbook/intro.html" }, { label: "React mit TypeScript", url: "https://react.dev/learn/typescript" }, { label: "Node.js lernen", url: "https://nodejs.org/en/learn" }],
+  cpp: [{ label: "C++ Referenz", url: "https://en.cppreference.com/w/" }, { label: "CMake Tutorial", url: "https://cmake.org/cmake/help/latest/guide/tutorial/index.html" }],
+  csharp: [{ label: "C#-Lernpfad", url: "https://learn.microsoft.com/en-us/dotnet/csharp/" }, { label: "ASP.NET Core", url: "https://learn.microsoft.com/en-us/aspnet/core/" }, { label: "Unity Learn", url: "https://learn.unity.com/" }],
+  rust: [{ label: "The Rust Book", url: "https://doc.rust-lang.org/book/" }, { label: "Cargo Book", url: "https://doc.rust-lang.org/cargo/" }, { label: "Axum Dokumentation", url: "https://docs.rs/axum/latest/axum/" }],
+  sql: [{ label: "PostgreSQL Tutorial", url: "https://www.postgresql.org/docs/current/tutorial.html" }, { label: "SQLAlchemy Unified Tutorial", url: "https://docs.sqlalchemy.org/en/20/tutorial/" }],
+  c: [{ label: "C Sprachreferenz", url: "https://en.cppreference.com/w/c" }, { label: "GCC Handbuch", url: "https://gcc.gnu.org/onlinedocs/" }],
+  kotlin: [{ label: "Kotlin Docs", url: "https://kotlinlang.org/docs/home.html" }, { label: "Android mit Compose", url: "https://developer.android.com/develop/ui/compose" }, { label: "Ktor Server", url: "https://ktor.io/docs/server-create-a-new-project.html" }],
+  swift: [{ label: "The Swift Programming Language", url: "https://docs.swift.org/swift-book/documentation/the-swift-programming-language/" }, { label: "SwiftUI Tutorials", url: "https://developer.apple.com/tutorials/swiftui" }],
+  "web-development": [{ label: "MDN Learn Web Development", url: "https://developer.mozilla.org/en-US/docs/Learn_web_development" }, { label: "React: Erste Schritte", url: "https://react.dev/learn" }, { label: "Vite Guide", url: "https://vite.dev/guide/" }],
+  backend: [{ label: "Node.js lernen", url: "https://nodejs.org/en/learn" }, { label: "Fastify Einstieg", url: "https://fastify.dev/docs/latest/Guides/Getting-Started/" }, { label: "Node.js Test Runner", url: "https://nodejs.org/api/test.html" }, { label: "PostgreSQL Tutorial", url: "https://www.postgresql.org/docs/current/tutorial.html" }],
+  security: [{ label: "OWASP Top 10", url: "https://owasp.org/www-project-top-ten/" }, { label: "OWASP Cheat Sheet Series", url: "https://cheatsheetseries.owasp.org/" }],
+  ai: [{ label: "scikit-learn Einstieg", url: "https://scikit-learn.org/stable/getting_started.html" }, { label: "PyTorch Tutorials", url: "https://pytorch.org/tutorials/" }, { label: "Python-Tutorial", url: "https://docs.python.org/3/tutorial/" }],
+  "game-development": [{ label: "Godot Dokumentation", url: "https://docs.godotengine.org/en/stable/getting_started/introduction/index.html" }, { label: "Unity Learn", url: "https://learn.unity.com/" }],
+  career: [{ label: "Git Book", url: "https://git-scm.com/book/en/v2" }, { label: "GitHub Skills", url: "https://skills.github.com/" }],
+};
 
 function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
   return lessons.map((lesson, index) => {
