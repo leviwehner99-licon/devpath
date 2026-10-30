@@ -16,7 +16,7 @@ export type CourseLesson = {
   method?: { title: string; description: string };
   framework?: { title: string; description: string };
   module?: string;
-  examples?: { title: string; code: string; note: string }[];
+  examples?: { title: string; code: string; note: string; language?: string }[];
   takeaway?: string;
   retrievalPrompt?: string;
   retrievalAnswer?: string;
