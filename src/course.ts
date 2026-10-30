@@ -18,6 +18,10 @@ export type CourseLesson = {
   module?: string;
   examples?: { title: string; code: string; note: string }[];
   takeaway?: string;
+  retrievalPrompt?: string;
+  retrievalAnswer?: string;
+  projectSteps?: string[];
+  acceptanceCriteria?: string[];
   practice?: boolean;
   knowledgeCheck?: { question: string; options: string[]; correctIndex: number; explanation: string };
 };
@@ -26,7 +30,7 @@ export type LearningCourse = { id: string; version: string; title: string; categ
 
 export const programmingCourse: LearningCourse = {
   id: "programming-intro",
-  version: "1.0.0",
+  version: "2.0.0",
   title: "Einstieg in die Programmierung",
   category: "Programmiergrundlagen",
   lessons: [
@@ -112,7 +116,7 @@ export const programmingCourse: LearningCourse = {
       concepts: [{ tag: "Array", description: "Speichert mehrere Werte in einer geordneten Liste." }, { tag: "function", description: "Macht die Auswertung als Arbeitsschritt wiederverwendbar." }, { tag: "for...of", description: "Geht nacheinander durch die Werte einer Liste." }],
       explanation: "In kleinen Programmen wirken die Grundlagen zusammen: Daten liegen in einer Liste, eine Funktion wertet sie aus und eine Schleife verarbeitet jeden Eintrag.",
       starterCode: "const scores = [4, 7, 9];\n\nfunction sumScores(values) {\n  // Addiere alle Werte\n}\n\nconsole.log(sumScores(scores));\n", examples: [{ title: "Datenliste", code: "const scores = [4, 7, 9];", note: "Jeder Wert steht einmal in der Liste." }, { title: "Schleife und Funktion", code: "function sumScores(values) {\n  let total = 0;\n  for (const value of values) total += value;\n  return total;\n}", note: "Die Funktion verarbeitet jeden Listenwert und gibt das Ergebnis zurück." }],
-      task: "Vervollständige sumScores mit einer for...of-Schleife und gib die Summe zurück.", successPattern: /function\s+sumScores\s*\(\s*values\s*\)\s*\{[\s\S]*for\s*\(\s*(?:const|let)\s+\w+\s+of\s+values\s*\)[\s\S]*return\s+\w+\s*;?[\s\S]*\}/i,
+      task: "Vervollständige sumScores mit einer for...of-Schleife und gib die Summe zurück.", successPattern: /function\s+sumScores\s*\(\s*values\s*\)\s*\{[\s\S]*for\s*\(\s*(?:const|let)\s+\w+\s+of\s+values\s*\)[\s\S]*return\s+\w+\s*;?[\s\S]*\}/i, projectSteps: ["1. Verfolge einen Durchlauf mit dem Wert 4.", "2. Addiere jeden Wert zur laufenden Summe.", "3. Gib die Summe zurück und prüfe die leere Liste."], acceptanceCriteria: ["Für [4, 7, 9] kommt 20 heraus.", "Die leere Liste ergibt 0.", "Eine Schleife verarbeitet alle Einträge.", "Du kannst Eingabe, Zwischensumme und Rückgabe erklären."],
     },
   ] satisfies CourseLesson[],
 };
@@ -157,8 +161,28 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       exampleCode: blueprint.examples[0]?.code,
     } satisfies CourseLesson;
   });
-  return { id: definition.id, version: "2.0.0", title: definition.title, category: definition.category, lessons };
+  return { id: definition.id, version: "3.0.0", title: definition.title, category: definition.category, lessons };
 }
 
-export const learningCourses: LearningCourse[] = [programmingCourse, ...courseDefinitions.map(buildCourse)];
+function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
+  return lessons.map((lesson, index) => {
+    const previous = lessons[index - 1];
+    return {
+      ...lesson,
+      retrievalPrompt: previous
+        ? `Ohne zurückzublättern: Was erinnerst du zu „${previous.title}“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.`
+        : `Bevor du startest: Was weißt du schon über „${lesson.title}“? Notiere eine Vermutung oder eine Frage.`,
+      retrievalAnswer: previous
+        ? previous.takeaway ?? previous.objective
+        : `Ziel dieser Lektion: ${lesson.objective}`,
+    };
+  });
+}
+
+programmingCourse.lessons = addRetrievalPractice(programmingCourse.lessons);
+export const learningCourses: LearningCourse[] = [programmingCourse, ...courseDefinitions.map((definition) => {
+  const course = buildCourse(definition);
+  course.lessons = addRetrievalPractice(course.lessons);
+  return course;
+})];
 export function getLearningCourse(courseId: string): LearningCourse { return learningCourses.find((course) => course.id === courseId) ?? programmingCourse; }

@@ -227,7 +227,7 @@ export default function App() {
     return { ...current, progress: { ...current.progress, [lessonId]: { completed: previous?.completed ?? false, code: previous?.code ?? "", updatedAt: new Date().toISOString(), attempts: (previous?.attempts ?? 0) + 1, hintCount: previous?.hintCount ?? 0, confidence: previous?.confidence ?? 0, nextReviewAt: previous?.nextReviewAt } } };
   });
 
-  const markComplete = (lesson: CourseLesson, hintCount: number, passed: boolean) => {
+  const markComplete = (lesson: CourseLesson, hintCount: number, passed: boolean, selfRating = 3) => {
     const currentCode = state.progress[lesson.id]?.code ?? lesson.starterCode;
     if (!passed || (lesson.practice !== false && !lesson.successPattern.test(currentCode))) {
       recordAttempt(lesson.id);
@@ -235,7 +235,7 @@ export default function App() {
       return;
     }
     const now = new Date();
-    const confidence = Math.max(1, 5 - hintCount);
+    const confidence = Math.max(1, Math.min(5, Math.round(selfRating)));
     const courseFinished = activeCourse.lessons.every((item) => item.id === lesson.id || state.progress[item.id]?.completed);
     setState((current) => ({
       ...current,
@@ -365,7 +365,7 @@ export default function App() {
         {stateLoaded && view === "curriculum" && <Curriculum course={activeCourse} state={state} completedCount={completedCount} recommendation={recommendation} openLesson={(id) => { setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
         {stateLoaded && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
         {stateLoaded && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
-        {stateLoaded && view === "learn" && <Learn courseTitle={activeCourse.title} lessons={activeCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed) => markComplete(activeLesson, hints, passed)} openStudio={openLessonInStudio} />}
+        {stateLoaded && view === "learn" && <Learn courseTitle={activeCourse.title} lessons={activeCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} onSelect={(id) => setSelectedLessonId(id)} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onComplete={(hints, passed, confidence) => markComplete(activeLesson, hints, passed, confidence)} openStudio={openLessonInStudio} />}
         {stateLoaded && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={effectiveTheme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && view === "diploma" && <Diploma course={activeCourse} completedAt={state.courseCompletions[activeCourse.id] ?? (activeCourse.id === "programming-intro" ? state.courseCompletedAt : undefined)} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}

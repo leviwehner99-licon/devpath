@@ -47,6 +47,8 @@ Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`,
 
 Migration 004 in Supabase unter **SQL Editor → New query** öffnen, vollständig ausführen und auf `COMMIT` ohne Fehler warten. Danach `GET /api/v1/courses` prüfen: die Antwort soll `programming-intro` enthalten und `pilot-html-css` nicht mehr enthalten. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
 
+Wenn eine neue Fassung des Einstiegskurses veröffentlicht wird, zusätzlich die neueste nummerierte Migration in `server/migrations` ausführen. Migration 005 veröffentlicht Version 2.0.0 und verweist auf das passende JSON-Paket. Erst nachdem das statische Website-Deployment abgeschlossen ist und der Inhaltspfad erreichbar ist, die Migration ausführen. Danach `GET /api/v1/courses` aufrufen und bei `programming-intro` Version `2.0.0` sowie den neuen `contentPath` kontrollieren.
+
 ## Öffentliche Desktop-Installer
 
 Die Workflow-Matrix baut Windows x64, macOS ARM64, macOS Intel x64 und Linux x64. Normale Pushes bauen und prüfen Windows, macOS ARM64 und Linux; der Intel-Mac-Build wird nur beim manuellen Plattformlauf ausgeführt. Öffentliche Pakete werden nach einem manuellen Lauf in den öffentlichen Supabase-Storage-Bucket `devpath-downloads` geladen; erst nach erfolgreichem Upload schaltet der Workflow die Installer- und SHA-256-Links in `/download/` frei und pusht die aktualisierte Seite nach `main`.
