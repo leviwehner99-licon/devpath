@@ -21,6 +21,18 @@ const navigation: { id: View; label: string; icon: "today" | "learn" | "library"
   { id: "diploma", label: "Diplom", icon: "diploma" },
 ];
 
+function describeLocalSaveError(error: unknown): string {
+  if (error instanceof Error) return error.message.slice(0, 300) || error.name;
+  if (typeof error === "string") return error.slice(0, 300) || "Leere Fehlermeldung";
+  if (error && typeof error === "object") {
+    const message = "message" in error && typeof error.message === "string" ? error.message : undefined;
+    if (message) return message.slice(0, 300);
+    try { return JSON.stringify(error).slice(0, 300) || "Leeres Fehlerobjekt"; }
+    catch { return Object.prototype.toString.call(error); }
+  }
+  return String(error).slice(0, 300) || "Unbekannter lokaler Speicherfehler";
+}
+
 function lessonFileName(language: string): string {
   const extensions: Record<string, string> = { html: "html", css: "css", javascript: "js", typescript: "ts", java: "java", python: "py", php: "php", cpp: "cpp", csharp: "cs", rust: "rs", sql: "sql", c: "c", kotlin: "kt", swift: "swift", plaintext: "md" };
   return `index.${extensions[language] ?? "txt"}`;
@@ -117,7 +129,7 @@ export default function App() {
     } catch (error) {
       setStorageWritable(false);
       console.error("Could not save the onboarding plan to the local database.", error);
-      return { ok: false, detail: error instanceof Error ? error.message.slice(0, 300) : "Unbekannter lokaler Speicherfehler." };
+      return { ok: false, detail: describeLocalSaveError(error) };
     }
   };
 
