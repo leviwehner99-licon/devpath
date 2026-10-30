@@ -17,7 +17,7 @@ function PageTitle({ eyebrow, title, subtitle, action }: { eyebrow?: string; tit
   return <div className="page-title-row"><div>{eyebrow && <div className="eyebrow">{eyebrow}</div>}<h1>{title}</h1>{subtitle && <p className="page-subtitle">{subtitle}</p>}</div>{action}</div>;
 }
 
-export function Onboarding({ onFinish }: { onFinish: (values: { learnerName: string; goal: string; experience: DevPathState["experience"]; weeklySessions: number; studyDays: number[]; studyTime: string; sessionMinutes: number }) => boolean | void | Promise<boolean | void> }) {
+export function Onboarding({ onFinish }: { onFinish: (values: { learnerName: string; goal: string; experience: DevPathState["experience"]; weeklySessions: number; studyDays: number[]; studyTime: string; sessionMinutes: number }) => Promise<{ ok: boolean; detail?: string }> }) {
   const [learnerName, setLearnerName] = useState("");
   const [goal, setGoal] = useState("Programmieren von Grund auf lernen");
   const [experience, setExperience] = useState<DevPathState["experience"]>("new");
@@ -41,7 +41,7 @@ export function Onboarding({ onFinish }: { onFinish: (values: { learnerName: str
     setSubmitError("");
     try {
       const saved = await onFinish({ learnerName: learnerName.trim(), goal, experience, weeklySessions: studyDays.length, studyDays, studyTime, sessionMinutes });
-      if (saved === false) setSubmitError("Der Lernplan konnte noch nicht gespeichert werden. Die Startabfrage bleibt geöffnet. Prüfe den lokalen Speicher und versuche es danach erneut.");
+      if (!saved.ok) setSubmitError(saved.detail ? `Der Lernplan konnte nicht gespeichert werden. Technische Ursache: ${saved.detail}` : "Der Lernplan konnte noch nicht gespeichert werden. Die Startabfrage bleibt geöffnet. Bitte versuche es erneut.");
     } catch {
       setSubmitError("Der Lernplan konnte gerade nicht erstellt werden. Deine Angaben sind noch da. Bitte versuche es erneut.");
     }

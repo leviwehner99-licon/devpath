@@ -103,7 +103,7 @@ export default function App() {
 
   const update = (patch: Partial<DevPathState>) => setState((current) => ({ ...current, ...patch }));
 
-  const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">) => {
+  const finishOnboarding = async (values: Pick<DevPathState, "learnerName" | "goal" | "experience" | "weeklySessions" | "studyDays" | "studyTime" | "sessionMinutes">): Promise<{ ok: boolean; detail?: string }> => {
     const profile = { ...state, ...values, learnerName: values.learnerName.trim() };
     const nextState = { ...profile, activeCourseId: recommendedCourse(profile).id, onboardingCompleted: true };
     try {
@@ -113,10 +113,11 @@ export default function App() {
       setStorageIssue("");
       setStorageIssueDetails("");
       setShowOnboarding(false);
-      return true;
-    } catch {
+      return { ok: true };
+    } catch (error) {
       setStorageWritable(false);
-      return false;
+      console.error("Could not save the onboarding plan to the local database.", error);
+      return { ok: false, detail: error instanceof Error ? error.message.slice(0, 300) : "Unbekannter lokaler Speicherfehler." };
     }
   };
 
