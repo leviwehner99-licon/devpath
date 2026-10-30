@@ -48,7 +48,7 @@ export const initialState: DevPathState = {
   experience: "new",
   weeklySessions: 3,
   studyDays: [0, 2, 4],
-  studyTime: "18:00",
+  studyTime: "flexible",
   sessionMinutes: 20,
   progress: {},
   versions: [],

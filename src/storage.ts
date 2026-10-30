@@ -105,7 +105,12 @@ function normalizeState(value: unknown): DevPathState {
     ? [...new Set(parsed.studyDays.filter((day): day is number => Number.isInteger(day) && day >= 0 && day <= 6))].slice(0, 7)
     : [];
   const safeStudyDays = studyDays.length ? studyDays : defaultStudyDays(weeklySessions);
-  const studyTime = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime) ? parsed.studyTime : "18:00";
+  const legacyStudyHour = typeof parsed.studyTime === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(parsed.studyTime)
+    ? Number(parsed.studyTime.slice(0, 2))
+    : undefined;
+  const studyTime = parsed.studyTime === "morning" || parsed.studyTime === "afternoon" || parsed.studyTime === "evening" || parsed.studyTime === "flexible"
+    ? parsed.studyTime
+    : legacyStudyHour === undefined ? "flexible" : legacyStudyHour < 12 ? "morning" : legacyStudyHour < 17 ? "afternoon" : "evening";
   const theme = rawSettings.theme === "dark" || rawSettings.theme === "light" || rawSettings.theme === "system"
     ? rawSettings.theme
     : "system";

@@ -113,9 +113,10 @@ export default function App() {
       setStorageIssue("");
       setStorageIssueDetails("");
       setShowOnboarding(false);
+      return true;
     } catch {
       setStorageWritable(false);
-      setNotice("Dein Lernplan konnte noch nicht gespeichert werden. Die Abfrage bleibt geöffnet; versuche es erneut, sobald der lokale Speicher wieder erreichbar ist.");
+      return false;
     }
   };
 

@@ -6,9 +6,15 @@ export type PlanRecommendation = { lesson: CourseLesson; reason: string; isRevie
 export const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"] as const;
 
 export function studyTimeLabel(value: string): string {
-  const hour = Number(value.slice(0, 2));
-  const period = hour < 11 ? "morgens" : hour < 14 ? "mittags" : hour < 18 ? "nachmittags" : hour < 21 ? "abends" : "spät abends";
-  return `${period} (${value} Uhr)`;
+  if (value === "flexible") return "flexibel, ohne feste Uhrzeit";
+  if (value === "morning") return "morgens";
+  if (value === "afternoon") return "nachmittags";
+  if (value === "evening") return "abends";
+  if (/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)) {
+    const hour = Number(value.slice(0, 2));
+    return hour < 12 ? "morgens" : hour < 17 ? "nachmittags" : "abends";
+  }
+  return "flexibel, ohne feste Uhrzeit";
 }
 
 export function defaultStudyDays(sessions: number): number[] {
