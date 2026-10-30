@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import type { CourseLesson } from "./course";
 import type { DevPathState, LessonProgress, LocalProject, SavedVersion } from "./types";
 import { defaultStudyDays, studyTimeLabel, weekdays, type PlanRecommendation } from "./planner";
@@ -63,42 +63,42 @@ export function Diploma({ course, completedAt, completedCount, reducedMotion }: 
 
 export function Learn({ courseTitle, lessons, activeLesson, progress, courseProgress, code, onSelect, onCode, onHint, onComplete, openStudio, theme = "light" }: { courseTitle: string; lessons: CourseLesson[]; activeLesson: CourseLesson; progress: Record<string, LessonProgress>; courseProgress: number; code: string; onSelect: (id: string) => void; onCode: (value: string | undefined) => void; onHint: (hintCount: number) => void; onComplete: (hintCount: number, passed: boolean) => void; openStudio: () => void; theme?: "light" | "dark" }) {
   const [hint, setHint] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  useEffect(() => { setHint(0); setShowAnswer(false); setSelectedAnswer(null); }, [activeLesson.id]);
+  useEffect(() => { setHint(0); setSelectedAnswer(null); }, [activeLesson.id]);
   const passed = activeLesson.practice === false
     ? selectedAnswer === activeLesson.knowledgeCheck?.correctIndex
     : activeLesson.successPattern.test(code);
+  const examples = activeLesson.examples ?? (activeLesson.exampleCode
+    ? [{ title: "Beispiel", code: activeLesson.exampleCode, note: "Lies den Code von oben nach unten und verfolge, welcher Wert jeweils entsteht." }]
+    : []);
+  const currentIndex = lessons.findIndex((lesson) => lesson.id === activeLesson.id);
 
   return <>
-    <PageTitle eyebrow="DEIN LERNPFAD" title="Lernen" subtitle="Verstehe zuerst die Idee. Danach probierst du sie selbst aus." />
+    <PageTitle eyebrow="DEIN LERNPFAD" title="Lernen" subtitle="Eine Lektion nach der anderen. Erst verstehen, dann üben." />
     <div className="learning-layout">
       <section className="lesson-main panel">
-        <div className="lesson-meta"><span className="course-chip">{activeLesson.language.toUpperCase()} · {activeLesson.practice === false ? "EINORDNUNG" : "LERNMODUL"}</span><span>{activeLesson.duration} MIN</span></div>
+        <div className="lesson-meta"><span className="course-chip">{activeLesson.module ?? courseTitle}</span><span>LEKTION {currentIndex + 1} VON {lessons.length} · {activeLesson.duration} MIN</span></div>
         <h2>{activeLesson.title}</h2>
-        <div className="objective-card"><span className="objective-icon">◎</span><div><strong>Am Ende kannst du</strong><p>{activeLesson.objective}</p></div></div>
-        <h3>Erklärung</h3><p className="lesson-explanation">{activeLesson.explanation}</p>
-        <div className="concept-grid">{activeLesson.concepts.map((concept) => <div className="concept" key={concept.tag}><code>{concept.tag}</code><span>{concept.description}</span></div>)}</div>
-        {activeLesson.visualSteps && <section className="lesson-visual" aria-label="Ablaufgrafik"><div className="eyebrow">DER ABLAUF AUF EINEN BLICK</div><div className="visual-flow">{activeLesson.visualSteps.map((step, index) => <div className="visual-step" key={`${step}-${index}`}><span>{index + 1}</span><strong>{step}</strong>{index < activeLesson.visualSteps!.length - 1 && <i aria-hidden="true">→</i>}</div>)}</div></section>}
-        {activeLesson.method && <section className="learning-callout"><div className="eyebrow">LERNMETHODE</div><h3>{activeLesson.method.title}</h3><p>{activeLesson.method.description}</p></section>}
-        {activeLesson.framework && <section className="learning-callout framework-callout"><div className="eyebrow">ÖKOSYSTEM · WERKZEUGE</div><h3>{activeLesson.framework.title}</h3><p>{activeLesson.framework.description}</p></section>}
-        {activeLesson.exampleCode && <details className="example-details"><summary>{activeLesson.practice === false ? "Skizze oder Beispiel ansehen" : `Vollständiges Beispiel ansehen · ${activeLesson.language.toUpperCase()}`}</summary><pre className="answer-box">{activeLesson.exampleCode}</pre></details>}
-        <div className="exercise-heading"><div><div className="eyebrow">{activeLesson.knowledgeCheck ? "VERSTÄNDNIS PRÜFEN" : "JETZT AUSPROBIEREN"}</div><h3>{activeLesson.task}</h3></div><span className="local-badge">● lokal</span></div>
-        {activeLesson.knowledgeCheck ? <div className="knowledge-check" role="group" aria-label={activeLesson.knowledgeCheck.question}>
-          <p><strong>{activeLesson.knowledgeCheck.question}</strong></p>
-          {activeLesson.knowledgeCheck.options.map((option, index) => <button key={option} className={`knowledge-option ${selectedAnswer === index ? (index === activeLesson.knowledgeCheck!.correctIndex ? "correct" : "incorrect") : ""}`} aria-pressed={selectedAnswer === index} onClick={() => setSelectedAnswer(index)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}
-          {selectedAnswer !== null && <p className={`knowledge-feedback ${passed ? "correct" : "incorrect"}`} role="status">{passed ? "Richtig. " : "Noch nicht. Lies die Erklärung noch einmal. "}{activeLesson.knowledgeCheck.explanation}</p>}
-        </div> : <>
-          <p>Bearbeite den Startcode. Ändere ihn schrittweise; dein Code und Lernstand bleiben auf diesem Gerät.</p>
-          <div className="mini-editor"><Editor height="260px" language={activeLesson.language} theme={theme === "dark" ? "vs-dark" : "vs"} value={code} onChange={onCode} options={{ minimap: { enabled: false }, fontSize: 14, lineNumbers: "on", scrollBeyondLastLine: false, wordWrap: "on", automaticLayout: true, ariaLabel: `${activeLesson.language.toUpperCase()}-Aufgabe bearbeiten` }} /></div>
-          <div className="lesson-check" role="status"><span className={passed ? "check-good" : "check-pending"}>{passed ? "✓" : "○"}</span>{passed ? "Der geforderte Codebaustein ist erkennbar. Lies die Aufgabe noch einmal und prüfe selbst, ob alle Teile stimmen." : "Lies erst die Erklärung und das Beispiel. Ergänze dann den geforderten Baustein im Editor."}<button className="text-button" onClick={() => setShowAnswer((value) => !value)}>{showAnswer ? "Beispiel verbergen" : "Beispiel einblenden"}</button></div>
-          {showAnswer && <pre className="answer-box">{activeLesson.exampleCode ?? activeLesson.starterCode}</pre>}
-        </>}
+        <div className="objective-card"><span className="objective-icon">◎</span><div><strong>Das lernst du hier</strong><p>{activeLesson.objective}</p></div></div>
+        <section className="lesson-explanation"><h3>Erklärung</h3><p>{activeLesson.explanation}</p></section>
+        {examples.length > 0 && <section className="lesson-examples"><h3>Beispiele</h3>{examples.map((item, index) => <article className="lesson-example" key={item.title + index}><div className="lesson-example-heading"><strong>{item.title}</strong><span>{activeLesson.language.toUpperCase()}</span></div><pre>{item.code}</pre><p>{item.note}</p></article>)}</section>}
+        {activeLesson.takeaway && <aside className="lesson-takeaway"><strong>Merke</strong><p>{activeLesson.takeaway}</p></aside>}
+        <section className="lesson-practice"><div className="exercise-heading"><div><div className="eyebrow">{activeLesson.knowledgeCheck ? "KURZER WISSENSCHECK" : "JETZT SELBST ÜBEN"}</div><h3>{activeLesson.task}</h3></div><span className="local-badge">● lokal</span></div>
+          {activeLesson.knowledgeCheck ? <div className="knowledge-check" role="group" aria-label={activeLesson.knowledgeCheck.question}>
+            <p><strong>{activeLesson.knowledgeCheck.question}</strong></p>
+            {activeLesson.knowledgeCheck.options.map((option, index) => <button key={option} className={`knowledge-option ${selectedAnswer === index ? (index === activeLesson.knowledgeCheck!.correctIndex ? "correct" : "incorrect") : ""}`} aria-pressed={selectedAnswer === index} onClick={() => setSelectedAnswer(index)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}
+            {selectedAnswer !== null && <p className={`knowledge-feedback ${passed ? "correct" : "incorrect"}`} role="status">{passed ? "Richtig. " : "Noch nicht. "}{activeLesson.knowledgeCheck.explanation}</p>}
+          </div> : <>
+            <p className="practice-instructions">Nutze die Erklärung und Beispiele als Hilfe. Ändere den Startcode und prüfe, ob du die Aufgabe selbst erklären kannst.</p>
+            <div className="mini-editor"><Editor height="260px" language={activeLesson.language} theme={theme === "dark" ? "vs-dark" : "vs"} value={code} onChange={onCode} options={{ minimap: { enabled: false }, fontSize: 14, lineNumbers: "on", scrollBeyondLastLine: false, wordWrap: "on", automaticLayout: true, ariaLabel: `${activeLesson.language.toUpperCase()}-Aufgabe bearbeiten` }} /></div>
+            <div className="lesson-check" role="status"><span className={passed ? "check-good" : "check-pending"}>{passed ? "✓" : "○"}</span>{passed ? "Die erwartete Struktur ist zu erkennen. Prüfe zusätzlich die Beispiele und Randfälle." : "Arbeite die Aufgabe durch und ergänze den passenden Baustein."}</div>
+          </>}
+        </section>
         <div className="hint-row"><button className="button secondary" onClick={() => { const next = Math.min(hint + 1, 2); setHint(next); onHint(next); }}>Hinweis {hint ? `(${hint}/2)` : "anzeigen"}</button>{activeLesson.practice !== false && <button className="text-button" onClick={openStudio}>Im Code Studio öffnen →</button>}</div>
-        {hint > 0 && <div className="hint-box" role="status">{hint === 1 ? `Tipp: Achte besonders auf ${activeLesson.concepts[0]?.tag}. ${activeLesson.concepts[0]?.description}` : `Vergleiche deine Antwort mit dem Beispiel und erkläre, warum ${activeLesson.concepts[0]?.tag} hier verwendet wird.`}</div>}
-        <div className="lesson-footer"><span className="muted">{progress[activeLesson.id]?.completed ? "Bereits abgeschlossen · Wiederholung ist willkommen." : activeLesson.practice === false ? "Beantworte die Verständnisfrage, um zum nächsten Lernschritt zu kommen." : "Der automatische Check sucht nur nach einem Codebaustein. Prüfe zusätzlich selbst, ob dein Code die Aufgabe erfüllt."}</span><button className="button primary" disabled={!passed} onClick={() => onComplete(hint, passed)}>{passed ? (progress[activeLesson.id]?.completed ? "Wiederholung abschließen" : "Lernziel abschließen") : "Erst Aufgabe bearbeiten"}</button></div>
+        {hint > 0 && <div className="hint-box" role="status">{hint === 1 ? `Tipp: Lies zuerst die Erklärung zu „${activeLesson.title}“ und prüfe danach das erste Beispiel.` : `Vergleiche deinen Ansatz mit allen Beispielen. Achte besonders auf: ${activeLesson.takeaway ?? activeLesson.objective}`}</div>}
+        <div className="lesson-footer"><span className="muted">{progress[activeLesson.id]?.completed ? "Bereits abgeschlossen · Wiederholung ist willkommen." : activeLesson.practice === false ? "Beantworte den Wissenscheck, um weiterzugehen." : "Der Strukturcheck ersetzt keinen Compiler oder vollständigen Test. Prüfe deinen Code zusätzlich selbst."}</span><button className="button primary" disabled={!passed} onClick={() => onComplete(hint, passed)}>{passed ? (progress[activeLesson.id]?.completed ? "Wiederholung abschließen" : "Lernziel abschließen") : "Erst Aufgabe bearbeiten"}</button></div>
       </section>
-      <aside className="lesson-sidebar"><section className="panel side-panel"><div className="eyebrow">DEIN KURS</div><h3>{courseTitle}</h3><div className="course-progress"><div className="progress-line"><span style={{ width: `${courseProgress}%` }} /></div><span>{courseProgress}%</span></div><ol className="lesson-list">{lessons.map((lesson, index) => <li className={`${lesson.id === activeLesson.id ? "active" : ""} ${progress[lesson.id]?.completed ? "done" : ""}`} key={lesson.id}><button onClick={() => onSelect(lesson.id)} aria-current={lesson.id === activeLesson.id ? "step" : undefined}><span>{progress[lesson.id]?.completed ? "✓" : index + 1}</span>{lesson.title}</button></li>)}</ol></section><section className="panel side-panel tutor-card"><div className="tutor-spark">✦</div><h3>Schritt für Schritt</h3><p>Erst verstehen, dann selbst ausprobieren. Hinweise beziehen sich auf die gezeigten Kursinhalte.</p><span className="local-badge">Lernen auf diesem Gerät</span></section></aside>
+      <aside className="lesson-sidebar"><section className="panel side-panel"><div className="eyebrow">KURSÜBERSICHT</div><h3>{courseTitle}</h3><div className="course-progress"><div className="progress-line"><span style={{ width: `${courseProgress}%` }} /></div><span>{courseProgress}%</span></div><ol className="lesson-list">{lessons.map((lesson, index) => <Fragment key={lesson.id}>{lesson.module !== (index > 0 ? lessons[index - 1].module : undefined) && <li className="lesson-module-label">{lesson.module ?? "Lernweg"}</li>}<li className={`${lesson.id === activeLesson.id ? "active" : ""} ${progress[lesson.id]?.completed ? "done" : ""}`}><button onClick={() => onSelect(lesson.id)} aria-current={lesson.id === activeLesson.id ? "step" : undefined}><span>{progress[lesson.id]?.completed ? "✓" : index + 1}</span>{lesson.title}</button></li></Fragment>)}</ol></section></aside>
     </div>
   </>;
 }

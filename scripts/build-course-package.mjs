@@ -4,8 +4,12 @@ import { resolve } from "node:path";
 import ts from "typescript";
 
 const root = process.cwd();
+const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
+const curriculumSource = await readFile(resolve(root, "src/course-curriculum.ts"), "utf8");
+const curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions }).outputText;
+const curriculumUrl = `data:text/javascript;base64,${Buffer.from(curriculumCompiled).toString("base64")}`;
 const source = await readFile(resolve(root, "src/course.ts"), "utf8");
-const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 } }).outputText;
+const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`;
 const { programmingCourse, courseSkills } = await import(moduleUrl);
 const packageData = {
