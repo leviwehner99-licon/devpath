@@ -62,7 +62,7 @@
         "correctIndex": 0,
         "explanation": "Richtig: Ein Programm beschreibt Schritte. Eine passende Laufzeit, zum Beispiel ein Browser oder Node.js, führt JavaScript aus."
       },
-      "retrievalPrompt": "Bevor du startest: Was weißt du schon über „Was ist Programmieren?“? Notiere eine Vermutung oder eine Frage.",
+      "retrievalPrompt": "Zum Festigen: Erkläre nach der Lektion in einem Satz, was „Was ist Programmieren?“ bedeutet und nenne ein Beispiel.",
       "retrievalAnswer": "Ziel dieser Lektion: Du kannst erklären, wie ein Programm aus einer Anweisung ein Ergebnis macht.",
       "successPattern": {
         "source": "(?:)",
@@ -101,7 +101,7 @@
         }
       ],
       "task": "Lege eine Variable name mit deinem Namen an und gib sie aus.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Was ist Programmieren?“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Was ist Programmieren?“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du kannst erklären, wie ein Programm aus einer Anweisung ein Ergebnis macht.",
       "successPattern": {
         "source": "(?:const|let)\\s+name\\s*=\\s*[\\\"'`][^\\\"'`]+[\\\"'`][\\s\\S]*console\\s*\\.\\s*log\\s*\\(\\s*name\\s*\\)",
@@ -144,7 +144,7 @@
         }
       ],
       "task": "Gib mit typeof den Typ der Variable age aus.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Werte in Variablen speichern“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Werte in Variablen speichern“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du kannst einen Wert mit const oder let benennen und wiederverwenden.",
       "successPattern": {
         "source": "console\\s*\\.\\s*log\\s*\\(\\s*typeof\\s+age\\s*\\)",
@@ -179,7 +179,7 @@
         }
       ],
       "task": "Berechne den Gesamtpreis und prüfe mit ===, ob amount genau 3 ist.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Texte, Zahlen und Wahrheitswerte“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Texte, Zahlen und Wahrheitswerte“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du erkennst die grundlegenden Datentypen und kannst sie verwenden.",
       "successPattern": {
         "source": "===|\\*\\s*amount",
@@ -218,7 +218,7 @@
         }
       ],
       "task": "Ergänze eine if/else-Entscheidung für mindestens 10 Punkte.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Rechnen und Werte vergleichen“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Rechnen und Werte vergleichen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du verwendest Rechenoperatoren und vergleichst Werte ohne unbeabsichtigte Typumwandlung.",
       "successPattern": {
         "source": "if\\s*\\([^)]*points\\s*>=\\s*10[^)]*\\)\\s*\\{[\\s\\S]*\\}\\s*else\\s*\\{[\\s\\S]*\\}",
@@ -257,7 +257,7 @@
           "note": "for...of liest jedes Element der Liste."
         }
       ],
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Entscheidungen mit Bedingungen“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Entscheidungen mit Bedingungen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du kannst mit if und else unterschiedliche Fälle behandeln.",
       "successPattern": {
         "source": "for\\s*\\(\\s*(?:let|var)\\s+i\\s*=\\s*1\\s*;\\s*i\\s*<=\\s*5\\s*;\\s*i\\s*(?:\\+\\+|\\+=\\s*1)\\s*\\)",
@@ -296,7 +296,7 @@
         }
       ],
       "task": "Gib learner.name aus und filtere aus scores alle Werte ab 10.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Wiederholungen mit Schleifen“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Wiederholungen mit Schleifen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du kannst eine Schleife nutzen, um eine Aktion mehrfach auszuführen.",
       "successPattern": {
         "source": "\\.filter\\s*\\(|learner\\.name",
@@ -339,7 +339,7 @@
           "note": "Eine kurze Funktion kann als Arrow Function geschrieben werden."
         }
       ],
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Listen und Objekte“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Listen und Objekte“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du speicherst mehrere Werte und greifst gezielt auf einzelne Eigenschaften zu.",
       "successPattern": {
         "source": "function\\s+greet\\s*\\(\\s*name\\s*\\)\\s*\\{[\\s\\S]*return\\s+[^;]*name[^;]*;?[\\s\\S]*\\}",
@@ -374,7 +374,7 @@
         }
       ],
       "task": "Erkenne NaN und gib eine verständliche Meldung aus.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Eigene Funktionen schreiben“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Eigene Funktionen schreiben“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du kannst eine Funktion mit einem Parameter definieren und aufrufen.",
       "successPattern": {
         "source": "Number\\.isNaN\\s*\\(",
@@ -409,7 +409,7 @@
         }
       ],
       "task": "Registriere ein click-Ereignis und schreibe eine kurze Rückmeldung mit textContent.",
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Fehler lesen und Werte prüfen“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Fehler lesen und Werte prüfen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du unterscheidest Fehlerarten und prüfst Daten vor ihrer Verwendung.",
       "successPattern": {
         "source": "addEventListener\\s*\\(|textContent\\s*=",
@@ -463,7 +463,7 @@
         "Eine Schleife verarbeitet alle Einträge.",
         "Du kannst Eingabe, Zwischensumme und Rückgabe erklären."
       ],
-      "retrievalPrompt": "Ohne zurückzublättern: Was erinnerst du zu „Auf Klicks im Browser reagieren“? Nenne zuerst eine Regel und versuche dann ein eigenes kleines Beispiel.",
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Auf Klicks im Browser reagieren“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
       "retrievalAnswer": "Du verbindest einen Button mit einer sicheren Text-Rückmeldung.",
       "successPattern": {
         "source": "function\\s+sumScores\\s*\\(\\s*values\\s*\\)\\s*\\{[\\s\\S]*for\\s*\\(\\s*(?:const|let)\\s+\\w+\\s+of\\s+values\\s*\\)[\\s\\S]*return\\s+\\w+\\s*;?[\\s\\S]*\\}",
