@@ -16,7 +16,8 @@ export type CourseLesson = {
   method?: { title: string; description: string };
   framework?: { title: string; description: string };
   module?: string;
-  examples?: { title: string; code: string; note: string; language?: string }[];
+  examples?: { title: string; code: string; note: string; language?: string; walkthrough?: string[] }[];
+  languageCourse?: { id: string; title: string; reason: string };
   takeaway?: string;
   retrievalPrompt?: string;
   retrievalAnswer?: string;
@@ -157,6 +158,9 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       : blueprint.id;
     return {
       ...blueprint,
+      languageCourse: languageCoursePaths[definition.id]?.lessonIds.includes(blueprint.id)
+        ? { id: languageCoursePaths[definition.id].id, title: languageCoursePaths[definition.id].title, reason: languageCoursePaths[definition.id].reason }
+        : undefined,
       id: `${definition.id}-${stableId}`,
       concepts: [],
       exampleCode: blueprint.examples[0]?.code,
@@ -164,6 +168,14 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
   });
   return { id: definition.id, version: "3.0.0", title: definition.title, category: definition.category, lessons };
 }
+
+const languageCoursePaths: Record<string, { id: string; title: string; reason: string; lessonIds: string[] }> = {
+  "web-development": { id: "javascript", title: "JavaScript", reason: "Diese Lektion baut auf Funktionen, Ereignissen und Datenstrukturen auf. Lerne sie hier im passenden Sprachkurs zuerst, wenn sie neu für dich sind.", lessonIds: ["framework-workshop"] },
+  backend: { id: "javascript", title: "JavaScript", reason: "Node.js führt JavaScript auf dem Server aus. Falls Variablen, Funktionen, Module oder asynchrone Abläufe neu sind, lernst du die Grundlagen zuerst im JavaScript-Kurs.", lessonIds: ["node-runtime", "node-modules-tests", "node-fastify-api"] },
+  ai: { id: "python", title: "Python", reason: "Die KI-Beispiele verwenden Listen, Funktionen und Bibliotheken aus Python. Lerne diese Grundlagen zuerst im Python-Kurs, wenn sie neu für dich sind.", lessonIds: ["python-bridge", "dataframe"] },
+  security: { id: "javascript", title: "JavaScript", reason: "Die Web-Sicherheitsbeispiele verwenden JavaScript-Funktionen, HTTP-Eingaben und Daten. Lerne die Sprachgrundlagen zuerst im JavaScript-Kurs, wenn sie neu für dich sind.", lessonIds: ["framework-workshop"] },
+  "game-development": { id: "csharp", title: "C#", reason: "Der Unity-Teil verwendet C#-Methoden und Spielzustand. Lerne die C#-Grundlagen zuerst im C#-Kurs, wenn sie neu für dich sind.", lessonIds: ["framework-workshop"] },
+};
 
 function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
   return lessons.map((lesson, index) => {
