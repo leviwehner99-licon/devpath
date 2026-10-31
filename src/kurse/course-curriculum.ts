@@ -2,6 +2,8 @@ import type { CourseLesson } from "./course";
 import { topicExtensions } from "./course-extensions";
 import { languageExtensions } from "./language-extensions";
 import { integrationsprojekte } from "./integrationsprojekte";
+import { modernizeBackend } from "./backend-korrekturen";
+import { themenvertiefung } from "./themenvertiefung";
 
 type Example = { title: string; code: string; note: string; language?: string; walkthrough?: string[] };
 export type LessonBlueprint = Pick<CourseLesson, "id" | "title" | "objective" | "duration" | "language" | "explanation" | "starterCode" | "task" | "successPattern" | "practice" | "knowledgeCheck"> & {
@@ -13,6 +15,8 @@ export type LessonBlueprint = Pick<CourseLesson, "id" | "title" | "objective" | 
   acceptanceCriteria?: string[];
   resultPreview?: { title: string; summary: string; checks: string[] };
   resources?: { label: string; url: string }[];
+  visualSteps?: CourseLesson["visualSteps"];
+  systemDiagram?: CourseLesson["systemDiagram"];
 };
 
 function exampleLanguage(title: string): string | undefined {
@@ -421,7 +425,7 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
   swift: languageOnly("swift", swift),
   gdscript: [...gdscript.slice(0, -1), ...(languageExtensions.gdscript ?? []), gdscript[gdscript.length - 1]],
   "web-development": extendTrack("web-development", [...webDevelopment.slice(0, -1), ...webPractice.slice(0, 2), webDevelopment[webDevelopment.length - 1], ...webPractice.slice(2)]),
-  backend: extendTrack("backend", [backend[0], ...backendFoundation, ...backend.slice(1), ...backendNodePath, ...backendPractice]),
+  backend: modernizeBackend(extendTrack("backend", [backend[0], ...backendFoundation, ...backend.slice(1), ...backendNodePath, ...backendPractice])),
   security: extendTrack("security", [security[0], ...securityPractice, ...security.slice(1), ...securityLabs]),
   ai: extendTrack("ai", [...aiJourney.slice(0, 2), ...mlFoundation, ...aiJourney.slice(2)]),
   "game-development": [gameDevelopment[0], gameEnginePractice[0], ...gameDevelopment.slice(1), topicExtensions["game-development"][0], gameEnginePractice[1], topicExtensions["game-development"][1], topicExtensions["game-development"][2], ...gameProjects.slice(0, 2), topicExtensions["game-development"][3], gameProjects[2]],
@@ -431,5 +435,19 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
 for (const [courseId, practice] of Object.entries(integrationsprojekte)) {
   const track = courseCurricula[courseId];
   track.splice(track.length - 1, 0, practice);
+}
+
+for (const [courseId, lessons] of Object.entries(themenvertiefung)) {
+  const track = courseCurricula[courseId];
+  const integrationIndex = track.findIndex((lesson) => lesson.id === integrationsprojekte[courseId]?.id);
+  track.splice(integrationIndex < 0 ? track.length - 1 : integrationIndex, 0, ...lessons);
+}
+
+for (const [courseId, finalReview] of Object.entries({ "web-development": "frontend-release", backend: "api-operations", "game-development": "game-export" })) {
+  const track = courseCurricula[courseId];
+  const current = track.findIndex((lesson) => lesson.id === finalReview);
+  if (current < 0) continue;
+  const [review] = track.splice(current, 1);
+  track.splice(track.length - 1, 0, review);
 }
 

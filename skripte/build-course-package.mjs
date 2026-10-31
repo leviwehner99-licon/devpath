@@ -6,7 +6,7 @@ import ts from "typescript";
 const root = process.cwd();
 const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
 const extensionModules = {};
-for (const name of ["course-extensions", "language-extensions", "einstieg", "lernmaterial", "systemarchitektur", "integrationsprojekte"]) {
+for (const name of ["course-extensions", "language-extensions", "einstieg", "lernmaterial", "systemarchitektur", "integrationsprojekte", "backend-korrekturen", "themenvertiefung"]) {
   const extensionSource = await readFile(resolve(root, `src/kurse/${name}.ts`), "utf8");
   const extensionCompiled = ts.transpileModule(extensionSource, { compilerOptions }).outputText;
   extensionModules[name] = `data:text/javascript;base64,${Buffer.from(extensionCompiled).toString("base64")}`;
@@ -30,6 +30,7 @@ for (const course of learningCourses) {
   if (course.lessons.some((lesson) => !lesson.title || !lesson.objective || !lesson.explanation)) throw new Error(`Unvollständige Lektion im Kurs ${course.id}`);
   if (course.lessons.some((lesson) => !lesson.visualSteps?.length)) throw new Error(`Anschauliche Schritte fehlen im Kurs ${course.id}`);
   if (course.category === "Themenkurs" && !course.lessons[0].systemDiagram) throw new Error(`Systemdiagramm fehlt im Kurs ${course.id}`);
+  if (course.category === "Themenkurs" && course.lessons.length < 30) throw new Error(`Themenkurs ${course.id} ist zu kurz: ${course.lessons.length} Lektionen`);
   if (course.lessons.some((lesson, index) => index > 0 && lesson.previousLesson?.title !== course.lessons[index - 1].title)) throw new Error(`Lernübergang fehlt im Kurs ${course.id}`);
   for (const lesson of course.lessons) {
     if (lesson.languageCourse && !learningCourses.some((target) => target.id === lesson.languageCourse.id)) throw new Error(`Sprachkurs ${lesson.languageCourse.id} für ${lesson.id} fehlt`);
@@ -39,6 +40,14 @@ for (const course of learningCourses) {
   }
 }
 const allLessons = learningCourses.flatMap((course) => course.lessons);
+const backendCourse = learningCourses.find((course) => course.id === "backend");
+const staleBackendLessons = backendCourse.lessons.filter((lesson) => /fastify/i.test(JSON.stringify(lesson))).map((lesson) => lesson.id);
+if (staleBackendLessons.length) throw new Error(`Fastify ist noch im aktiven Backendkurs: ${staleBackendLessons.join(", ")}`);
+for (const course of learningCourses.filter((item) => item.category === "Themenkurs")) {
+  const deeper = course.lessons.filter((lesson) => lesson.systemDiagram && lesson.id !== `${course.id}-orientation` && lesson.id !== `${course.id}-project`);
+  if (deeper.length < 5) throw new Error(`Zu wenige erklärende Ablaufdiagramme in ${course.id}`);
+  if (deeper.some((lesson) => !lesson.systemDiagram.diagram.includes("↓") || !lesson.acceptanceCriteria?.length)) throw new Error(`Vertiefung ohne Diagramm oder Praxisprüfung in ${course.id}`);
+}
 for (const [id, setup] of Object.entries(setups)) {
   const lesson = allLessons.find((entry) => entry.id === id);
   if (!lesson || lesson.setup !== setup || setup.steps.length < 3 || !setup.verify) throw new Error(`Installationsanleitung fehlt oder ist unvollständig: ${id}`);
@@ -49,7 +58,7 @@ for (const course of learningCourses) {
 const orderChecks = {
   "programming-intro": [["program-input-result", "program-search-workshop"], ["program-debug", "program-debug-workshop"], ["program-ecosystem", "program-languages"], ["program-languages", "program-system"]],
   "web-development": [["web-development-combine-frontend", "web-development-vite-setup"], ["web-development-vite-setup", "web-development-frameworks"], ["web-development-frameworks", "web-development-typescript-ui"], ["web-development-react-state", "web-development-frontend-integration"], ["web-development-frontend-integration", "web-development-project"]],
-  backend: [["backend-server-model", "backend-api-model"], ["backend-fastify-setup", "backend-node-fastify-api"], ["backend-spring-setup", "backend-spring-api"], ["backend-node-postgres-api", "backend-backend-integration"], ["backend-backend-integration", "backend-project"]],
+  backend: [["backend-server-model", "backend-api-model"], ["backend-node-runtime", "backend-express-setup"], ["backend-express-setup", "backend-node-express-api"], ["backend-spring-setup", "backend-spring-api"], ["backend-node-postgres-api", "backend-backend-integration"], ["backend-backend-integration", "backend-project"]],
   ai: [["ai-python-environment", "ai-dataframe"], ["ai-sklearn-setup", "ai-sklearn-model"], ["ai-pytorch-setup", "ai-pytorch-neural-network"], ["ai-fastapi-practice", "ai-ai-integration"], ["ai-ai-integration", "ai-project"]],
   "game-development": [["game-development-orientation", "game-development-godot-setup"], ["game-development-godot-setup", "game-development-godot-first-game"], ["game-development-unity-setup", "game-development-unity-basics"], ["game-development-game-integration", "game-development-project"]],
   security: [["security-ethical-lab", "security-zap-setup"], ["security-security-integration", "security-project"]],
@@ -87,6 +96,8 @@ for (const lesson of web.lessons) {
 const reactSearch = web.lessons.find((lesson) => lesson.id === "web-development-react-state");
 if (!reactSearch.examples[0].code.includes('htmlFor="search"') || reactSearch.examples[0].code.includes(' for="search"')) throw new Error("React-Beispiel benutzt ein falsches Label-Attribut");
 process.stdout.write(`${learningCourses.length} Kurse, ${allLessons.length} Lektionen und ${Object.keys(setups).length} Installationsanleitungen geprüft.\n`);
+if (process.argv.includes("--report")) for (const course of learningCourses) process.stdout.write(`${course.id}: ${course.lessons.length}\n`);
+if (process.argv.includes("--report-lessons")) for (const course of learningCourses.filter((item) => item.category === "Themenkurs")) process.stdout.write(`${course.id}: ${course.lessons.map((lesson) => lesson.id).join(", ")}\n`);
 const packageData = {
   schemaVersion: 1,
   id: programmingCourse.id,

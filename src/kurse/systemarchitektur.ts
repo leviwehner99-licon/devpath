@@ -93,6 +93,6 @@ export function improveLesson(lesson: CourseLesson, courseId: string): CourseLes
   return {
     ...lesson,
     ...(correctedWeb[lesson.id] ?? {}),
-    systemDiagram: lesson.id === `${courseId}-orientation` || lesson.id === `${courseId}-project` ? diagrams[courseId] : undefined,
+    systemDiagram: lesson.systemDiagram ?? (lesson.id === `${courseId}-orientation` || lesson.id === `${courseId}-project` ? diagrams[courseId] : undefined),
   };
 }
