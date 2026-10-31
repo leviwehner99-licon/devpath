@@ -24,6 +24,7 @@ export type CourseLesson = {
   projectSteps?: string[];
   acceptanceCriteria?: string[];
   resultPreview?: { title: string; summary: string; checks: string[] };
+  resources?: { label: string; url: string }[];
   practice?: boolean;
   knowledgeCheck?: { question: string; options: string[]; correctIndex: number; explanation: string };
 };
@@ -32,7 +33,7 @@ export type LearningCourse = { id: string; version: string; title: string; categ
 
 export const programmingCourse: LearningCourse = {
   id: "programming-intro",
-  version: "3.0.0",
+  version: "4.0.0",
   title: "Einstieg in die Programmierung",
   category: "Programmiergrundlagen",
   lessons: [
@@ -141,6 +142,7 @@ const courseDefinitions = [
   { id:"c", title:"C", category:"Programmiersprache", language:"c", topic:"Systemnahe Grundlagen lernen", framework:"Compiler, Make und Unity als Ausblick", intro:"C ist eine kompakte Sprache, die nah an Betriebssystem und Hardware arbeitet.", examples:["#include <stdio.h>\\nint main(void) {\\n  printf(\"Hallo\\n\");\\n}","int points = 12;\\nif (points >= 10) {\\n  printf(\"Bestanden\\n\");\\n}","int double_value(int value) {\\n  return value * 2;\\n}","int values[] = {2, 4, 6};\\nfor (int i = 0; i < 3; i++) printf(\"%d\\n\", values[i]);"] },
   { id:"kotlin", title:"Kotlin", category:"Programmiersprache", language:"kotlin", topic:"Moderne JVM-Apps schreiben", framework:"Kotlin coroutines, Ktor und Android", intro:"Kotlin verbindet kompakte Syntax mit JVM- und Android-Ökosystemen.", examples:["val name = \"Ada\"\\nprintln(name)","val points = 12\\nif (points >= 10) println(\"Bestanden\")","fun double(value: Int): Int = value * 2","val names = listOf(\"Ada\", \"Linus\")\\nnames.forEach(::println)"] },
   { id:"swift", title:"Swift", category:"Programmiersprache", language:"swift", topic:"Apps für Apple-Plattformen entwickeln", framework:"SwiftUI, XCTest und async/await", intro:"Swift ist eine typsichere Sprache für Apps und Programme im Apple-Ökosystem.", examples:["let name = \"Ada\"\\nprint(name)","let points = 12\\nif points >= 10 {\\n    print(\"Bestanden\")\\n}","func double(_ value: Int) -> Int { value * 2 }","let names = [\"Ada\", \"Linus\"]\\nnames.forEach { print($0) }"] },
+  { id:"gdscript", title:"GDScript", category:"Programmiersprache", language:"gdscript", topic:"Spielregeln in Godot schreiben", framework:"", intro:"GDScript ist die gut lesbare Skriptsprache von Godot.", examples:[] },
   { id:"web-development", title:"Webentwicklung", category:"Themenkurs", language:"html", topic:"Eine vollständige Webseite planen und bauen", framework:"HTML, CSS, JavaScript und React", intro:"Webentwicklung verbindet Struktur, Gestaltung, Verhalten und Veröffentlichung.", examples:["<main><h1>Mein Projekt</h1><p>Eine klare Aussage.</p></main>",".card { display: grid; gap: 1rem; }","const button = document.querySelector('button');\\nbutton?.addEventListener('click', () => console.log('Start'));","Komponente → Daten → Darstellung → Interaktion"] },
   { id:"backend", title:"Backendentwicklung", category:"Themenkurs", language:"javascript", topic:"Eine API mit Datenbank entwerfen", framework:"REST, Node.js, PostgreSQL und OpenAPI", intro:"Das Backend prüft Anfragen, setzt Regeln durch und verwaltet Daten.", examples:["GET /api/courses → 200 + JSON","const course = await db.query('SELECT id, title FROM courses');","if (!user) return response.status(401);","Client → Route → Validierung → Datenbank → Antwort"] },
   { id:"security", title:"IT-Sicherheit", category:"Themenkurs", language:"javascript", topic:"Risiken erkennen und sicher abwehren", framework:"OWASP Top 10, STRIDE und Defense in Depth", intro:"Sicherheit beginnt mit Bedrohungsmodell, sicheren Standardwerten und Prüfung.", examples:["Asset → Bedrohung → Schwachstelle → Schutzmaßnahme","const safe = textContent; // Text statt ungeprüftem HTML","SELECT * FROM users WHERE id = $1; // gebundener Parameter","Änderung → Review → automatischer Scan → Freigabe"] },
@@ -152,6 +154,7 @@ const courseDefinitions = [
 function buildCourse(definition: typeof courseDefinitions[number]): LearningCourse {
   const curriculum = courseCurricula[definition.id];
   if (!curriculum || curriculum.length < 7) throw new Error(`Ausführlicher Kursinhalt fehlt: ${definition.id}`);
+  const linkedLanguages = new Set<string>();
   const lessons = curriculum.map((blueprint, index) => {
     // Preserve the earlier release's four lesson IDs so saved completion records stay visible.
     const stableId = blueprint.id === "orientation" ? "orientation"
@@ -159,32 +162,28 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       : blueprint.id === "conditions" || blueprint.id === "flow" ? "logic"
       : index === curriculum.length - 1 ? "project"
       : blueprint.id;
+    const languageCourseId = blueprint.languageCourse?.id ?? (definition.id === "backend" && blueprint.id === "database" || definition.id === "security" && blueprint.id === "injection-lab" ? "sql" : ({ javascript: "javascript", typescript: "typescript", python: "python", sql: "sql", csharp: "csharp", java: "java", php: "php", gdscript: "gdscript" } as Record<string, string>)[blueprint.language]);
+    const linkLanguage = definition.category === "Themenkurs" && blueprint.practice !== false && languageCourseId && !linkedLanguages.has(languageCourseId);
+    if (linkLanguage) linkedLanguages.add(languageCourseId);
     return {
       ...blueprint,
-      // Show the direct prerequisite path throughout a thematic course, not only
-      // on a few advanced lessons where learners may already be lost.
-      languageCourse: languageCoursePaths[definition.id]
-        ? { id: languageCoursePaths[definition.id].id, title: languageCoursePaths[definition.id].title, reason: languageCoursePaths[definition.id].reason }
+      languageCourse: linkLanguage
+        ? blueprint.languageCourse ?? { id: languageCourseId, title: learningLanguageTitles[languageCourseId] ?? languageCourseId, reason: `Hier brauchst du erstmals ${learningLanguageTitles[languageCourseId] ?? languageCourseId}. Im Sprachkurs übst du die Grundlagen ausführlich und kehrst danach zu dieser Anwendung zurück.` }
         : undefined,
       id: `${definition.id}-${stableId}`,
       concepts: [],
       exampleCode: blueprint.examples[0]?.code,
     } satisfies CourseLesson;
   });
-  return { id: definition.id, version: "3.0.0", title: definition.title, category: definition.category, lessons };
+  return { id: definition.id, version: "4.0.0", title: definition.title, category: definition.category, lessons };
 }
 
-const languageCoursePaths: Record<string, { id: string; title: string; reason: string }> = {
-  "web-development": { id: "javascript", title: "JavaScript", reason: "JavaScript macht Webseiten interaktiv. Der Sprachkurs erklärt zuerst Variablen, Funktionen, Ereignisse und Datenstrukturen, die du in diesem Themenkurs praktisch brauchst." },
-  backend: { id: "javascript", title: "JavaScript", reason: "Node.js führt JavaScript auf dem Server aus. Der Sprachkurs erklärt zuerst Variablen, Funktionen, Module und asynchrone Abläufe, die du in diesem Themenkurs praktisch brauchst." },
-  ai: { id: "python", title: "Python", reason: "Die KI-Beispiele nutzen Python und seine Bibliotheken. Der Sprachkurs erklärt zuerst Variablen, Funktionen, Listen und Daten, die du in diesem Themenkurs praktisch brauchst." },
-  security: { id: "javascript", title: "JavaScript", reason: "Viele Web-Sicherheitsbeispiele nutzen JavaScript, HTTP-Eingaben und Daten. Der Sprachkurs erklärt die dafür benötigten Sprachgrundlagen Schritt für Schritt." },
-  "game-development": { id: "csharp", title: "C#", reason: "Der Unity-Teil nutzt C#-Methoden und Spielzustände. Der Sprachkurs erklärt die benötigten Grundlagen, bevor du sie in diesem Themenkurs anwendest." },
-};
+const learningLanguageTitles: Record<string, string> = { javascript: "JavaScript", typescript: "TypeScript", python: "Python", sql: "SQL", csharp: "C#", java: "Java", php: "PHP", gdscript: "GDScript" };
 
 function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
   return lessons.map((lesson, index) => {
-    const previous = lessons[index - 1];
+    const earlierIndex = index > 7 && index % 7 === 0 ? index - 7 : index > 3 && index % 3 === 0 ? index - 3 : index - 1;
+    const previous = lessons[earlierIndex];
     return {
       ...lesson,
       retrievalPrompt: previous

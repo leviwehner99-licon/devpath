@@ -5,13 +5,28 @@ import ts from "typescript";
 
 const root = process.cwd();
 const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
+const extensionModules = {};
+for (const name of ["course-extensions", "language-extensions"]) {
+  const extensionSource = await readFile(resolve(root, `src/${name}.ts`), "utf8");
+  const extensionCompiled = ts.transpileModule(extensionSource, { compilerOptions }).outputText;
+  extensionModules[name] = `data:text/javascript;base64,${Buffer.from(extensionCompiled).toString("base64")}`;
+}
 const curriculumSource = await readFile(resolve(root, "src/course-curriculum.ts"), "utf8");
-const curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions }).outputText;
+let curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions }).outputText;
+for (const [name, url] of Object.entries(extensionModules)) curriculumCompiled = curriculumCompiled.replace(`from "./${name}"`, `from "${url}"`);
 const curriculumUrl = `data:text/javascript;base64,${Buffer.from(curriculumCompiled).toString("base64")}`;
 const source = await readFile(resolve(root, "src/course.ts"), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`;
-const { programmingCourse, courseSkills } = await import(moduleUrl);
+const { programmingCourse, courseSkills, learningCourses } = await import(moduleUrl);
+for (const course of learningCourses) {
+  const ids = course.lessons.map((lesson) => lesson.id);
+  if (new Set(ids).size !== ids.length) throw new Error(`Doppelte Lektion im Kurs ${course.id}: ${ids.filter((id, index) => ids.indexOf(id) !== index).join(", ")}`);
+  if (course.lessons.some((lesson) => !lesson.title || !lesson.objective || !lesson.explanation)) throw new Error(`Unvollständige Lektion im Kurs ${course.id}`);
+  for (const lesson of course.lessons) {
+    if (lesson.languageCourse && !learningCourses.some((target) => target.id === lesson.languageCourse.id)) throw new Error(`Sprachkurs ${lesson.languageCourse.id} für ${lesson.id} fehlt`);
+  }
+}
 const packageData = {
   schemaVersion: 1,
   id: programmingCourse.id,

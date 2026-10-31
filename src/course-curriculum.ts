@@ -1,4 +1,6 @@
 import type { CourseLesson } from "./course";
+import { topicExtensions } from "./course-extensions";
+import { languageExtensions } from "./language-extensions";
 
 type Example = { title: string; code: string; note: string; language?: string; walkthrough?: string[] };
 export type LessonBlueprint = Pick<CourseLesson, "id" | "title" | "objective" | "duration" | "language" | "explanation" | "starterCode" | "task" | "successPattern" | "practice" | "knowledgeCheck"> & {
@@ -9,6 +11,7 @@ export type LessonBlueprint = Pick<CourseLesson, "id" | "title" | "objective" | 
   projectSteps?: string[];
   acceptanceCriteria?: string[];
   resultPreview?: { title: string; summary: string; checks: string[] };
+  resources?: { label: string; url: string }[];
 };
 
 function exampleLanguage(title: string): string | undefined {
@@ -181,6 +184,17 @@ const swift: LessonBlueprint[] = [
   lesson("async", "05 · Anwenden", "async/await, SwiftUI und XCTest", "swift", "Du ordnest asynchrone Arbeit, UI und Tests ein.", "`async` markiert eine asynchrone Funktion; `await` wartet an einer möglichen Unterbrechungsstelle. SwiftUI beschreibt Oberflächen aus Zustand und Darstellung. XCTest prüft Verhalten. UI-Aktualisierungen gehören auf den passenden Actor, häufig `MainActor`; blockiere die Oberfläche nicht mit langer Arbeit.", [example("Asynchron laden", "func loadCourse() async throws -> Course {\n  try await client.fetchCourse()\n}", "Fehler werden mit throws sichtbar weitergereicht."), example("SwiftUI Ansicht", "struct CourseView: View {\n  var body: some View { Text(\"Kurse\") }\n}", "Die View beschreibt, was für den aktuellen Zustand dargestellt wird.")], "func loadCourse() async throws -> Course {\n  try await client.fetchCourse()\n}\n", "Teste eine kleine Funktion mit XCTest und beschreibe, wofür SwiftUI im Vergleich zur Sprache zuständig ist.", "async\\s+throws|XCTAssert|struct\\s+\\w+View\\s*:\\s*View"),
 ];
 
+const gdscript: LessonBlueprint[] = [
+  intro("orientation", "Was ist GDScript?", "plaintext", "GDScript ist die Skriptsprache von Godot. Sie ist für kurze, gut lesbare Spielregeln entwickelt. Der Editor hilft mit Fehlermeldungen, Autovervollständigung und direkt startbaren Szenen. Im Sprachkurs lernst du Werte, Entscheidungen, Schleifen und Funktionen. Nodes und Szenen setzt du danach im Spielekurs praktisch ein.", [example("Einfache Idee", "Eingabe → Spielregel → neuer Zustand", "Die Sprache drückt die Regel aus; die Engine zeigt das Ergebnis.", "plaintext")], "Was beschreibt GDScript?", "Spielregeln und Abläufe als lesbare Anweisungen", "Nur Farben einer Website", "Eine Datenbankabfrage ohne Godot"),
+  lesson("run", "02 · Erste Schritte", "Ausgabe und Einrückung", "gdscript", "Du schreibst eine Anweisung und erkennst einen eingerückten Block.", "GDScript verwendet Einrückung, um zusammengehörige Anweisungen zu markieren. print zeigt Werte in Godots Ausgabe. Beginne mit einem Text und einer Rechnung. Achte darauf, dass Code in einer Funktion steht, die beim Start aufgerufen wird.", [example("Erste Ausgabe", "func _ready():\n    print('Hallo Spiel')\n    print(2 + 3)", "Beim Start der Szene erscheinen Text und Zahl im Ausgabefenster.")], "func _ready():\n    pass\n", "Gib beim Start einen Text und eine Rechnung aus.", "print\\s*\\("),
+  lesson("values", "02 · Erste Schritte", "Variablen und Datentypen", "gdscript", "Du speicherst Spielwerte unter verständlichen Namen.", "var erstellt eine veränderliche Variable, const einen festen Wert. Du kannst einen Typ angeben, etwa int oder String. Nutze Namen wie score und speed; ein unklarer Name erschwert später die Fehlersuche.", [example("Punkte und Geschwindigkeit", "var score: int = 0\nconst MAX_SCORE: int = 5\nvar speed: float = 120.0", "Die Typangaben beschreiben erlaubte Werte.")], "var score: int = 0\n", "Lege eine Punktzahl, Geschwindigkeit und eine feste Obergrenze an.", "var\\s+speed|const\\s+MAX_SCORE"),
+  lesson("conditions", "03 · Ablauf steuern", "Entscheidungen mit if und else", "gdscript", "Du behandelst Gewinn und Weiterspielen als getrennte Fälle.", "Eine Bedingung prüft true oder false. Der eingerückte Block läuft nur bei passendem Ergebnis. Prüfe den Grenzwert bewusst: Bei genau fünf Punkten soll das Spiel gewonnen sein.", [example("Zwei Fälle", "if score >= 5:\n    print('Gewonnen')\nelse:\n    print('Weiter sammeln')", "Genau ein Zweig läuft.")], "var score = 4\n", "Schreibe eine Gewinnprüfung für mindestens fünf Punkte mit else-Fall.", "if\\s+score\\s*>=\\s*5|else:"),
+  lesson("loops", "03 · Ablauf steuern", "Schleifen und Listen", "gdscript", "Du verarbeitest mehrere Spielwerte ohne kopierte Anweisungen.", "Ein Array hält geordnete Werte. for durchläuft die Werte nacheinander; range erzeugt eine Zahlenfolge. Prüfe auch eine leere Liste, bei der die Schleife keinen Durchlauf hat.", [example("Punkte zählen", "var scores = [2, 4, 3]\nvar total = 0\nfor value in scores:\n    total += value\nprint(total)", "Das Ergebnis ist 9.")], "var scores = [2, 4, 3]\n", "Addiere die Werte mit einer for-Schleife und prüfe eine leere Liste.", "for\\s+\\w+\\s+in\\s+scores"),
+  lesson("functions", "04 · Wiederverwenden", "Funktionen, Parameter und Rückgabe", "gdscript", "Du kapselst eine Spielregel in einer testbaren Funktion.", "Eine Funktion erhält Parameter und kann mit return ein Ergebnis liefern. Schreibe add_score für eine Punktzahl und einen Zuwachs. Prüfe 0, einen positiven Wert und einen ungültigen negativen Zuwachs.", [example("Punkte berechnen", "func add_score(current: int, amount: int) -> int:\n    return current + amount", "Die Funktion verändert keinen globalen Spielzustand.")], "func add_score(current: int, amount: int) -> int:\n    pass\n", "Gib die neue Punktzahl zurück und behandle einen negativen Zuwachs.", "func\\s+add_score|return"),
+  lesson("collections", "04 · Wiederverwenden", "Dictionaries und Zustände", "gdscript", "Du ordnest benannte Werte einem Spielzustand zu.", "Ein Dictionary verbindet Schlüssel mit Werten. Nutze es für einen kleinen Spielstand, aber prüfe fehlende Schlüssel mit get. Für größere Projekte helfen später eigene Klassen und Engine-Objekte; zuerst musst du die Datenform verstehen.", [example("Spielstand", "var state = {'score': 3, 'lives': 2}\nprint(state.get('score', 0))", "get liefert bei fehlendem Schlüssel den Standardwert.")], "var state = {'score': 0}\n", "Ergänze lives und lies einen möglicherweise fehlenden Wert sicher aus.", "state\\.get|lives"),
+  lesson("project", "05 · Eigenes Sprachprojekt", "Projekt: Punktestand ohne Engine-Abhängigkeit", "gdscript", "Du verbindest Werte, Bedingungen, Schleifen und Funktionen.", "Schreibe eine Funktion, die Sammelwerte addiert und entscheidet, ob das Ziel erreicht ist. Teste eine leere Liste, einen Wert genau am Ziel und einen Wert darüber. Erkläre jede verwendete Sprachregel, bevor du sie im Spielekurs in eine Szene einbaust.", [example("Ziel prüfen", "func won(scores: Array[int], target: int) -> bool:\n    var total = 0\n    for value in scores:\n        total += value\n    return total >= target", "Die Regel ist unabhängig von einer Godot-Szene prüfbar.")], "func won(scores: Array[int], target: int) -> bool:\n    pass\n", "Vervollständige won und prüfe drei Eingaben.", "for\\s+\\w+\\s+in\\s+scores|return\\s+total", "Erst die Regel verstehen, dann mit Engine-Objekten verbinden."),
+];
+
 const webDevelopment: LessonBlueprint[] = [
   intro("orientation", "Was ist Frontend-Entwicklung?", "plaintext", "In diesem Kurs baust du ausschließlich das, was Menschen im Browser sehen und bedienen. HTML beschreibt Bedeutung und Struktur, CSS die Gestaltung und JavaScript das Verhalten. TypeScript kann JavaScript beim Entwickeln mit Typen ergänzen. Später setzt du diese Bausteine gemeinsam in einer Website und mit einem UI-Framework ein. Daten können von einer vorhandenen API kommen; einen Server programmierst du im Backendkurs.", [example("Drei Aufgaben", "HTML = Inhalt · CSS = Darstellung · JavaScript = Verhalten", "Ein Button braucht Bedeutung, Gestaltung und gegebenenfalls eine Aktion."), example("Dein Projekt", "Skizze → HTML → CSS → Interaktion → Tests → Veröffentlichung", "Jeder Schritt macht die Website benutzbarer.")], "Welche Aufgabe hat HTML?", "HTML beschreibt Bedeutung und Struktur des Inhalts.", "HTML führt alle Datenbankabfragen des Servers aus.", "HTML legt ausschließlich Farben und Abstände fest."),
   lesson("html", "02 · Struktur", "Semantisches HTML", "html", "Du strukturierst Inhalt mit Elementen, die ihre Bedeutung ausdrücken.", "HTML-Elemente bestehen oft aus öffnendem Tag, Inhalt und schließendem Tag. Semantische Elemente wie `main`, `nav`, `article` und `button` helfen Browsern, Assistenztechnik und Suchmaschinen. Wähle ein Element nach seiner Aufgabe, nicht nach seinem Standardaussehen.", [example("Seitenstruktur", "<main>\n  <article>\n    <h1>Mein Lernprojekt</h1>\n    <p>Ich baue eine kleine Webseite.</p>\n  </article>\n</main>", "main enthält den Hauptinhalt; article ist ein eigenständiger Beitrag."), example("Link und Aktion", "<a href=\"/kurse\">Kurse ansehen</a>\n<button type=\"button\">Start</button>", "Ein Link navigiert; ein Button löst eine Aktion aus.")], "<main>\n  <h1>Mein Projekt</h1>\n</main>\n", "Baue eine semantische Seite mit nav, main, Überschrift, Artikel und einem echten Link.", "<main|<nav|<article"),
@@ -314,7 +328,7 @@ function languageOnly(id: string, basics: LessonBlueprint[]): LessonBlueprint[] 
   const arc = projectArcs[id];
   const frameworkTerms = /React|Spring Boot|FastAPI|Laravel|ASP\.NET|Ktor|SwiftUI|JUnit|pytest|PHPUnit|xUnit|Catch2|XCTest|Zod|Axum|SQLAlchemy|Vitest|Angular|Vue/i;
   const core = basics.filter((item) => !frameworkTerms.test(`${item.title} ${item.explanation} ${item.examples.map((sample) => `${sample.title} ${sample.code} ${sample.note}`).join(" ")}`));
-  return [...core,
+  return [...core, ...(languageExtensions[id] ?? []),
     lesson("problem-solving", "06 · Selbst anwenden", "Ein Problem in Schritte zerlegen", "plaintext", "Du planst eine kleine Lösung mit Eingabe, Regel, Ergebnis und Randfall.", "Wähle ein Problem, das du mit den Sprachmitteln dieses Kurses lösen kannst. Formuliere erst einen Normalfall und einen Randfall. Schreibe dann die kleinste Kernfunktion und prüfe ihre Ausgabe. Du brauchst dafür kein Framework.", [example("Plan vor Code", "Eingabe → Regel → Ergebnis → Randfall", "Eine eindeutige Regel lässt sich einfacher programmieren und prüfen.")], "", `Plane eine kleine Aufgabe in ${id}: beschreibe Eingabe, erwartetes Ergebnis und Randfall.`, "Eingabe|Ergebnis|Randfall"),
     lesson("language-project", "07 · Eigenes Sprachprojekt", `Abschlussprojekt in ${id.toUpperCase()}`, arc.language, "Du verbindest die Sprachelemente zu einem eigenen Programm und erklärst jeden Schritt.", "Baue eine kleine Kernfunktion mit den Mitteln der Sprache. Ergänze Eingabeprüfung und einen Randfall. Die Beispiele zeigen einen möglichen Anfang, den du selbst erweitern sollst.", [example("Kernfunktion", arc.capstoneExample, "Verfolge Eingabe und Ausgabe und ändere danach eine Regel selbst.")], "", "Schreibe eine eigene Kernfunktion, prüfe einen normalen und einen leeren oder ungültigen Fall und erkläre das Ergebnis.", arc.capstoneMarker, "Sprachbeherrschung zeigt sich daran, dass du die Lösung selbst ändern und Fehler erklären kannst.", ["Problem und zwei Beispiele festlegen.", "Kernfunktion schreiben.", "Normal- und Randfall prüfen.", "Eine Änderung ohne Vorlage vornehmen und erklären."], ["Das Programm zeigt ein nachvollziehbares Ergebnis.", "Ein Randfall ist geprüft.", "Alle verwendeten Sprachmittel sind erklärbar."])
   ];
@@ -370,6 +384,18 @@ const mlFoundation: LessonBlueprint[] = [
   intro("ml-split", "Warum brauchen wir neue Testdaten?", "plaintext", "Wenn du Vokabeln nur auswendig lernst, kannst du dieselben Karten beantworten, verstehst aber vielleicht neue Sätze nicht. Ein Modell kann sich genauso an Trainingsbeispiele anpassen. Darum trennt man Trainings-, Validierungs- und Testdaten. Training ändert Parameter, Validierung hilft bei Entscheidungen und der Test misst erst am Ende, wie gut neue Fälle funktionieren. Ähnliche Texte derselben Quelle können sonst unbemerkt in mehreren Gruppen landen.", [example("Faire Prüfung", "100 Beispiele → 70 Training · 15 Validierung · 15 Test", "Die Zahlen sind ein Beispiel; bei kleinen Datensätzen sind Messwerte stark unsicher.")], "Warum darf das Testset nicht immer wieder zum Optimieren benutzt werden?", "Sonst passt man Entscheidungen an genau diese Testfälle an", "Weil Testdaten keine Labels haben dürfen", "Weil ein Modell nur mit Testdaten trainiert"),
 ];
 
+function extendTrack(id: string, base: LessonBlueprint[]): LessonBlueprint[] {
+  const anchors: Record<string, Record<string, string>> = {
+    "web-development": { "vite-setup": "typescript-ui", "react-state": "project", "vue-practice": "project", "angular-practice": "project", "playwright-setup": "project", "frontend-release": "project" },
+    backend: { "express-setup": "node-fastify-api", "fastify-setup": "node-fastify-api", "fastify-schema": "project", "backend-architecture": "project", "spring-setup": "project", "spring-api": "project", "api-operations": "project" },
+    security: { "zap-setup": "injection-lab", "security-regression": "project", "security-defense": "project" },
+    ai: { "sklearn-setup": "sklearn-model", "ml-experiment": "sql-ai-data", "pytorch-setup": "pytorch-neural-network", "model-audit": "ai-capstone-pipeline" },
+    career: { "git-setup": "git", "review-workflow": "tests-review", "portfolio-demo": "application-practice", "application-loop": "project" },
+  };
+  const additions = topicExtensions[id] ?? [];
+  return base.flatMap((item) => [...additions.filter((extra) => anchors[id]?.[extra.id] === item.id), item]);
+}
+
 export const courseCurricula: Record<string, LessonBlueprint[]> = {
   javascript: languageOnly("javascript", javascript),
   java: languageOnly("java", java),
@@ -383,11 +409,12 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
   c: languageOnly("c", c),
   kotlin: languageOnly("kotlin", kotlin),
   swift: languageOnly("swift", swift),
-  "web-development": [...webDevelopment, ...webPractice],
-  backend: [...backendFoundation, ...backend, ...backendNodePath, ...backendPractice],
-  security: [...securityPractice, ...security, ...securityLabs],
-  ai: [...aiJourney.slice(0, 2), ...mlFoundation, ...aiJourney.slice(2)],
-  "game-development": [...gameEnginePractice, ...gameDevelopment, ...gameProjects],
-  career: [...career, ...careerPractice],
+  gdscript: [...gdscript.slice(0, -1), ...(languageExtensions.gdscript ?? []), gdscript[gdscript.length - 1]],
+  "web-development": extendTrack("web-development", [...webDevelopment, ...webPractice]),
+  backend: extendTrack("backend", [...backendFoundation, ...backend, ...backendNodePath, ...backendPractice]),
+  security: extendTrack("security", [...securityPractice, ...security, ...securityLabs]),
+  ai: extendTrack("ai", [...aiJourney.slice(0, 2), ...mlFoundation, ...aiJourney.slice(2)]),
+  "game-development": [gameEnginePractice[0], ...gameDevelopment, topicExtensions["game-development"][0], gameEnginePractice[1], topicExtensions["game-development"][1], topicExtensions["game-development"][2], ...gameProjects.slice(0, 2), topicExtensions["game-development"][3], gameProjects[2]],
+  career: extendTrack("career", [...career, ...careerPractice]),
 };
 

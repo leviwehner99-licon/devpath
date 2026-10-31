@@ -14,9 +14,7 @@ export function buildLearningPath(state: DevPathState, preferredCourseId?: strin
     : goal.includes("ki") || goal.includes("künstliche") ? "ai" : goal.includes("beruf") || goal.includes("job") ? "career"
     : goal.includes("software") ? "javascript" : "programming-intro";
   const target = learningCourses.find((course) => course.id === targetId) ?? learningCourses[0];
-  const prerequisiteId: Record<string, string> = { "web-development": "javascript", backend: "javascript", ai: "python", "game-development": "csharp", security: "javascript" };
   const ids = state.experience === "new" && target.id !== "programming-intro" ? ["programming-intro"] : [];
-  if (prerequisiteId[target.id] && state.experience !== "experienced") ids.push(prerequisiteId[target.id]);
   ids.push(target.id);
   const courses = [...new Set(ids)].map((id) => learningCourses.find((course) => course.id === id)!).filter(Boolean);
   const lessons = courses.flatMap((course) => course.lessons);
