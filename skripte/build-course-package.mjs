@@ -21,6 +21,7 @@ const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString(
 const { programmingCourse, courseSkills, learningCourses } = await import(moduleUrl);
 for (const course of learningCourses) {
   const ids = course.lessons.map((lesson) => lesson.id);
+  if (course.id !== "programming-intro" && ids[0] !== `${course.id}-orientation`) throw new Error(`Kurs ${course.id} beginnt nicht mit der Orientierung`);
   if (new Set(ids).size !== ids.length) throw new Error(`Doppelte Lektion im Kurs ${course.id}: ${ids.filter((id, index) => ids.indexOf(id) !== index).join(", ")}`);
   if (course.lessons.some((lesson) => !lesson.title || !lesson.objective || !lesson.explanation)) throw new Error(`Unvollständige Lektion im Kurs ${course.id}`);
   for (const lesson of course.lessons) {
