@@ -6,7 +6,7 @@
   "build": { "beforeDevCommand": "npm run dev", "devUrl": "http://localhost:5173", "beforeBuildCommand": "npm run build", "frontendDist": "../dist" },
   "app": {
     "windows": [{ "title": "CodeZone", "width": 1440, "height": 960, "minWidth": 760, "minHeight": 620, "resizable": true }],
-    "security": { "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src ipc: http://ipc.localhost https://rvhxsgexonmolrpdxdou.supabase.co https://devpath-dpxzcux4g6bz.edgeone.dev; worker-src 'self' blob:;" }
+    "security": { "csp": "default-src 'self'; img-src 'self' asset: data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://rvhxsgexonmolrpdxdou.supabase.co https://devpath-dpxzcux4g6bz.edgeone.dev; worker-src 'self' blob:;" }
   },
   "plugins": { "deep-link": { "desktop": { "schemes": ["codezone"] } } },
   "bundle": { "active": true, "targets": ["nsis", "dmg", "deb"], "icon": ["icons/icon.ico", "icons/icon.icns", "icons/icon.png"], "category": "Education", "shortDescription": "Softwareentwicklung in deinem Tempo lernen", "longDescription": "Lokale Lernumgebung für Softwareentwicklung.", "linux": { "deb": { "depends": ["libwebkit2gtk-4.1-0", "libayatana-appindicator3-1"] } }, "windows": { "nsis": { "installerIcon": "icons/icon.ico", "uninstallerIcon": "icons/icon.ico", "headerImage": "icons/installer-header.bmp", "sidebarImage": "icons/installer-sidebar.bmp", "languages": ["German"], "displayLanguageSelector": false } } }

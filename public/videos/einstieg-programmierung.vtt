@@ -1,0 +1,535 @@
+WEBVTT
+
+00:00:00.100 --> 00:00:03.838
+Was passiert eigentlich, wenn wir programmieren?
+
+00:00:03.788 --> 00:00:10.012
+Wir übersetzen eine Absicht in einen Ablauf, den ein Computer eindeutig ausführen kann.
+
+00:00:10.012 --> 00:00:14.238
+Das klingt abstrakt, wird aber mit einem Beispiel klar.
+
+00:00:14.238 --> 00:00:20.075
+Stell dir vor, eine Lernende sucht in einer langen Kursliste nach Webentwicklung.
+
+00:00:20.075 --> 00:00:22.162
+Sie tippt Web ein.
+
+00:00:22.162 --> 00:00:28.338
+Das Programm liest dieses Wort, vergleicht es mit den Kurstiteln und zeigt passende Treffer.
+
+00:00:28.338 --> 00:00:35.775
+Die Idee allein reicht noch nicht: Wir müssen festlegen, was bei einem Treffer und was ohne Treffer passieren soll.
+
+00:00:35.775 --> 00:00:39.588
+Quellcode ist die aufgeschriebene Form dieser Regeln.
+
+00:00:39.588 --> 00:00:42.462
+Ein laufendes Programm führt sie aus.
+
+00:00:42.462 --> 00:00:47.350
+Und ein Test prüft, ob das Ergebnis wirklich zur Aufgabe passt.
+
+00:00:47.350 --> 00:00:52.338
+Programmieren bedeutet also nicht, möglichst viele Befehle zu kennen.
+
+00:00:52.338 --> 00:00:59.475
+Es bedeutet, ein Problem zu verstehen, eine präzise Regel zu bauen und ihre Wirkung zu überprüfen.
+
+00:00:59.475 --> 00:01:04.738
+Diesen gesamten Weg werden wir im Video an derselben Kurssuche verfolgen.
+
+00:01:05.600 --> 00:01:10.750
+Bevor wir eine Funktion planen, sollten wir wissen, wem sie hilft.
+
+00:01:10.700 --> 00:01:15.600
+Unsere Lernende hat wenig Zeit und eine lange Kursliste vor sich.
+
+00:01:15.600 --> 00:01:20.688
+Ihr Ziel ist nicht, eine besonders aufwendige Webseite zu benutzen.
+
+00:01:20.688 --> 00:01:23.962
+Sie möchte einen passenden Kurs finden.
+
+00:01:23.962 --> 00:01:31.550
+Deshalb beginnen wir mit einem kleinen, prüfbaren Nutzen: Sie gibt einen Begriff ein und sieht relevante Kurse.
+
+00:01:31.550 --> 00:01:37.325
+Eine riesige Liste möglicher Funktionen würde uns an dieser Stelle eher ablenken.
+
+00:01:37.325 --> 00:01:42.500
+Vielleicht wären Empfehlungen, Konten und Bewertungen irgendwann sinnvoll.
+
+00:01:42.500 --> 00:01:45.762
+Für die erste Version brauchen wir sie nicht.
+
+00:01:45.762 --> 00:01:52.012
+Der Unterschied ist wichtig: Ein Funktionswunsch beschreibt, was die Software vielleicht hat.
+
+00:01:52.012 --> 00:01:56.712
+Ein Nutzerziel beschreibt, was eine Person damit erreichen kann.
+
+00:01:56.712 --> 00:02:04.338
+Wir können sogar prüfen, ob unsere erste Version hilft: Das Wort Spiel soll Spieleentwicklung auffindbar machen.
+
+00:02:04.338 --> 00:02:08.650
+Eine Person soll danach erkennen, wohin sie klicken kann.
+
+00:02:08.650 --> 00:02:15.275
+Wenn wir Ziel und Erfolg so konkret formulieren, können wir die Technik später passend auswählen.
+
+00:02:16.140 --> 00:02:22.503
+Fast jedes Programm lässt sich zunächst als Weg von einer Eingabe zu einem Ergebnis betrachten.
+
+00:02:22.453 --> 00:02:26.003
+Bei der Kurssuche ist die Eingabe das Suchwort.
+
+00:02:26.003 --> 00:02:30.328
+Außerdem braucht die Suche eine vorhandene Liste von Kursen.
+
+00:02:30.328 --> 00:02:35.515
+Die Verarbeitung ist die Regel, die das Wort mit jedem Titel vergleicht.
+
+00:02:35.515 --> 00:02:39.778
+Das Ergebnis ist eine neue Liste mit passenden Kursen.
+
+00:02:39.778 --> 00:02:43.190
+Diese drei Teile sollten wir sauber trennen.
+
+00:02:43.190 --> 00:02:52.565
+Sonst wissen wir bei einem Fehler kaum, ob die Eingabe falsch gelesen, die Regel falsch angewendet oder das Ergebnis falsch angezeigt wurde.
+
+00:02:52.565 --> 00:02:58.853
+Nehmen wir Web als Suchwort und die Titel Webentwicklung, Spieleentwicklung und Python.
+
+00:02:58.853 --> 00:03:01.678
+Die Regel findet Webentwicklung.
+
+00:03:01.678 --> 00:03:04.503
+Der Bildschirm zeigt diesen Kurs.
+
+00:03:04.503 --> 00:03:08.865
+Bei der Eingabe xyz ist die Trefferliste leer.
+
+00:03:08.865 --> 00:03:13.953
+Auch das ist ein gültiges Ergebnis, das die Oberfläche erklären muss.
+
+00:03:13.953 --> 00:03:19.302
+Wenn du ein neues Programm entwirfst, zeichne zuerst diese drei Stationen.
+
+00:03:19.302 --> 00:03:22.802
+Danach lässt sich jeder Schritt einzeln prüfen.
+
+00:03:23.656 --> 00:03:26.256
+Jetzt ordnen wir die Schritte.
+
+00:03:26.206 --> 00:03:30.069
+Ein Ablauf beschreibt, was nacheinander geschieht.
+
+00:03:30.069 --> 00:03:34.181
+Ein Zustand beschreibt, welche Werte gerade gelten.
+
+00:03:34.181 --> 00:03:38.506
+In unserer Suche ist das aktuelle Suchwort ein Zustand.
+
+00:03:38.506 --> 00:03:43.681
+Wenn die Lernende Web eintippt, liest die Anwendung zuerst diesen Wert.
+
+00:03:43.681 --> 00:03:46.381
+Dann vergleicht sie die Kurstitel.
+
+00:03:46.381 --> 00:03:49.544
+Erst danach kann sie Treffer anzeigen.
+
+00:03:49.544 --> 00:03:55.806
+Würde sie die Anzeige vor dem Vergleich aktualisieren, hätte sie noch kein neues Ergebnis.
+
+00:03:55.806 --> 00:04:02.894
+Ändert die Lernende Web zu Spiel, beginnt derselbe Ablauf erneut, aber mit einem anderen Zustand.
+
+00:04:02.894 --> 00:04:07.494
+Der Ablauf bleibt also gleich, während sich die Daten ändern.
+
+00:04:07.494 --> 00:04:12.506
+Diese Unterscheidung hilft später bei Formularen, Spielen und Apps.
+
+00:04:12.506 --> 00:04:22.031
+Ein Spielfigur-Zustand kann zum Beispiel ihre Position sein; ein Ablauf liest eine Taste, berechnet eine neue Position und zeichnet sie.
+
+00:04:22.031 --> 00:04:30.131
+Frage dich bei jeder Planung: Welche Information muss bereits vorliegen, bevor der nächste Schritt ausgeführt werden kann?
+
+00:04:30.980 --> 00:04:36.618
+Eine Bedingung ist eine Frage, auf die das Programm mit ja oder nein antwortet.
+
+00:04:36.568 --> 00:04:41.330
+Bei der Suche lautet sie: Enthält dieser Kurstitel das Suchwort?
+
+00:04:41.330 --> 00:04:44.993
+Bei ja nehmen wir den Kurs in die Trefferliste auf.
+
+00:04:44.993 --> 00:04:47.343
+Bei nein lassen wir ihn aus.
+
+00:04:47.343 --> 00:04:51.393
+Doch eine gute Lösung plant mehr als den glücklichen Fall.
+
+00:04:51.393 --> 00:04:54.493
+Was passiert bei einem leeren Suchfeld?
+
+00:04:54.493 --> 00:04:58.055
+Was bei einem Wort, zu dem kein Kurs passt?
+
+00:04:58.055 --> 00:05:01.218
+Solche Randfälle sind keine Nebensache.
+
+00:05:01.218 --> 00:05:05.080
+Sie gehören zum normalen Verhalten einer Anwendung.
+
+00:05:05.080 --> 00:05:09.168
+Für eine leere Suche könnten wir alle Kurse anzeigen.
+
+00:05:09.168 --> 00:05:16.280
+Wenn kein Titel passt, zeigen wir den Hinweis Keine Kurse gefunden und bieten einen Weg zurück zur Suche.
+
+00:05:16.280 --> 00:05:20.055
+Wichtig ist, dass die Regel eindeutig bleibt.
+
+00:05:20.055 --> 00:05:26.055
+Wenn wir stattdessen einen zufälligen Kurs zeigen, wirkt die Anwendung unzuverlässig.
+
+00:05:26.055 --> 00:05:29.818
+Zeichne für jede wichtige Bedingung beide Wege.
+
+00:05:29.818 --> 00:05:33.068
+Dann kannst du beide Wege gezielt testen.
+
+00:05:33.936 --> 00:05:37.224
+Unsere Liste enthält nicht nur einen Kurs.
+
+00:05:37.174 --> 00:05:41.136
+Die gleiche Frage muss für jeden Titel gestellt werden.
+
+00:05:41.136 --> 00:05:46.936
+Dafür verwenden Programme eine Schleife: Sie wiederholt einen Schritt für mehrere Werte.
+
+00:05:46.936 --> 00:05:52.899
+Zuerst prüft die Suche Webentwicklung, dann Spieleentwicklung und schließlich Python.
+
+00:05:52.899 --> 00:05:58.474
+Jedes Mal gilt dieselbe Regel; nur der gerade untersuchte Titel ändert sich.
+
+00:05:58.474 --> 00:06:04.949
+Wenn die Liste später tausend Kurse enthält, müssen wir die Regel trotzdem nur einmal formulieren.
+
+00:06:04.949 --> 00:06:08.936
+Eine Funktion bündelt diese Regel unter einem Namen.
+
+00:06:08.936 --> 00:06:18.836
+Man kann sich die Funktion als klar benannten Teil des Ablaufs vorstellen: Gib ihr Suchwort und Titel, und sie liefert zurück, ob sie zusammenpassen.
+
+00:06:18.836 --> 00:06:26.499
+Das ist keine Magie, sondern eine Möglichkeit, große Aufgaben in kleinere prüfbare Teile zu zerlegen.
+
+00:06:26.499 --> 00:06:34.011
+Wir können die Vergleichsregel zunächst mit einem Titel testen und danach mit der Schleife auf die ganze Liste anwenden.
+
+00:06:34.011 --> 00:06:38.311
+So wächst die Lösung, ohne unübersichtlich zu werden.
+
+00:06:39.172 --> 00:06:43.360
+Du kannst die Suche jetzt ohne Programmiersprache entwerfen.
+
+00:06:43.310 --> 00:06:49.485
+Nimm drei Kurstitel, zum Beispiel Webentwicklung, Spieleentwicklung und Python.
+
+00:06:49.485 --> 00:06:54.347
+Entscheide zuerst ganz genau, wann ein Titel als Treffer zählt.
+
+00:06:54.347 --> 00:07:03.360
+Eine brauchbare Regel könnte lauten: Das Suchwort muss irgendwo im Titel vorkommen, unabhängig von Groß- und Kleinschreibung.
+
+00:07:03.360 --> 00:07:06.472
+Nun probieren wir zwei Eingaben aus.
+
+00:07:06.472 --> 00:07:10.035
+Bei Spiel findet die Regel Spieleentwicklung.
+
+00:07:10.035 --> 00:07:13.247
+Bei xyz findet sie nichts.
+
+00:07:13.247 --> 00:07:19.097
+Schreibe für beide Fälle das erwartete Ergebnis auf, bevor du die Regel ausführst.
+
+00:07:19.097 --> 00:07:24.247
+Danach gehst du jeden Titel nacheinander durch und wendest dieselbe Regel an.
+
+00:07:24.247 --> 00:07:29.722
+Du bemerkst vielleicht eine offene Frage: Was soll bei leerem Suchwort passieren?
+
+00:07:29.722 --> 00:07:32.760
+Auch dafür musst du eine Entscheidung treffen.
+
+00:07:32.760 --> 00:07:36.360
+Genau so sieht praktische Programmplanung aus.
+
+00:07:36.360 --> 00:07:42.497
+Man beginnt mit Daten, legt eine eindeutige Regel fest und prüft sie an mehreren Fällen.
+
+00:07:42.497 --> 00:07:47.697
+Halte das Video gern kurz an und versuche es mit drei eigenen Titeln.
+
+00:07:48.560 --> 00:07:51.560
+Unsere erste Suche hat einen Fehler.
+
+00:07:51.510 --> 00:07:55.985
+Die Eingabe Spiel sollte den Kurs Spieleentwicklung finden.
+
+00:07:55.985 --> 00:07:58.873
+Tatsächlich erscheint kein Treffer.
+
+00:07:58.873 --> 00:08:03.510
+Statt jetzt beliebig etwas zu ändern, trennen wir drei Dinge.
+
+00:08:03.510 --> 00:08:08.085
+Erstens die Erwartung: Spieleentwicklung soll sichtbar sein.
+
+00:08:08.085 --> 00:08:12.085
+Zweitens die Beobachtung: Die Liste bleibt leer.
+
+00:08:12.085 --> 00:08:19.435
+Drittens eine Vermutung über die Ursache: Vielleicht vergleicht die Regel beide Wörter nur auf exakte Gleichheit.
+
+00:08:19.435 --> 00:08:24.873
+Dann sind Spiel und Spieleentwicklung verschieden, und der Fehler wird verständlich.
+
+00:08:24.873 --> 00:08:27.885
+Diese Vermutung können wir prüfen.
+
+00:08:27.885 --> 00:08:33.373
+Wir sehen uns die Vergleichsregel an und testen sie mit genau diesen beiden Werten.
+
+00:08:33.373 --> 00:08:37.398
+Erst wenn die Vermutung passt, ändern wir eine Sache.
+
+00:08:37.398 --> 00:08:42.635
+Statt gleicher Wörter erlauben wir, dass der Titel das Suchwort enthält.
+
+00:08:42.635 --> 00:08:45.735
+Danach wiederholen wir denselben Test.
+
+00:08:45.735 --> 00:08:53.435
+Debuggen bedeutet also, eine Ursache mit Beobachtungen einzugrenzen, nicht auf gut Glück Code umzubauen.
+
+00:08:53.435 --> 00:08:57.460
+Die gleiche Methode hilft bei jeder späteren Anwendung.
+
+00:08:58.308 --> 00:09:02.146
+Wir führen die Fehlersuche jetzt vollständig durch.
+
+00:09:02.096 --> 00:09:06.521
+Ausgangspunkt ist die Eingabe Spiel und der Kurstitel Spiele.
+
+00:09:06.521 --> 00:09:10.421
+Erwartet wird ein Treffer, beobachtet wird keiner.
+
+00:09:10.421 --> 00:09:15.583
+Die alte Regel verlangt, dass Suchwort und Titel exakt gleich sind.
+
+00:09:15.583 --> 00:09:18.146
+Das erklärt die Beobachtung.
+
+00:09:18.146 --> 00:09:22.846
+Wir ersetzen sie durch die Regel: Der Titel enthält das Suchwort.
+
+00:09:22.846 --> 00:09:27.533
+Nun prüfen wir Spiel gegen Spiele erneut und erhalten einen Treffer.
+
+00:09:27.533 --> 00:09:30.446
+Aber damit sind wir noch nicht fertig.
+
+00:09:30.446 --> 00:09:35.708
+Wir testen auch ein Wort, das nicht im Titel vorkommt, zum Beispiel Web.
+
+00:09:35.708 --> 00:09:38.958
+Dieser Test darf Spiele nicht anzeigen.
+
+00:09:38.958 --> 00:09:45.108
+Zusätzlich überlegen wir, ob Groß- und Kleinschreibung die Suche beeinflussen soll.
+
+00:09:45.108 --> 00:09:49.858
+Wenn nicht, vergleichen wir beide Texte in derselben Schreibweise.
+
+00:09:49.858 --> 00:09:54.646
+So verhindern wir, dass eine Korrektur einen neuen Fehler schafft.
+
+00:09:54.646 --> 00:10:04.871
+Das Muster ist immer gleich: Fall festhalten, Ursache vermuten, genau eine Änderung vornehmen und ursprünglichen sowie benachbarten Fall prüfen.
+
+00:10:04.871 --> 00:10:09.608
+Versuche danach, diese fünf Schritte ohne Hilfe zu erklären.
+
+00:10:10.456 --> 00:10:16.294
+Bisher haben wir Regeln beschrieben, ohne uns auf eine Programmiersprache festzulegen.
+
+00:10:16.244 --> 00:10:20.331
+Jetzt ordnen wir die Bausteine eines Softwareprojekts.
+
+00:10:20.331 --> 00:10:24.669
+Eine Programmiersprache legt fest, wie wir Regeln schreiben.
+
+00:10:24.669 --> 00:10:28.481
+JavaScript ist zum Beispiel eine solche Sprache.
+
+00:10:28.481 --> 00:10:31.894
+Eine Laufzeit führt geschriebenen Code aus.
+
+00:10:31.894 --> 00:10:39.744
+Im Browser kann JavaScript auf einer Webseite laufen; Node.js führt JavaScript außerhalb des Browsers aus.
+
+00:10:39.744 --> 00:10:45.044
+Eine Bibliothek stellt fertige Funktionen für bestimmte Aufgaben bereit.
+
+00:10:45.044 --> 00:10:50.806
+Ein Framework gibt zusätzlich eine Projektstruktur oder typische Abläufe vor.
+
+00:10:50.806 --> 00:10:55.281
+Werkzeuge helfen uns beim Schreiben, Starten und Prüfen.
+
+00:10:55.281 --> 00:11:01.481
+Ein Editor ist ein Werkzeug; ein Paketmanager lädt Bibliotheken in ein Projekt.
+
+00:11:01.481 --> 00:11:05.044
+Diese Wörter werden oft durcheinandergeworfen.
+
+00:11:05.044 --> 00:11:14.244
+Darum eine klare Frage: Erfüllt ein Baustein die Regeln, führt er sie aus, liefert er fertige Teile oder hilft er nur beim Entwickeln?
+
+00:11:14.244 --> 00:11:17.694
+Nicht jedes Projekt braucht jedes Werkzeug.
+
+00:11:17.694 --> 00:11:21.406
+Wähle sie erst, wenn die Aufgabe klar ist.
+
+00:11:22.268 --> 00:11:26.956
+Es gibt keine eine beste Programmiersprache für alle Aufgaben.
+
+00:11:26.906 --> 00:11:32.156
+Für eine Oberfläche im Browser arbeiten mehrere Technologien zusammen.
+
+00:11:32.156 --> 00:11:36.906
+HTML ordnet Inhalte und ist eine Auszeichnungssprache.
+
+00:11:36.906 --> 00:11:40.006
+CSS gestaltet diese Inhalte.
+
+00:11:40.006 --> 00:11:48.006
+JavaScript steuert das Verhalten; TypeScript ergänzt JavaScript um eine Prüfung von Datentypen während der Entwicklung.
+
+00:11:48.006 --> 00:11:54.181
+Auf einem Server werden häufig Java, C Sharp, Python oder PHP verwendet.
+
+00:11:54.181 --> 00:11:59.268
+SQL fragt Tabellen einer Datenbank ab und verändert deren Daten.
+
+00:11:59.268 --> 00:12:04.281
+Für Datenanalyse und maschinelles Lernen ist Python verbreitet.
+
+00:12:04.281 --> 00:12:11.856
+C, C Plus Plus und Rust sind wichtig, wenn Leistung, Speicher und Hardware eine große Rolle spielen.
+
+00:12:11.856 --> 00:12:18.956
+Kotlin wird oft für Android, Swift für Apple-Apps und G D Script für Spiele mit Godot eingesetzt.
+
+00:12:18.956 --> 00:12:23.706
+Diese Zuordnung ist eine Orientierung, kein starres Gesetz.
+
+00:12:23.706 --> 00:12:29.156
+In echten Projekten zählen auch vorhandene Systeme und Erfahrung im Team.
+
+00:12:29.156 --> 00:12:37.356
+Wenn du weißt, was du bauen willst, kannst du die passenden Sprachen gezielt lernen, statt alle gleichzeitig anzufangen.
+
+00:12:38.208 --> 00:12:41.383
+Zum Schluss setzen wir die Teile zusammen.
+
+00:12:41.333 --> 00:12:44.846
+Eine Lernende klickt im Browser auf Favorit.
+
+00:12:44.846 --> 00:12:50.608
+Die Oberfläche reagiert zunächst sichtbar und schickt eine Anfrage an einen Server.
+
+00:12:50.608 --> 00:12:54.371
+Der Server prüft: Ist die Person angemeldet?
+
+00:12:54.371 --> 00:12:56.546
+Gibt es diesen Kurs?
+
+00:12:56.546 --> 00:12:59.533
+Darf sie diesen Favoriten verändern?
+
+00:12:59.533 --> 00:13:03.621
+Erst dann speichert er die Information in einer Datenbank.
+
+00:13:03.621 --> 00:13:07.058
+Die Datenbank hält den Wert dauerhaft fest.
+
+00:13:07.058 --> 00:13:14.108
+Der Server sendet eine Antwort zurück, und die Oberfläche zeigt Erfolg oder einen verständlichen Fehler.
+
+00:13:14.108 --> 00:13:17.621
+Jeder Teil hat eine eigene Verantwortung.
+
+00:13:17.621 --> 00:13:24.571
+Der Browser darf eine hübsche Meldung anzeigen, aber er sollte nicht allein über Zugriffsrechte entscheiden.
+
+00:13:24.571 --> 00:13:27.946
+Der Server muss die Regeln selbst durchsetzen.
+
+00:13:27.946 --> 00:13:33.246
+Nicht jede kleine Webseite braucht einen eigenen Server und eine Datenbank.
+
+00:13:33.246 --> 00:13:38.721
+Für einen einfachen statischen Kursfinder könnten Dateien im Browser genügen.
+
+00:13:38.721 --> 00:13:45.508
+Wenn aber persönliche Favoriten gespeichert werden sollen, brauchen wir einen verlässlichen Speicherweg.
+
+00:13:45.508 --> 00:13:50.771
+So hilft uns die Architektur, die richtige Größe einer Lösung zu wählen.
+
+00:13:51.628 --> 00:13:56.603
+Du hast jetzt den Weg von einer Idee zu einem prüfbaren Programm gesehen.
+
+00:13:56.553 --> 00:14:02.003
+Du brauchst zum Weiterlernen nicht sofort zehn Sprachen oder ein großes Framework.
+
+00:14:02.003 --> 00:14:05.828
+Wähle ein Thema, das dich wirklich interessiert.
+
+00:14:05.828 --> 00:14:10.841
+Wenn du Webseiten magst, baue einen kleinen Kursfinder im Browser.
+
+00:14:10.841 --> 00:14:15.803
+Wenn du Spiele magst, lass eine Figur auf eine Eingabe reagieren.
+
+00:14:15.803 --> 00:14:21.128
+Wenn du Daten spannend findest, ordne und untersuche eine kleine Liste.
+
+00:14:21.128 --> 00:14:26.678
+Formuliere für dein erstes Projekt einen sichtbaren Erfolg und einen Fehlerfall.
+
+00:14:26.678 --> 00:14:33.566
+Baue dann eine kleine lauffähige Version, prüfe beide Fälle und verbessere einen gefundenen Fehler.
+
+00:14:33.566 --> 00:14:40.903
+Wenn du etwas nicht verstehst, erkläre den Ablauf laut in eigenen Worten und probiere ein kleineres Beispiel.
+
+00:14:40.903 --> 00:14:47.516
+Der passende Themenkurs führt dich an der richtigen Stelle zu einer Programmiersprache und zu Werkzeugen.
+
+00:14:47.516 --> 00:14:52.466
+Entscheidend ist, dass du immer wieder selbst etwas baust und prüfst.
+
+00:14:52.466 --> 00:15:02.403
+Halte zum Abschluss dieses Videos fest: Welches Problem möchtest du als Erstes lösen, und woran würdest du erkennen, dass deine Lösung funktioniert?

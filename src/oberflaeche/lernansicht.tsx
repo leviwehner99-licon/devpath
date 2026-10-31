@@ -3,6 +3,7 @@ import type { CourseLesson } from "../kurse/course";
 import type { LessonProgress } from "../daten/types";
 import { measuredMastery, reviewDate } from "../kurse/planner";
 import { LektionsAudio } from "./lektionsaudio";
+import { Einstiegsvideo } from "./einstiegsvideo";
 
 const MonacoEditor = lazy(async () => {
   await import("./monaco");
@@ -85,6 +86,8 @@ export function Learn({ courseId, courseTitle, lessons, activeLesson, progress, 
         {activeLesson.previousLesson && <p className="learn-bridge"><strong>Das kannst du schon:</strong> {activeLesson.previousLesson.title}. {activeLesson.previousLesson.reminder}</p>}
         {returnToTopic && <button className="text-button learn-back" onClick={returnToTopic.action}>← Zurück zu {returnToTopic.label}</button>}
         {activeLesson.languageCourse && <div className="language-prerequisite lesson-language-link"><strong>{activeLesson.languageCourse.title} brauchst du ab hier.</strong><p>{activeLesson.languageCourse.reason}</p><button className="button secondary" onClick={() => openLanguageCourse(activeLesson.languageCourse!.id)}>{activeLesson.languageCourse.title} lernen →</button></div>}
+
+        {courseId === "programming-intro" && <Einstiegsvideo lessonId={activeLesson.id} />}
 
         <LektionsAudio lesson={activeLesson} courseId={courseId} />
 

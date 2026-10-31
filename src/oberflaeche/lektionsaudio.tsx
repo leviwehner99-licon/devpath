@@ -37,6 +37,7 @@ export function LektionsAudio({ lesson, courseId }: { lesson: CourseLesson; cour
   }
 
   function play() {
+    document.querySelector<HTMLVideoElement>(".intro-video-player")?.pause();
     const synthesis = window.speechSynthesis;
     if (playback === "paused" && utteranceRef.current) {
       synthesis.resume();

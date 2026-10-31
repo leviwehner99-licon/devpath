@@ -1,4 +1,7 @@
 node_modules/
+.video-tools/
+.video-test.mp3
+__pycache__/
 dist/
 target/
 .env
