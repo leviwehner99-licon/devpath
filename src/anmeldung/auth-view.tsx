@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { authRedirectUrl, supabase } from "./auth-client";
-import { LogoMark } from "./ui";
+import { LogoMark } from "../oberflaeche/ui";
 import type { Session } from "@supabase/supabase-js";
 
 type AuthMode = "login" | "register" | "reset";

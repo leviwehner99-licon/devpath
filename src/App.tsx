@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { clearState, exportState, loadState, parseDataExport, saveState, setStorageProfileId } from "./storage";
-import { buildLearningPath, measuredMastery, recommendNextLesson, reviewDate } from "./planner";
-import { initialState, type DevPathState, type SavedVersion, type View } from "./types";
-import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, Today } from "./views";
-import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projects";
-import { Icon, LogoMark } from "./ui";
-import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./extra-views";
-import { learningCourses, programmingCourse, type CourseLesson } from "./course";
-import { recommendedCourse } from "./catalog";
+import { clearState, exportState, loadState, parseDataExport, saveState, setStorageProfileId } from "./daten/storage";
+import { buildLearningPath, measuredMastery, recommendNextLesson, reviewDate } from "./kurse/planner";
+import { initialState, type DevPathState, type SavedVersion, type View } from "./daten/types";
+import { CodeBase, Diploma, Learn, Onboarding, Settings, Studio, SupportDialog, Today } from "./oberflaeche/views";
+import { createLocalProject, downloadProjectBundle, parseProjectBundle, safeProjectPath, validateProjectFiles } from "./projekte/projects";
+import { Icon, LogoMark } from "./oberflaeche/ui";
+import { Community, CourseLibrary, Curriculum, DashboardDiscover, Projects } from "./oberflaeche/extra-views";
+import { learningCourses, programmingCourse, type CourseLesson } from "./kurse/course";
+import { recommendedCourse } from "./kurse/catalog";
 
 const navigation: { id: View; label: string; icon: "today" | "learn" | "library" | "curriculum" | "studio" | "projects" | "community" | "base" | "diploma" }[] = [
   { id: "today", label: "Heute", icon: "today" },

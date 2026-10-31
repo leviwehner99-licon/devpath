@@ -1,6 +1,6 @@
 import type { CourseLesson } from "./course";
-import type { LessonProgress } from "./types";
-import type { DevPathState } from "./types";
+import type { LessonProgress } from "../daten/types";
+import type { DevPathState } from "../daten/types";
 import { learningCourses, type LearningCourse } from "./course";
 
 export type PlanRecommendation = { lesson: CourseLesson; reason: string; isReview: boolean };

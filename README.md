@@ -12,6 +12,22 @@ Der Repositorystand enthält ein lokales Desktop-Alpha-Grundgerüst. Ein Windows
 - Statische Website unter `website/`.
 - Nutzer-Codeausführung ist bis zur Prüfung eines Betriebssystem-spezifischen Sandboxesystems gesperrt. Externe KI, Community, Kontoanmeldung und Synchronisierung sind nicht verbunden.
 
+## Ordnerübersicht
+
+| Ordner | Hier änderst du … |
+| --- | --- |
+| `src/kurse/` | Kursinhalte (`course-curriculum.ts`), zusätzliche Themenlektionen (`course-extensions.ts`), Sprachlektionen (`language-extensions.ts`), Katalog und Lernplan. |
+| `src/oberflaeche/` | Ansichten, wiederverwendbare Bauteile, Editor und Gestaltung der Desktop-App. |
+| `src/anmeldung/` | Anmeldung und Kontenansicht. |
+| `src/projekte/` | Lokale Code-Projekte und Import/Export. |
+| `src/daten/` | Gespeicherter Lernstand und gemeinsame Datentypen. |
+| `dokumentation/` | Einrichtung, Betrieb und Entscheidungen. |
+| `skripte/` | Build- und Veröffentlichungshelfer. |
+| `website/` | Statische Website und veröffentlichte Kurspakete. |
+| `server/` | API und Datenbankmigrationen. |
+
+`src`, `src-tauri`, `public` und `.github` behalten ihre von den verwendeten Werkzeugen erwarteten Namen. Die Startdateien `src/main.tsx` und `src/App.tsx` liegen direkt unter `src`.
+
 ## Entwicklung
 
 Die neueste Version direkt auf diesem Windows-PC starten:

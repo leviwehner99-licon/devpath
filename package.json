@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:course-package": "node scripts/build-course-package.mjs",
+    "build:course-package": "node skripte/build-course-package.mjs",
     "build": "npm run build:course-package && tsc -b && vite build",
     "preview": "vite preview",
     "tauri": "tauri"

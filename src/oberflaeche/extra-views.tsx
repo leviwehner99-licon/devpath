@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import type { CatalogCourse } from "./catalog";
-import { courseCatalog } from "./catalog";
-import type { LearningCourse } from "./course";
-import type { DevPathState, LocalProject } from "./types";
+import type { CatalogCourse } from "../kurse/catalog";
+import { courseCatalog } from "../kurse/catalog";
+import type { LearningCourse } from "../kurse/course";
+import type { DevPathState, LocalProject } from "../daten/types";
 import { Icon } from "./ui";
-import { studyTimeLabel, type PlanRecommendation } from "./planner";
+import { studyTimeLabel, type PlanRecommendation } from "../kurse/planner";
 
 function Title({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return <header className="page-title-row"><div><div className="eyebrow">{eyebrow}</div><h1>{title}</h1><p className="page-subtitle">{subtitle}</p></div></header>;

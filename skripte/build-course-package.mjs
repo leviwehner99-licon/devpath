@@ -7,15 +7,15 @@ const root = process.cwd();
 const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
 const extensionModules = {};
 for (const name of ["course-extensions", "language-extensions"]) {
-  const extensionSource = await readFile(resolve(root, `src/${name}.ts`), "utf8");
+  const extensionSource = await readFile(resolve(root, `src/kurse/${name}.ts`), "utf8");
   const extensionCompiled = ts.transpileModule(extensionSource, { compilerOptions }).outputText;
   extensionModules[name] = `data:text/javascript;base64,${Buffer.from(extensionCompiled).toString("base64")}`;
 }
-const curriculumSource = await readFile(resolve(root, "src/course-curriculum.ts"), "utf8");
+const curriculumSource = await readFile(resolve(root, "src/kurse/course-curriculum.ts"), "utf8");
 let curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions }).outputText;
 for (const [name, url] of Object.entries(extensionModules)) curriculumCompiled = curriculumCompiled.replace(`from "./${name}"`, `from "${url}"`);
 const curriculumUrl = `data:text/javascript;base64,${Buffer.from(curriculumCompiled).toString("base64")}`;
-const source = await readFile(resolve(root, "src/course.ts"), "utf8");
+const source = await readFile(resolve(root, "src/kurse/course.ts"), "utf8");
 const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`;
 const { programmingCourse, courseSkills, learningCourses } = await import(moduleUrl);

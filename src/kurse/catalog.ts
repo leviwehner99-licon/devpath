@@ -1,4 +1,4 @@
-import type { DevPathState } from "./types";
+import type { DevPathState } from "../daten/types";
 import { learningCourses } from "./course";
 
 export type CatalogCourse = { id: string; title: string; description: string; category: string; icon: string; status: "available" | "planned"; tags: string[]; lessonCount?: number };

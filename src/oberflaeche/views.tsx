@@ -1,8 +1,8 @@
 import { Fragment, lazy, Suspense, useEffect, useRef, useState, type FormEvent } from "react";
-import type { CourseLesson } from "./course";
-import type { DevPathState, LessonProgress, LocalProject, SavedVersion } from "./types";
-import { defaultStudyDays, studyTimeLabel, weekdays, type PlanRecommendation } from "./planner";
-import { editorLanguage } from "./projects";
+import type { CourseLesson } from "../kurse/course";
+import type { DevPathState, LessonProgress, LocalProject, SavedVersion } from "../daten/types";
+import { defaultStudyDays, studyTimeLabel, weekdays, type PlanRecommendation } from "../kurse/planner";
+import { editorLanguage } from "../projekte/projects";
 
 const MonacoEditor = lazy(async () => {
   await import("./monaco");

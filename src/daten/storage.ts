@@ -1,7 +1,7 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { initialState, type DevPathState } from "./types";
-import { validateProjectFiles } from "./projects";
-import { defaultStudyDays } from "./planner";
+import { validateProjectFiles } from "../projekte/projects";
+import { defaultStudyDays } from "../kurse/planner";
 
 const STORAGE_KEY = "devpath.local.v1";
 const ACTIVE_PROFILE_KEY = "devpath.active-profile.v1";

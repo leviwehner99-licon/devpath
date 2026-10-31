@@ -1,4 +1,4 @@
-import type { LocalProject } from "./types";
+import type { LocalProject } from "../daten/types";
 
 export const PROJECT_BUNDLE_FORMAT = "devpath-project";
 export const MAX_PROJECT_FILES = 100;

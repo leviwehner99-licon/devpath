@@ -69,7 +69,7 @@ Die Dateien sind unsignierte Alpha-Pakete. Der Workflow veröffentlicht neben je
 - `GET /api/v1/releases/:platform?channel=alpha` – Release-Metadaten.
 - `PUT`, `GET`, `PATCH`, `DELETE /api/v1/me` – OIDC-geschütztes Konto anlegen, lesen, Startprofil speichern und löschen.
 
-Die Konto-Routen verlangen gültige Supabase-Auth-JWTs und bearbeiten unter transaktionsgebundenen OIDC-Claims nur das Konto der angemeldeten Identität. App-Builds benötigen `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` und `VITE_DEVPATH_API_URL`. Die Einrichtung steht in `../docs/AUTH_SETUP.md`.
+Die Konto-Routen verlangen gültige Supabase-Auth-JWTs und bearbeiten unter transaktionsgebundenen OIDC-Claims nur das Konto der angemeldeten Identität. App-Builds benötigen `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` und `VITE_DEVPATH_API_URL`. Die Einrichtung steht in `../dokumentation/AUTH_SETUP.md`.
 
 ## Vor einer Alpha-Freigabe
 
