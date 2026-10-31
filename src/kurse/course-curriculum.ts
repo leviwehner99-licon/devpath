@@ -384,6 +384,15 @@ const mlFoundation: LessonBlueprint[] = [
   intro("ml-split", "Warum brauchen wir neue Testdaten?", "plaintext", "Wenn du Vokabeln nur auswendig lernst, kannst du dieselben Karten beantworten, verstehst aber vielleicht neue Sätze nicht. Ein Modell kann sich genauso an Trainingsbeispiele anpassen. Darum trennt man Trainings-, Validierungs- und Testdaten. Training ändert Parameter, Validierung hilft bei Entscheidungen und der Test misst erst am Ende, wie gut neue Fälle funktionieren. Ähnliche Texte derselben Quelle können sonst unbemerkt in mehreren Gruppen landen.", [example("Faire Prüfung", "100 Beispiele → 70 Training · 15 Validierung · 15 Test", "Die Zahlen sind ein Beispiel; bei kleinen Datensätzen sind Messwerte stark unsicher.")], "Warum darf das Testset nicht immer wieder zum Optimieren benutzt werden?", "Sonst passt man Entscheidungen an genau diese Testfälle an", "Weil Testdaten keine Labels haben dürfen", "Weil ein Modell nur mit Testdaten trainiert"),
 ];
 
+const careerRubrics: Record<string, string[]> = {
+  roles: ["Ich habe zwei Tätigkeiten verglichen, die im Arbeitsalltag tatsächlich vorkommen.", "Ich habe eine kleine Probeaufgabe für meinen bevorzugten Bereich gewählt.", "Ich begründe meine Wahl mit eigener Erfahrung statt nur mit einem Trend."],
+  portfolio: ["Mein Projekt löst ein benanntes Problem für eine benannte Personengruppe.", "Die erste Version ist klein genug, um sie fertigzustellen.", "Ich habe notiert, woran ich ein funktionierendes Ergebnis erkenne."],
+  git: ["Ich habe vor dem Commit geprüft, welche Dateien enthalten sind.", "Meine Commit-Nachricht beschreibt die konkrete Änderung.", "Ich kann erklären, wann ich einen eigenen Branch verwende."],
+  "tests-review": ["Ich kann den Fehler mit konkreten Schritten reproduzieren.", "Ich unterscheide erwartetes und tatsächliches Ergebnis.", "Mein Review-Kommentar nennt eine Auswirkung und eine prüfbare Frage."],
+  interview: ["Ich beschreibe meinen eigenen Beitrag ohne Übertreibung.", "Ich nenne eine konkrete Handlung und ein beobachtbares Ergebnis.", "Ich kann eine offene Grenze oder einen Fehler erklären."],
+  growth: ["Ich habe Startanleitung, Tests und Lizenz geprüft.", "Ich habe Zugangsdaten und persönliche Daten ausgeschlossen.", "Mein nächster Lernschritt folgt aus einer konkreten Lücke."],
+};
+
 function extendTrack(id: string, base: LessonBlueprint[]): LessonBlueprint[] {
   const anchors: Record<string, Record<string, string>> = {
     "web-development": { "vite-setup": "typescript-ui", "react-state": "project", "vue-practice": "project", "angular-practice": "project", "playwright-setup": "project", "frontend-release": "project" },
@@ -415,6 +424,6 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
   security: extendTrack("security", [security[0], ...securityPractice, ...security.slice(1), ...securityLabs]),
   ai: extendTrack("ai", [...aiJourney.slice(0, 2), ...mlFoundation, ...aiJourney.slice(2)]),
   "game-development": [gameDevelopment[0], gameEnginePractice[0], ...gameDevelopment.slice(1), topicExtensions["game-development"][0], gameEnginePractice[1], topicExtensions["game-development"][1], topicExtensions["game-development"][2], ...gameProjects.slice(0, 2), topicExtensions["game-development"][3], gameProjects[2]],
-  career: extendTrack("career", [...career, ...careerPractice]),
+  career: extendTrack("career", [...career, ...careerPractice]).map((item) => ({ ...item, acceptanceCriteria: item.acceptanceCriteria ?? careerRubrics[item.id] })),
 };
 

@@ -49,7 +49,6 @@ export default function App() {
   const [runRequested, setRunRequested] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [returnToLesson, setReturnToLesson] = useState<{ courseId: string; lessonId: string; title: string } | null>(null);
-  const [showCompletion, setShowCompletion] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [systemPrefersDark, setSystemPrefersDark] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -289,7 +288,7 @@ export default function App() {
 
   const markComplete = (lesson: CourseLesson, hintCount: number, passed: boolean, selfRating = 3) => {
     const currentCode = state.progress[lesson.id]?.code ?? lesson.starterCode;
-    if (!passed || (lesson.practice !== false && !lesson.successPattern.test(currentCode))) {
+    if (!passed || (lesson.practice !== false && lesson.language !== "plaintext" && !lesson.successPattern.test(currentCode))) {
       recordAttempt(lesson.id);
       setNotice("Prüfe dein Ergebnis noch einmal. Das Lernziel ist im Code noch nicht erkennbar.");
       return;
@@ -318,7 +317,6 @@ export default function App() {
     }));
     setSelectedLessonId(null);
     if (courseFinished) {
-      setShowCompletion(true);
       setNotice(`Du hast alle Lernziele von „${activeCourse.title}“ erreicht. Dein lokales Diplom ist freigeschaltet.`);
     } else setNotice(state.progress[lesson.id]?.completed ? "Wiederholung abgeschlossen. Dein Lernplan wurde aktualisiert." : "Lernziel abgeschlossen. Der Lernplan hat deinen nächsten Schritt ausgewählt.");
   };
@@ -428,27 +426,15 @@ export default function App() {
         {stateLoaded && view === "curriculum" && <Curriculum course={activeCourse} path={learningPath.courses} state={state} completedCount={completedCount} recommendation={recommendation} openLesson={(id) => { const owner = learningPath.courses.find((item) => item.lessons.some((lesson) => lesson.id === id)); if (owner) update({ activeCourseId: owner.id }); setSelectedLessonId(id); setView("learn"); }} openLibrary={() => setView("library")} />}
         {stateLoaded && view === "projects" && <Projects projects={state.projects} open={() => setView("studio")} create={() => { createProject("Mein neues Projekt"); setView("studio"); }} manage={(id) => { update({ activeProjectId: id }); setView("studio"); }} />}
         {stateLoaded && view === "community" && <Community copyToProject={(name, files) => { const project = createLocalProject(name, files); setState((current) => ({ ...current, projects: [project, ...current.projects], activeProjectId: project.id })); setView("studio"); setNotice("Demo-Projekt wurde lokal in Code Studio kopiert."); }} />}
-        {stateLoaded && view === "learn" && <Learn courseTitle={activeCourse.title} lessons={activeCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} isReview={recommendation.isReview && recommendation.lesson.id === activeLesson.id} returnToTopic={returnToLesson && activeCourse.id !== returnToLesson.courseId ? { label: returnToLesson.title, action: () => { update({ activeCourseId: returnToLesson.courseId }); setSelectedLessonId(returnToLesson.lessonId); setReturnToLesson(null); } } : undefined} onSelect={(id) => setSelectedLessonId(id)} openLanguageCourse={(courseId) => { setReturnToLesson({ courseId: activeCourse.id, lessonId: activeLesson.id, title: activeCourse.title }); update({ activeCourseId: courseId }); setSelectedLessonId(`${courseId}-orientation`); setView("learn"); }} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onAttempt={() => recordAttempt(activeLesson.id)} onComplete={(hints, passed, confidence) => markComplete(activeLesson, hints, passed, confidence)} openStudio={openLessonInStudio} />}
+        {stateLoaded && view === "learn" && <Learn courseTitle={activeCourse.title} lessons={activeCourse.lessons} activeLesson={activeLesson} progress={state.progress} courseProgress={progressPercent} code={code} isReview={recommendation.isReview && recommendation.lesson.id === activeLesson.id} returnToTopic={returnToLesson && activeCourse.id !== returnToLesson.courseId ? { label: returnToLesson.title, action: () => { update({ activeCourseId: returnToLesson.courseId }); setSelectedLessonId(returnToLesson.lessonId); setReturnToLesson(null); } } : undefined} onSelect={(id) => setSelectedLessonId(id)} openNextCourse={(courseId) => { update({ activeCourseId: courseId, targetCourseId: courseId }); setReturnToLesson(null); setSelectedLessonId(`${courseId}-orientation`); setView("learn"); }} openLanguageCourse={(courseId) => { setReturnToLesson({ courseId: activeCourse.id, lessonId: activeLesson.id, title: activeCourse.title }); update({ activeCourseId: courseId }); setSelectedLessonId(`${courseId}-orientation`); setView("learn"); }} onCode={(value) => saveCode(activeLesson.id, value)} theme={effectiveTheme} onHint={(hints) => recordHint(activeLesson.id, hints)} onAttempt={() => recordAttempt(activeLesson.id)} onComplete={(hints, passed, confidence) => markComplete(activeLesson, hints, passed, confidence)} openStudio={openLessonInStudio} />}
         {stateLoaded && view === "studio" && activeProject && <Studio lesson={activeLesson} projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} code={projectCode} onCode={updateProjectFile} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSelectFile={(path) => updateProject(activeProject.id, (project) => ({ ...project, activeFile: path }))} theme={effectiveTheme} onCreateProject={createProject} onAddFile={addProjectFile} onDeleteFile={deleteProjectFile} onImportProject={importProject} onDeleteProject={removeProject} onRenameProject={renameProject} onExportProject={() => downloadProjectBundle(activeProject)} onRun={() => setRunRequested(true)} onAsk={() => setNotice("Der Tutor verwendet lokale Kurs-Hinweise. Dein Code wird nicht übertragen.")} />}
         {stateLoaded && view === "base" && activeProject && <CodeBase projects={state.projects} activeProject={activeProject} activeFile={activeFilePath} versions={state.versions.filter((version) => !version.projectId || version.projectId === activeProject.id)} currentCode={projectCode} onSelectProject={(projectId) => update({ activeProjectId: projectId })} onSave={saveVersion} onRestore={restoreVersion} onExport={() => downloadProjectBundle(activeProject)} />}
         {stateLoaded && view === "diploma" && <Diploma course={activeCourse} completedAt={state.courseCompletions[activeCourse.id] ?? (activeCourse.id === "programming-intro" ? state.courseCompletedAt : undefined)} completedCount={completedCount} reducedMotion={state.settings.reducedMotion} />}
         {stateLoaded && view === "settings" && <Settings state={state} update={update} storageWritable={storageWritable} exportData={exportLocalData} importData={importLocalData} clearData={() => { void resetData(); }} onOpenSupport={() => setShowSupport(true)} />}
       </div>
       {runRequested && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRunRequested(false); }}><section className="dialog" role="dialog" aria-modal="true" aria-labelledby="run-title"><div className="dialog-icon">⛨</div><h2 id="run-title">Ausführung wird noch geprüft</h2><p>Der Runner wird für dein System erst aktiviert, wenn seine Sandbox die Phase-2-Sicherheitsprüfung besteht. Bis dahin wird dein Code nicht gestartet.</p><div className="security-note"><strong>Dein Code bleibt lokal.</strong><br />Er wurde weder hochgeladen noch an einen KI-Dienst gesendet.</div><button className="button primary full" onClick={() => setRunRequested(false)}>Verstanden</button></section></div>}
-      {showCompletion && <CompletionDialog courseTitle={activeCourse.title} lessonCount={activeCourse.lessons.length} reducedMotion={state.settings.reducedMotion} onClose={() => { setShowCompletion(false); setView("diploma"); }} />}
       {showSupport && <SupportDialog learnerName={state.learnerName} onClose={() => setShowSupport(false)} onNotice={setNotice} />}
       {stateLoaded && showOnboarding && <Onboarding onFinish={finishOnboarding} />}
     </main>
   </div>;
-}
-
-function CompletionDialog({ courseTitle, lessonCount, reducedMotion, onClose }: { courseTitle: string; lessonCount: number; reducedMotion: boolean; onClose: () => void }) {
-  const [seconds, setSeconds] = useState(10);
-  useEffect(() => {
-    if (reducedMotion) return;
-    const timer = window.setInterval(() => setSeconds((value) => Math.max(0, value - 1)), 1000);
-    return () => window.clearInterval(timer);
-  }, [reducedMotion]);
-  useEffect(() => { if (seconds === 0 || reducedMotion) onClose(); }, [seconds, reducedMotion, onClose]);
-  return <div className="modal-backdrop"><section className={`dialog completion-dialog ${reducedMotion ? "reduced" : ""}`} role="dialog" aria-modal="true" aria-labelledby="completion-title"><div className="completion-sparkles" aria-hidden="true">✦　✧　✦</div><div className="dialog-icon diploma-icon">✧</div><h2 id="completion-title">Dein Lernpfad ist geschafft!</h2><p>Du hast alle {lessonCount} Lektionen im Kurs „{courseTitle}“ abgeschlossen.</p><div className="diploma-preview"><span>CodeZone · Lernerfolg</span><strong>{courseTitle}</strong><small>Lokales Abschlussdiplom</small></div><button className="button primary full" onClick={onClose}>{reducedMotion ? "Diplom ansehen" : `Weiter zum Diplom${seconds ? ` · ${seconds}s` : ""}`}</button><button className="text-button completion-skip" onClick={onClose}>Animation überspringen</button></section></div>;
 }

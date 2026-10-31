@@ -6,7 +6,7 @@ Der Repositorystand enthält ein lokales Desktop-Alpha-Grundgerüst. Ein Windows
 
 - Tauri-2-Shell mit beschränkter Capability.
 - React + TypeScript-Oberfläche für Heute, Lernen, Code Studio, Code Base, Diplom und Einstellungen.
-- Einmalige, lokal gespeicherte Startabfrage; anfängerfreundlicher Einstieg ohne Code in den ersten Lektionen; Sprach- und Themenkurse mit persönlichem Lehrplan und Wiederholungen.
+- Einmalige, lokal gespeicherte Startabfrage; anfängerfreundlicher Einstieg ohne Sprachcode; Sprach- und Themenkurse mit persönlichem Lehrplan und Wiederholungen.
 - Lokale SQLite-Datenhaltung, Lernplan, Code-Base-Snapshots, JSON-Export und Löschfunktion.
 - PostgreSQL-Migration und OIDC-geschütztes API-Grundgerüst unter `server/`; noch ohne Hosting, Identitätsanbieter oder produktive Datenbank.
 - Statische Website unter `website/`.

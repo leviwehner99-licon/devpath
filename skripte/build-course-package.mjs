@@ -6,7 +6,7 @@ import ts from "typescript";
 const root = process.cwd();
 const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
 const extensionModules = {};
-for (const name of ["course-extensions", "language-extensions"]) {
+for (const name of ["course-extensions", "language-extensions", "einstieg"]) {
   const extensionSource = await readFile(resolve(root, `src/kurse/${name}.ts`), "utf8");
   const extensionCompiled = ts.transpileModule(extensionSource, { compilerOptions }).outputText;
   extensionModules[name] = `data:text/javascript;base64,${Buffer.from(extensionCompiled).toString("base64")}`;
@@ -16,9 +16,10 @@ let curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions 
 for (const [name, url] of Object.entries(extensionModules)) curriculumCompiled = curriculumCompiled.replace(`from "./${name}"`, `from "${url}"`);
 const curriculumUrl = `data:text/javascript;base64,${Buffer.from(curriculumCompiled).toString("base64")}`;
 const source = await readFile(resolve(root, "src/kurse/course.ts"), "utf8");
-const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`);
+const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`).replace('from "./einstieg"', `from "${extensionModules.einstieg}"`);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`;
 const { programmingCourse, courseSkills, learningCourses } = await import(moduleUrl);
+if (programmingCourse.lessons.some((lesson) => lesson.language !== "plaintext" || !lesson.knowledgeCheck || !lesson.visualSteps?.length)) throw new Error("Der Einstiegskurs muss ohne Sprachcode beginnen und jede Lektion anschaulich prüfen");
 for (const course of learningCourses) {
   const ids = course.lessons.map((lesson) => lesson.id);
   if (course.id !== "programming-intro" && ids[0] !== `${course.id}-orientation`) throw new Error(`Kurs ${course.id} beginnt nicht mit der Orientierung`);
