@@ -59,7 +59,7 @@ jobs:
           test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run tauri -- build --bundles ${{ matrix.bundle }}
       - name: Store unsigned CI package for review
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: CodeZone-${{ matrix.platform }}-${{ github.sha }}
           path: src-tauri/target/release/bundle/${{ matrix.bundle }}/*
@@ -94,7 +94,7 @@ jobs:
           test -n "$VITE_DEVPATH_API_URL" || { echo 'Missing GitHub Actions variable VITE_DEVPATH_API_URL'; exit 1; }
       - run: npm run tauri -- build --bundles dmg
       - name: Store unsigned Intel Mac package for review
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: CodeZone-macos-x64-${{ github.sha }}
           path: src-tauri/target/release/bundle/dmg/*
