@@ -40,6 +40,13 @@ for (const course of learningCourses) {
   }
 }
 const allLessons = learningCourses.flatMap((course) => course.lessons);
+const narrationSource = await readFile(resolve(root, "src/kurse/lektionserzaehlung.ts"), "utf8");
+const narrationUrl = `data:text/javascript;base64,${Buffer.from(ts.transpileModule(narrationSource, { compilerOptions }).outputText).toString("base64")}`;
+const { lessonNarration } = await import(narrationUrl);
+for (const course of learningCourses) for (const lesson of course.lessons) {
+  const narration = lessonNarration(lesson, course.id);
+  if (narration.length < 160 || narration.includes("Willkommen zu undefined")) throw new Error(`Audio-Erklärung unvollständig: ${lesson.id}`);
+}
 const backendCourse = learningCourses.find((course) => course.id === "backend");
 const staleBackendLessons = backendCourse.lessons.filter((lesson) => /fastify/i.test(JSON.stringify(lesson))).map((lesson) => lesson.id);
 if (staleBackendLessons.length) throw new Error(`Fastify ist noch im aktiven Backendkurs: ${staleBackendLessons.join(", ")}`);
@@ -98,6 +105,10 @@ if (!reactSearch.examples[0].code.includes('htmlFor="search"') || reactSearch.ex
 process.stdout.write(`${learningCourses.length} Kurse, ${allLessons.length} Lektionen und ${Object.keys(setups).length} Installationsanleitungen geprüft.\n`);
 if (process.argv.includes("--report")) for (const course of learningCourses) process.stdout.write(`${course.id}: ${course.lessons.length}\n`);
 if (process.argv.includes("--report-lessons")) for (const course of learningCourses.filter((item) => item.category === "Themenkurs")) process.stdout.write(`${course.id}: ${course.lessons.map((lesson) => lesson.id).join(", ")}\n`);
+if (process.argv.includes("--report-audio")) for (const id of ["program-output", "web-development-information-architecture", "backend-express-setup", "security-threat-model", "ai-ml-problem-framing", "game-development-orientation", "career-role-fit"]) {
+  const course = learningCourses.find((item) => item.lessons.some((lesson) => lesson.id === id));
+  process.stdout.write(`${id}: ${lessonNarration(course.lessons.find((lesson) => lesson.id === id), course.id)}\n`);
+}
 const packageData = {
   schemaVersion: 1,
   id: programmingCourse.id,

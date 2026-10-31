@@ -103,6 +103,21 @@
 .learn-focus { max-width: 920px; }
 .learn-focus > h2 { margin: 18px 0 12px; }
 .learn-back { display: inline-block; margin: 0 0 16px; }
+.lesson-audio { margin: 16px 0 20px; padding: 17px 18px; border: 1px solid color-mix(in srgb,var(--brand) 28%,var(--border)); border-radius: 16px; background: color-mix(in srgb,var(--brand) 5%,var(--surface)); }
+.lesson-audio-heading { display: flex; align-items: center; gap: 12px; }
+.lesson-audio-symbol { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 12px; background: var(--brand); color: var(--brand-on); font-size: 22px; }
+.lesson-audio-heading strong,.lesson-audio-heading small { display: block; }
+.lesson-audio-heading strong { color: var(--ink); font-size: 14px; }
+.lesson-audio-heading small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.lesson-audio-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
+.lesson-audio-controls .button { min-height: 36px; padding: 8px 13px; }
+.lesson-audio-controls button:disabled { opacity: .5; cursor: default; }
+.lesson-audio-controls label { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
+.lesson-audio-controls select { max-width: 170px; min-height: 35px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--ink); font: inherit; }
+.lesson-audio-status { margin: 10px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.lesson-audio details { margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border); color: var(--ink); font-size: 12px; line-height: 1.65; }
+.lesson-audio summary { color: var(--brand-strong); font-weight: 700; cursor: pointer; }
+.lesson-audio details p { margin: 9px 0 0; }
 .learn-goal { padding: 16px 18px; border-radius: 16px; background: color-mix(in srgb, var(--brand) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--border)); }
 .learn-goal span { display: block; margin-bottom: 6px; color: var(--brand-strong); font-size: 10px; font-weight: 800; letter-spacing: 1px; }
 .learn-goal p { margin: 0; color: var(--ink); font-size: 15px; line-height: 1.5; font-weight: 600; }

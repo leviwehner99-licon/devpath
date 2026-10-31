@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import type { CourseLesson } from "../kurse/course";
 import type { LessonProgress } from "../daten/types";
 import { measuredMastery, reviewDate } from "../kurse/planner";
+import { LektionsAudio } from "./lektionsaudio";
 
 const MonacoEditor = lazy(async () => {
   await import("./monaco");
@@ -9,6 +10,7 @@ const MonacoEditor = lazy(async () => {
 });
 
 type Props = {
+  courseId: string;
   courseTitle: string;
   lessons: CourseLesson[];
   activeLesson: CourseLesson;
@@ -28,7 +30,7 @@ type Props = {
   theme?: "light" | "dark";
 };
 
-export function Learn({ courseTitle, lessons, activeLesson, progress, courseProgress, code, isReview = false, returnToTopic, onSelect, openLanguageCourse, openNextCourse, onCode, onHint, onAttempt, onComplete, openStudio, theme = "light" }: Props) {
+export function Learn({ courseId, courseTitle, lessons, activeLesson, progress, courseProgress, code, isReview = false, returnToTopic, onSelect, openLanguageCourse, openNextCourse, onCode, onHint, onAttempt, onComplete, openStudio, theme = "light" }: Props) {
   const [answer, setAnswer] = useState<number | null>(null);
   const [showExamples, setShowExamples] = useState(false);
   const [showMore, setShowMore] = useState(false);
@@ -83,6 +85,8 @@ export function Learn({ courseTitle, lessons, activeLesson, progress, courseProg
         {activeLesson.previousLesson && <p className="learn-bridge"><strong>Das kannst du schon:</strong> {activeLesson.previousLesson.title}. {activeLesson.previousLesson.reminder}</p>}
         {returnToTopic && <button className="text-button learn-back" onClick={returnToTopic.action}>← Zurück zu {returnToTopic.label}</button>}
         {activeLesson.languageCourse && <div className="language-prerequisite lesson-language-link"><strong>{activeLesson.languageCourse.title} brauchst du ab hier.</strong><p>{activeLesson.languageCourse.reason}</p><button className="button secondary" onClick={() => openLanguageCourse(activeLesson.languageCourse!.id)}>{activeLesson.languageCourse.title} lernen →</button></div>}
+
+        <LektionsAudio lesson={activeLesson} courseId={courseId} />
 
         {Boolean(activeLesson.definitions?.length) && <section className="learn-terms" aria-label="Neue Begriffe"><strong>Bevor du beginnst</strong><dl>{activeLesson.definitions!.map(({ term, meaning }) => <div key={term}><dt>{term}</dt><dd>{meaning}</dd></div>)}</dl></section>}
         <div className="learn-goal"><span>DEIN ZIEL</span><p>{activeLesson.objective}</p></div>
