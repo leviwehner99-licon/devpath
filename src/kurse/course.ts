@@ -1,6 +1,7 @@
 import { courseCurricula } from "./course-curriculum";
 import { einstiegLektionen } from "./einstieg";
 import { enrichLesson } from "./lernmaterial";
+import { improveLesson } from "./systemarchitektur";
 
 export type CourseLesson = {
   id: string;
@@ -18,6 +19,8 @@ export type CourseLesson = {
   previousLesson?: { title: string; reminder: string };
   definitions?: { term: string; meaning: string }[];
   setup?: { title: string; steps: { text: string; command?: string }[]; verify: string; source?: string };
+  systemDiagram?: { title: string; diagram: string; note: string };
+  languageGuide?: { field: string; technology: string; role: string }[];
   method?: { title: string; description: string };
   framework?: { title: string; description: string };
   module?: string;
@@ -38,7 +41,7 @@ export type LearningCourse = { id: string; version: string; title: string; categ
 
 export const programmingCourse: LearningCourse = {
   id: "programming-intro",
-  version: "5.1.0",
+  version: "5.2.0",
   title: "Einstieg in die Programmierung",
   category: "Programmiergrundlagen",
   lessons: einstiegLektionen,
@@ -79,7 +82,8 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       : blueprint.id === "conditions" || blueprint.id === "flow" ? "logic"
       : index === curriculum.length - 1 ? "project"
       : blueprint.id;
-    const languageCourseId = blueprint.languageCourse?.id ?? (definition.id === "backend" && blueprint.id === "database" || definition.id === "security" && blueprint.id === "injection-lab" ? "sql" : ({ javascript: "javascript", typescript: "typescript", python: "python", sql: "sql", csharp: "csharp", java: "java", php: "php", gdscript: "gdscript" } as Record<string, string>)[blueprint.language]);
+    const lessonLanguage = definition.id === "web-development" && blueprint.id === "frameworks" ? "typescript" : blueprint.language;
+    const languageCourseId = blueprint.languageCourse?.id ?? (definition.id === "backend" && blueprint.id === "database" || definition.id === "security" && blueprint.id === "injection-lab" ? "sql" : ({ javascript: "javascript", typescript: "typescript", python: "python", sql: "sql", csharp: "csharp", java: "java", php: "php", gdscript: "gdscript" } as Record<string, string>)[lessonLanguage]);
     const linkLanguage = definition.category === "Themenkurs" && blueprint.practice !== false && languageCourseId && !linkedLanguages.has(languageCourseId);
     if (linkLanguage) linkedLanguages.add(languageCourseId);
     return {
@@ -92,7 +96,7 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       exampleCode: blueprint.examples[0]?.code,
     } satisfies CourseLesson;
   });
-  return { id: definition.id, version: "5.1.0", title: definition.title, category: definition.category, lessons };
+  return { id: definition.id, version: "5.2.0", title: definition.title, category: definition.category, lessons };
 }
 
 const learningLanguageTitles: Record<string, string> = { javascript: "JavaScript", typescript: "TypeScript", python: "Python", sql: "SQL", csharp: "C#", java: "Java", php: "PHP", gdscript: "GDScript" };
@@ -116,7 +120,8 @@ function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
 programmingCourse.lessons = addRetrievalPractice(programmingCourse.lessons).map((lesson, index, all) => enrichLesson(lesson, all[index - 1]));
 export const learningCourses: LearningCourse[] = [programmingCourse, ...courseDefinitions.map((definition) => {
   const course = buildCourse(definition);
-  course.lessons = addRetrievalPractice(course.lessons).map((lesson, index, all) => enrichLesson(lesson, all[index - 1]));
+  const refined = addRetrievalPractice(course.lessons.map((lesson) => improveLesson(lesson, course.id)));
+  course.lessons = refined.map((lesson, index) => enrichLesson(lesson, refined[index - 1]));
   return course;
 })];
 export function getLearningCourse(courseId: string): LearningCourse { return learningCourses.find((course) => course.id === courseId) ?? programmingCourse; }

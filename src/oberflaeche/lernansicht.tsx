@@ -57,7 +57,7 @@ export function Learn({ courseTitle, lessons, activeLesson, progress, courseProg
   const sentences = activeLesson.explanation.split(/(?<=[.!?])\s+/);
   const shortExplanation = sentences.slice(0, 2).join(" ");
   const additionalExplanation = sentences.slice(2).join(" ");
-  const criteria = activeLesson.acceptanceCriteria?.slice(0, 3) ?? activeLesson.projectSteps?.slice(0, 3) ?? [
+  const criteria = activeLesson.acceptanceCriteria ?? activeLesson.projectSteps ?? [
     `Meine Antwort bezieht sich auf: ${activeLesson.title}.`,
     "Ich nenne ein konkretes eigenes Beispiel.",
     "Ich kann meine Entscheidung in eigenen Worten begründen.",
@@ -88,7 +88,11 @@ export function Learn({ courseTitle, lessons, activeLesson, progress, courseProg
         <div className="learn-goal"><span>DEIN ZIEL</span><p>{activeLesson.objective}</p></div>
         <section className="learn-idea"><h3>Kurz erklärt</h3><p>{shortExplanation}</p>{additionalExplanation && <details><summary>Mehr dazu lesen</summary><p>{additionalExplanation}</p></details>}</section>
 
+        {activeLesson.systemDiagram && <section className="learn-system"><h3>{activeLesson.systemDiagram.title}</h3><pre aria-label={activeLesson.systemDiagram.title}>{activeLesson.systemDiagram.diagram}</pre><p>{activeLesson.systemDiagram.note}</p></section>}
+
         {activeLesson.visualSteps && <ol className="visual-steps" aria-label="Beispiel Schritt für Schritt">{activeLesson.visualSteps.map((step, stepIndex) => <li key={`${stepIndex}-${step}`}><span>{stepIndex + 1}</span><strong>{step}</strong></li>)}</ol>}
+
+        {activeLesson.languageGuide && <section className="learn-language-guide"><h3>Sprachen und Einsatzgebiete</h3><div className="learn-language-table-wrap"><table><thead><tr><th>Bereich</th><th>Technik</th><th>Aufgabe</th></tr></thead><tbody>{activeLesson.languageGuide.map((item) => <tr key={item.field}><th scope="row">{item.field}</th><td>{item.technology}</td><td>{item.role}</td></tr>)}</tbody></table></div></section>}
 
         {activeLesson.setup && <section className="learn-setup"><h3>{activeLesson.setup.title}</h3><p>Arbeite die Schritte der Reihe nach ab. Die Befehle laufen im Terminal deines eigenen Projekts.</p><ol>{activeLesson.setup.steps.map((item, stepIndex) => <li key={`${stepIndex}-${item.text}`}><span>{item.text}</span>{item.command && <pre><code>{item.command}</code></pre>}</li>)}</ol><p className="learn-setup-verify"><strong>So prüfst du es:</strong> {activeLesson.setup.verify}</p>{(activeLesson.setup.source ?? activeLesson.resources?.[0]?.url) && <a href={activeLesson.setup.source ?? activeLesson.resources?.[0]?.url} target="_blank" rel="noreferrer noopener">Offizielle Anleitung öffnen ↗</a>}</section>}
 

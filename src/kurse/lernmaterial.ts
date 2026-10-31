@@ -26,7 +26,22 @@ export const setups: Record<string, Setup> = {
 };
 
 const terms: [RegExp, string, string][] = [
+  [/\bQuellcode\b/i, "Quellcode", "Die von Menschen geschriebene Form der Regeln eines Programms."],
+  [/\bProgrammiersprache\b/i, "Programmiersprache", "Eine festgelegte Schreibweise, mit der Menschen ausführbare Regeln beschreiben."],
+  [/\bHTML\b/i, "HTML", "Eine Auszeichnungssprache, die Inhalt und Bedeutung einer Webseite strukturiert."],
+  [/\bCSS\b/i, "CSS", "Eine Gestaltungssprache für Farben, Abstände und Layout einer Webseite."],
+  [/\bJavaScript\b/i, "JavaScript", "Eine Programmiersprache, die im Browser Verhalten und Interaktion steuert und auch auf Servern laufen kann."],
+  [/\bTypeScript\b/i, "TypeScript", "JavaScript mit zusätzlicher Typprüfung während der Entwicklung."],
+  [/\bFrontend\b/i, "Frontend", "Der Teil einer Anwendung, den Menschen im Browser sehen und bedienen."],
+  [/\bBackend\b/i, "Backend", "Der Serverteil, der Anfragen, Berechtigungen, Regeln und Daten verarbeitet."],
+  [/\bBetriebssystem\b/i, "Betriebssystem", "Die grundlegende Software eines Geräts, auf der Anwendungen laufen."],
   [/\bAPI\b/i, "API", "Eine feste Vereinbarung, welche Anfragen ein Programm annimmt und welche Antworten es gibt."],
+  [/\bDatenfluss\b/i, "Datenfluss", "Der Weg, den Daten von einer Eingabe über Verarbeitung bis zur Ausgabe nehmen."],
+  [/\bRepository\b/i, "Repository", "Hier: eine eigene Programmschicht, die Datenbankzugriffe bündelt."],
+  [/\bGeschäftsregel\b/i, "Geschäftsregel", "Eine fachliche Entscheidung, etwa ob eine Aufgabe angelegt werden darf."],
+  [/\bStatuscode\b/i, "Statuscode", "Eine Zahl in einer HTTP-Antwort, die Erfolg oder Fehler einordnet."],
+  [/\bTSX\b/i, "TSX", "Eine TypeScript-Datei, in der React-Komponenten auch Darstellung beschreiben können."],
+  [/\bJSX\b/i, "JSX", "Eine Schreibweise für Oberflächenstruktur innerhalb von JavaScript oder TypeScript."],
   [/\bHTTP\b/i, "HTTP", "Regeln für Anfragen und Antworten zwischen Browser und Server."],
   [/\bServer\b/i, "Server", "Ein Programm, das auf Anfragen wartet und Antworten zurückschickt."],
   [/\bRoute\b/i, "Route", "Eine Regel, die einen Anfrageweg wie /courses mit passendem Programmcode verbindet."],

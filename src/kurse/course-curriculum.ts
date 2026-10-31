@@ -1,6 +1,7 @@
 import type { CourseLesson } from "./course";
 import { topicExtensions } from "./course-extensions";
 import { languageExtensions } from "./language-extensions";
+import { integrationsprojekte } from "./integrationsprojekte";
 
 type Example = { title: string; code: string; note: string; language?: string; walkthrough?: string[] };
 export type LessonBlueprint = Pick<CourseLesson, "id" | "title" | "objective" | "duration" | "language" | "explanation" | "starterCode" | "task" | "successPattern" | "practice" | "knowledgeCheck"> & {
@@ -426,4 +427,9 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
   "game-development": [gameDevelopment[0], gameEnginePractice[0], ...gameDevelopment.slice(1), topicExtensions["game-development"][0], gameEnginePractice[1], topicExtensions["game-development"][1], topicExtensions["game-development"][2], ...gameProjects.slice(0, 2), topicExtensions["game-development"][3], gameProjects[2]],
   career: extendTrack("career", [...career, ...careerPractice]).map((item) => ({ ...item, acceptanceCriteria: item.acceptanceCriteria ?? careerRubrics[item.id] })),
 };
+
+for (const [courseId, practice] of Object.entries(integrationsprojekte)) {
+  const track = courseCurricula[courseId];
+  track.splice(track.length - 1, 0, practice);
+}
 
