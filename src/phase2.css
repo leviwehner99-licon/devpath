@@ -36,6 +36,22 @@
 .curriculum-recommendation{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 0 16px;border-color:color-mix(in srgb,var(--brand) 32%,var(--border))}
 .curriculum-recommendation h2{font:600 17px 'Space Grotesk',sans-serif;margin:7px 0}
 .curriculum-recommendation p{font-size:11px;line-height:1.5;color:var(--muted);margin:0}
+.curriculum-list{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.curriculum-course{min-width:0;padding:22px;overflow:hidden}
+.curriculum-course-heading{display:flex;align-items:center;gap:14px;margin-bottom:17px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.curriculum-course-heading .step-index{flex:0 0 34px}
+.curriculum-course-heading h2{font:600 18px 'Space Grotesk',sans-serif;margin:4px 0;color:var(--ink)}
+.curriculum-course-heading p{font-size:11px;color:var(--muted);margin:0}
+.curriculum-course-lessons{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}
+.curriculum-course-lessons .curriculum-step{width:100%;min-width:0;display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:13px}
+.curriculum-course-lessons .curriculum-step>span:nth-child(2){min-width:0}
+.curriculum-course-lessons .curriculum-step strong,.curriculum-course-lessons .curriculum-step small{overflow-wrap:anywhere}
+.curriculum-hero>div,.curriculum-recommendation>div{min-width:0}
+.curriculum-hero h2{overflow-wrap:anywhere}
+.curriculum-path{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.curriculum-path-item{display:inline-flex;align-items:center;gap:8px;max-width:100%}
+.curriculum-path-item>span{color:var(--brand-strong);font-weight:700}
+.curriculum-path-item strong{display:inline-block;padding:7px 11px;border-radius:999px;background:var(--surface-subtle);color:var(--brand-strong);font-size:11px;overflow-wrap:anywhere}
 .account-password-form{margin:20px 0 8px;padding:17px;border:1px solid var(--border);border-radius:15px;background:var(--surface-subtle)}
 .account-password-form h3{font:600 14px 'Space Grotesk',sans-serif;margin:7px 0}
 .account-password-form .field-grid{margin:4px 0 10px}
