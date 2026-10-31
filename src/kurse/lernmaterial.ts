@@ -1,0 +1,108 @@
+import type { CourseLesson } from "./course";
+
+type Setup = NonNullable<CourseLesson["setup"]>;
+const step = (text: string, command?: string) => ({ text, command });
+
+// These guides live beside the course data so a lesson can show them before its exercise.
+export const setups: Record<string, Setup> = {
+  "sql-tables": { title: "PostgreSQL und eine Übungstabelle einrichten", steps: [step("Auf postgresql.org/download das eigene System wählen; unter Windows den verlinkten Installer mit Server und SQL Shell (psql) verwenden."), step("Bei der Installation ein lokales Passwort für den Datenbankbenutzer festlegen und sicher aufbewahren."), step("SQL Shell (psql) öffnen, Standardserver und Port bestätigen und als Benutzer postgres anmelden."), step("Eigene Übungsdatenbank anlegen und hineinwechseln.", "CREATE DATABASE lernkurs;\n\\c lernkurs"), step("Kleine Tabelle und drei Testzeilen anlegen.", "CREATE TABLE courses (id integer PRIMARY KEY, title text NOT NULL, category text, published boolean NOT NULL);\nINSERT INTO courses VALUES (1, 'Spiele', 'Praxis', true), (2, 'Web', 'Praxis', true), (3, 'Python', 'Sprache', false);"), step("Erste Abfrage selbst ausführen.", "SELECT id, title, category FROM courses;")], verify: "Die Abfrage zeigt genau drei Zeilen mit den eigenen Kurstiteln.", source: "https://www.postgresql.org/download/" },
+  "web-development-vite-setup": { title: "Node.js, Vite und React einrichten", steps: [step("Node.js LTS von nodejs.org herunterladen, installieren und ein neues Terminal öffnen."), step("Prüfen, ob Node.js und npm erreichbar sind.", "node --version\nnpm --version"), step("Im gewünschten Elternordner ein React-Projekt mit TypeScript anlegen.", "npm create vite@latest kursfinder -- --template react-ts"), step("In den Projektordner wechseln und Pakete installieren.", "cd kursfinder\nnpm install"), step("Lokale Adresse öffnen, eine Überschrift ändern und danach den Build prüfen.", "npm run dev\nnpm run build")], verify: "Die geänderte Überschrift erscheint im Browser; npm run build endet ohne Fehler." },
+  "web-development-playwright-setup": { title: "Playwright im Frontend-Projekt einrichten", steps: [step("Terminal im bestehenden Frontend-Projekt öffnen."), step("Testpaket und Beispielkonfiguration mit dem offiziellen Assistenten anlegen.", "npm init playwright@latest"), step("Im Assistenten TypeScript und den gewünschten Browser wählen; benötigte Browser installieren lassen."), step("Beispieltest ausführen.", "npx playwright test"), step("Einen Test für Suche mit Treffer und einen für den Leerzustand schreiben und erneut starten.", "npx playwright test")], verify: "Der Testbericht meldet beide eigenen Fälle als bestanden." },
+  "web-development-vue-practice": { title: "Vue als eigenes Vergleichsprojekt einrichten", steps: [step("Node.js und npm prüfen.", "node --version\nnpm --version"), step("Vue-Projektassistent im Elternordner starten.", "npm create vue@latest"), step("Als Projektnamen kursfinder-vue eingeben; optionale Funktionen zunächst nur nach Bedarf wählen."), step("Projekt betreten, Pakete installieren und starten.", "cd kursfinder-vue\nnpm install\nnpm run dev"), step("Angezeigte Adresse öffnen, Überschrift ändern und Produktionsbuild prüfen.", "npm run build")], verify: "Änderung ist sichtbar und der Build läuft durch." },
+  "web-development-angular-practice": { title: "Angular CLI und Projekt einrichten", steps: [step("Node.js-Version anhand der verlinkten Angular-Anforderungen prüfen.", "node --version\nnpm --version"), step("Angular CLI installieren und Verfügbarkeit prüfen.", "npm install -g @angular/cli\nng version"), step("Im Elternordner ein Projekt erzeugen; Einsteiger können die Standardantworten wählen.", "ng new kursfinder-angular"), step("Projekt öffnen und Entwicklungsserver starten.", "cd kursfinder-angular\nng serve --open"), step("Eine sichtbare Überschrift ändern und den Build prüfen.", "ng build")], verify: "Browser zeigt die Änderung; ng build endet ohne Fehler." },
+  "backend-express-setup": { title: "Express in einem eigenen Node-Projekt einrichten", steps: [step("Node.js und npm prüfen.", "node --version\nnpm --version"), step("Neuen Projektordner anlegen und betreten.", "mkdir api-express\ncd api-express"), step("Paketdatei erzeugen, ES-Module aktivieren und Express lokal installieren.", "npm init -y\nnpm pkg set type=module\nnpm install express"), step("server.js mit GET /health aus dem Beispiel anlegen und starten.", "node server.js"), step("In einem zweiten Terminal die Antwort prüfen.", "curl http://127.0.0.1:3000/health")], verify: "Die lokale Anfrage liefert JSON mit status ok." },
+  "backend-fastify-setup": { title: "Fastify in einem eigenen Node-Projekt einrichten", steps: [step("Node.js und npm prüfen.", "node --version\nnpm --version"), step("Projektordner anlegen und betreten.", "mkdir api-fastify\ncd api-fastify"), step("Paketdatei anlegen, ES-Module aktivieren und Fastify installieren.", "npm init -y\nnpm pkg set type=module\nnpm install fastify"), step("server.js mit lokaler GET-Route aus dem Beispiel speichern und starten.", "node server.js"), step("Route in einem zweiten Terminal aufrufen.", "curl http://127.0.0.1:3000/health")], verify: "Die lokale Route antwortet mit dem erwarteten Status und JSON." },
+  "backend-spring-setup": { title: "Spring Boot mit dem offiziellen Generator einrichten", steps: [step("Passende JDK-Version gemäß Spring-Anleitung installieren und prüfen.", "java --version"), step("start.spring.io öffnen: Maven, Java, aktuelle stabile Spring-Boot-Version und Projektname kurs-api wählen."), step("Abhängigkeit Spring Web hinzufügen, ZIP erzeugen und in einen eigenen Ordner entpacken."), step("Terminal im entpackten Ordner öffnen und den enthaltenen Maven-Wrapper starten.", ".\\mvnw.cmd spring-boot:run"), step("Eine GET-Route ergänzen und lokal aufrufen; bei macOS/Linux stattdessen ./mvnw verwenden.")], verify: "Die eigene GET-Route antwortet lokal; der Build läuft mit dem Projekt-Wrapper." },
+  "security-zap-setup": { title: "OWASP ZAP für ein eigenes Testprojekt einrichten", steps: [step("Installer für das eigene Betriebssystem von zaproxy.org/download herunterladen und ausführen."), step("ZAP starten und eine Sitzung für das eigene Labor anlegen."), step("Eigene lokale Testanwendung starten; ihre lokale URL im Browser prüfen."), step("In ZAP nur diese eigene URL als Ziel wählen und zuerst passiv beobachten."), step("Befund im eigenen Projekt reproduzieren, Schutz ergänzen und denselben Fall erneut prüfen.")], verify: "Ziel-URL, Befund und erneuter Test sind im Laborprotokoll festgehalten." },
+  "game-development-godot-setup": { title: "Godot und erstes 2D-Projekt einrichten", steps: [step("Stabile Godot-Version von godotengine.org/download für das eigene System herunterladen."), step("Godot entpacken bzw. installieren und Projektmanager öffnen."), step("Neues Projekt in eigenem Ordner erstellen; 2D als Arbeitsfläche wählen."), step("Node2D als Hauptknoten anlegen, Szene als Main speichern und als Startszene festlegen."), step("Sichtbares Sprite oder Label hinzufügen und Projekt mit F6/F5 starten.")], verify: "Die eigene Szene läuft und zeigt das neue Element." },
+  "game-development-unity-setup": { title: "Unity Hub, Editor und 2D-Projekt einrichten", steps: [step("Unity Hub über die verlinkte Unity-Anleitung herunterladen, installieren und anmelden."), step("Im Hub unter Installs eine unterstützte Editor-Version installieren."), step("Unter Projects ein neues 2D-Projekt in einem eigenen Ordner anlegen."), step("Szene öffnen, ein GameObject hinzufügen und seine Position im Inspector ändern."), step("Play drücken und den sichtbaren Zustand prüfen.")], verify: "Editor und Projekt starten; das hinzugefügte Objekt ist in der Szene sichtbar." },
+  "ai-sklearn-setup": { title: "Python und scikit-learn isoliert einrichten", steps: [step("Python von python.org installieren und im neuen Terminal prüfen.", "python --version"), step("Im eigenen Projektordner eine virtuelle Umgebung anlegen.", "python -m venv .venv"), step("In PowerShell die Umgebung aktivieren.", ".\\.venv\\Scripts\\Activate.ps1"), step("Paket in dieser Umgebung installieren.", "python -m pip install -U scikit-learn"), step("Paket und Version prüfen.", "python -m pip show scikit-learn")], verify: "pip show meldet scikit-learn aus der Projektumgebung." },
+  "ai-pytorch-setup": { title: "PyTorch passend zum Rechner einrichten", steps: [step("Bestehende Python-Projektumgebung aktivieren."), step("Auf pytorch.org/get-started/locally Betriebssystem, pip, Python und CPU oder passende GPU auswählen."), step("Den dort erzeugten Installationsbefehl unverändert in der aktiven Umgebung ausführen; GPU-Befehle hängen von der Hardware ab."), step("Import und kleine Rechnung ausführen.", "python -c \"import torch; print(torch.__version__); print(torch.tensor([2, 3]).sum().item())\"")], verify: "Python zeigt eine Version und danach die Zahl 5." },
+  "ai-python-environment": { title: "Python-Projektumgebung und pandas einrichten", steps: [step("Python installieren und ein neues Terminal öffnen.", "python --version"), step("Im Projektordner eine virtuelle Umgebung anlegen und aktivieren.", "python -m venv .venv\n.\\.venv\\Scripts\\Activate.ps1"), step("pandas in der aktiven Umgebung installieren.", "python -m pip install pandas"), step("Import und Version prüfen.", "python -c \"import pandas; print(pandas.__version__)\"")], verify: "Die Ausgabe enthält eine pandas-Version ohne Importfehler.", source: "https://pandas.pydata.org/docs/getting_started/index.html" },
+  "ai-sql-python": { title: "SQLAlchemy für die Datenanbindung einrichten", steps: [step("Vorhandene Python-Projektumgebung aktivieren."), step("SQLAlchemy installieren.", "python -m pip install SQLAlchemy"), step("Import und Version prüfen.", "python -c \"import sqlalchemy; print(sqlalchemy.__version__)\""), step("Mit einer lokalen SQLite-Testdatei beginnen; für PostgreSQL zusätzlich einen passenden Datenbanktreiber nach offizieller Anleitung installieren."), step("Erst eine parametergebundene Testabfrage ausführen, danach echte Daten anschließen.")], verify: "Import klappt und die lokale Testabfrage liefert das erwartete Ergebnis.", source: "https://docs.sqlalchemy.org/en/20/intro.html" },
+  "ai-fastapi-practice": { title: "FastAPI in der Modellumgebung einrichten", steps: [step("Vorhandene Python-Projektumgebung aktivieren."), step("FastAPI samt lokalem Entwicklungsserver installieren.", "python -m pip install \"fastapi[standard]\""), step("main.py mit der Beispielroute speichern."), step("Lokalen Server starten.", "fastapi dev main.py"), step("Im Browser /docs öffnen und gültige sowie leere Eingabe prüfen.")], verify: "Die Route ist in /docs sichtbar und lehnt leeren Text mit Status 400 ab.", source: "https://fastapi.tiangolo.com/tutorial/" },
+  "backend-node-postgres-api": { title: "PostgreSQL und Node-Treiber einrichten", steps: [step("PostgreSQL von postgresql.org/download für das eigene System installieren; lokales Testkonto und Datenbank anlegen."), step("In der vorhandenen Node-API den Treiber installieren.", "npm install pg"), step("Verbindungsdaten nur lokal als Umgebungsvariablen setzen; keine Passwörter in Git speichern."), step("Mit pg.Pool eine Verbindung erstellen und SELECT 1 als ersten Test abfragen."), step("Danach die parametrisierte Kursabfrage aus dieser Lektion ausführen und Fehlerfall prüfen.")], verify: "SELECT 1 klappt; falsche Verbindung erzeugt eine kontrollierte Fehlermeldung ohne Passwort.", source: "https://node-postgres.com/features/connecting" },
+  "career-git-setup": { title: "Git lokal einrichten", steps: [step("Git von git-scm.com installieren und ein neues Terminal öffnen."), step("Installation prüfen.", "git --version"), step("In einem eigenen Übungsordner ein Repository starten.", "git init\ngit status"), step("README.md mit Projektziel anlegen und einen ersten Stand speichern; falls Git nach Identität fragt, git config user.name und user.email für das Übungsprojekt setzen.", "git add README.md\ngit commit -m \"Projektziel beschreiben\""), step("Letzten Eintrag prüfen.", "git log -1")], verify: "git log -1 zeigt den eigenen Commit." },
+};
+
+const terms: [RegExp, string, string][] = [
+  [/\bAPI\b/i, "API", "Eine feste Vereinbarung, welche Anfragen ein Programm annimmt und welche Antworten es gibt."],
+  [/\bHTTP\b/i, "HTTP", "Regeln für Anfragen und Antworten zwischen Browser und Server."],
+  [/\bServer\b/i, "Server", "Ein Programm, das auf Anfragen wartet und Antworten zurückschickt."],
+  [/\bRoute\b/i, "Route", "Eine Regel, die einen Anfrageweg wie /courses mit passendem Programmcode verbindet."],
+  [/\bFramework\b/i, "Framework", "Ein Gerüst mit fertigen Bausteinen und Regeln für eine bestimmte Art von Anwendung."],
+  [/\bBibliothek\b/i, "Bibliothek", "Wiederverwendbarer Code für eine bestimmte Aufgabe."],
+  [/\bNode\.js\b/i, "Node.js", "Eine Umgebung, die JavaScript außerhalb des Browsers ausführt."],
+  [/\bnpm\b/i, "npm", "Ein Werkzeug, das JavaScript-Pakete installiert und Projektbefehle startet."],
+  [/\bKomponente\b/i, "Komponente", "Ein wiederverwendbarer Teil einer Benutzeroberfläche mit eigener Darstellung und Logik."],
+  [/\bState\b/i, "State", "Der aktuelle Zustand einer Anwendung, etwa der eingegebene Suchtext."],
+  [/\bProps\b/i, "Props", "Werte, die eine React-Komponente von außen erhält."],
+  [/\bDOM\b/i, "DOM", "Die HTML-Seite als Struktur, die JavaScript lesen und ändern kann."],
+  [/\bCompiler\b/i, "Compiler", "Ein Programm, das Quellcode prüft und in eine ausführbare Form übersetzt."],
+  [/\bJDK\b/i, "JDK", "Das Entwicklungspaket mit Werkzeugen zum Schreiben und Bauen von Java-Programmen."],
+  [/\bJVM\b/i, "JVM", "Die Umgebung, die übersetzte Java-Programme ausführt."],
+  [/\bLaufzeit\b/i, "Laufzeit", "Die Umgebung, in der ein Programm tatsächlich ausgeführt wird."],
+  [/\bVariable\b/i, "Variable", "Ein benannter Platz für einen Wert, den dein Programm verwendet."],
+  [/\bFunktion\b/i, "Funktion", "Ein benannter Arbeitsschritt, den du mit Eingaben aufrufen kannst."],
+  [/\bParameter\b/i, "Parameter", "Ein Platzhalter für einen Wert, den eine Funktion beim Aufruf bekommt."],
+  [/\bArray\b/i, "Array", "Eine geordnete Liste von Werten."],
+  [/\bObjekt\b/i, "Objekt", "Zusammengehörige Werte mit benannten Eigenschaften."],
+  [/\bTyp\b/i, "Typ", "Eine Angabe, welche Art von Wert erlaubt ist, etwa Zahl oder Text."],
+  [/\bSchleife\b/i, "Schleife", "Ein Programmteil, der einen Schritt nach einer klaren Regel wiederholt."],
+  [/\bModul\b/i, "Modul", "Ein abgegrenzter Teil eines Programms, häufig in einer eigenen Datei."],
+  [/\bPromise\b/i, "Promise", "Ein Platzhalter für ein Ergebnis, das erst später vorliegt."],
+  [/\basynchron\b/i, "asynchron", "Ein Ablauf, bei dem eine langsame Arbeit später fertig wird und andere Schritte inzwischen weitergehen können."],
+  [/\bDatenbank\b/i, "Datenbank", "Ein System zum geordneten Speichern und Abfragen von Daten."],
+  [/\bSQL\b/i, "SQL", "Eine Sprache, mit der du Daten in Tabellen abfragst und änderst."],
+  [/\bJSON\b/i, "JSON", "Ein Textformat zum Austauschen strukturierter Daten."],
+  [/\bTransaktion\b/i, "Transaktion", "Mehrere Datenbankänderungen, die zusammen bestätigt oder zurückgenommen werden."],
+  [/\bIndex\b/i, "Index", "Eine zusätzliche Suchstruktur, mit der eine Datenbank bestimmte Abfragen schneller finden kann."],
+  [/\bModell\b/i, "Modell", "Im KI-Kurs: eine aus Beispielen gelernte Rechenregel für Vorhersagen."],
+  [/\bscikit-learn\b/i, "scikit-learn", "Eine Python-Bibliothek für klassische Lernverfahren und deren Prüfung."],
+  [/\bPyTorch\b/i, "PyTorch", "Eine Bibliothek zum Rechnen mit Zahlenfeldern und Trainieren neuronaler Netze."],
+  [/\bpandas\b/i, "pandas", "Eine Python-Bibliothek für tabellarische Daten."],
+  [/\bSQLAlchemy\b/i, "SQLAlchemy", "Ein Python-Werkzeug für Datenbankverbindungen und Abfragen."],
+  [/\bFastAPI\b/i, "FastAPI", "Ein Python-Framework für HTTP-Schnittstellen."],
+  [/\bReact\b/i, "React", "Eine Bibliothek für Benutzeroberflächen aus wiederverwendbaren Teilen."],
+  [/\bVue\b/i, "Vue", "Ein Framework für interaktive Benutzeroberflächen im Browser."],
+  [/\bAngular\b/i, "Angular", "Ein Framework mit festen Werkzeugen und Struktur für größere Browseranwendungen."],
+  [/\bExpress\b/i, "Express", "Ein leichtes Framework für HTTP-Routen mit Node.js."],
+  [/\bFastify\b/i, "Fastify", "Ein Node.js-Framework für HTTP-Routen und prüfbare Eingaben."],
+  [/\bSpring Boot\b/i, "Spring Boot", "Ein Java-Framework zum Starten von Serveranwendungen."],
+  [/\bPlaywright\b/i, "Playwright", "Ein Werkzeug, das echte Browserabläufe automatisch prüft."],
+  [/\bVite\b/i, "Vite", "Ein Werkzeug zum Starten und Bauen moderner Frontend-Projekte."],
+  [/\bTraining\b/i, "Training", "Der Schritt, in dem ein KI-Modell aus Übungsbeispielen Muster lernt."],
+  [/\bBaseline\b/i, "Baseline", "Eine einfache Vergleichslösung, die ein neues Verfahren übertreffen sollte."],
+  [/\bMetrik\b/i, "Metrik", "Eine festgelegte Zahl, mit der du eine Eigenschaft oder Modellleistung misst."],
+  [/\bPipeline\b/i, "Pipeline", "Eine feste Reihenfolge von Verarbeitungsschritten, etwa Bereinigen, Trainieren und Prüfen."],
+  [/\bTensor\b/i, "Tensor", "Eine geordnete Sammlung von Zahlen, mit der KI-Bibliotheken rechnen."],
+  [/\bEngine\b/i, "Engine", "Ein Werkzeugkasten für Spiele mit Darstellung, Eingaben und oft Physik."],
+  [/\bKollision\b/i, "Kollision", "Im Spiel: wenn sich zwei Objekte berühren oder überschneiden."],
+  [/\bSzene\b/i, "Szene", "Ein gespeicherter Abschnitt eines Spiels mit seinen Objekten."],
+  [/\bNode\b/i, "Node", "In Godot: ein Baustein im Szenenbaum, etwa für eine Figur oder Kamera."],
+  [/\bFirewall\b/i, "Firewall", "Regeln, die erlaubte und gesperrte Netzwerkverbindungen unterscheiden."],
+  [/\bZAP\b/i, "ZAP", "Ein Werkzeug zum Prüfen eigener Webanwendungen auf Sicherheitsprobleme."],
+  [/\bXSS\b/i, "XSS", "Eine Schwachstelle, bei der fremder Inhalt als Code im Browser ausgeführt wird."],
+  [/\bInjection\b/i, "Injection", "Eine Schwachstelle, bei der Eingaben unbeabsichtigt als Befehl verarbeitet werden."],
+  [/\bAuthentifizierung\b/i, "Authentifizierung", "Die Prüfung, wer eine Person oder ein Programm ist."],
+  [/\bAutorisierung\b/i, "Autorisierung", "Die Prüfung, was eine angemeldete Person tun darf."],
+  [/\bCommit\b/i, "Commit", "Ein gespeicherter Stand einer Änderung in Git."],
+  [/\bTest\b/i, "Test", "Eine Prüfung, ob ein erwartetes Ergebnis tatsächlich eintritt."],
+];
+
+export function enrichLesson(lesson: CourseLesson, previous?: CourseLesson): CourseLesson {
+  const text = `${lesson.title} ${lesson.objective} ${lesson.explanation} ${lesson.task}`;
+  const definitions = terms.filter(([pattern]) => pattern.test(text)).map(([, term, meaning]) => ({ term, meaning }));
+  const example = lesson.examples?.[0];
+  return {
+    ...lesson,
+    previousLesson: previous ? { title: previous.title, reminder: previous.takeaway ?? previous.objective } : undefined,
+    definitions,
+    setup: setups[lesson.id],
+    visualSteps: lesson.visualSteps?.length ? lesson.visualSteps : [
+      `🎯 Ziel: ${lesson.objective}`,
+      `👀 Beispiel: ${example?.note ?? lesson.explanation.split(/[.!?]/)[0]}`,
+      `🧪 Versuch: ${lesson.task}`,
+    ],
+  };
+}

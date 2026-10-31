@@ -80,13 +80,17 @@ export function Learn({ courseTitle, lessons, activeLesson, progress, courseProg
       <main className="lesson-main panel learn-focus">
         <div className="lesson-meta"><span className="course-chip">{activeLesson.module ?? courseTitle}</span><span>{index + 1} / {lessons.length} · etwa {activeLesson.duration} Min.</span></div>
         <h2>{activeLesson.title}</h2>
+        {activeLesson.previousLesson && <p className="learn-bridge"><strong>Das kannst du schon:</strong> {activeLesson.previousLesson.title}. {activeLesson.previousLesson.reminder}</p>}
         {returnToTopic && <button className="text-button learn-back" onClick={returnToTopic.action}>← Zurück zu {returnToTopic.label}</button>}
         {activeLesson.languageCourse && <div className="language-prerequisite lesson-language-link"><strong>{activeLesson.languageCourse.title} brauchst du ab hier.</strong><p>{activeLesson.languageCourse.reason}</p><button className="button secondary" onClick={() => openLanguageCourse(activeLesson.languageCourse!.id)}>{activeLesson.languageCourse.title} lernen →</button></div>}
 
+        {Boolean(activeLesson.definitions?.length) && <section className="learn-terms" aria-label="Neue Begriffe"><strong>Bevor du beginnst</strong><dl>{activeLesson.definitions!.map(({ term, meaning }) => <div key={term}><dt>{term}</dt><dd>{meaning}</dd></div>)}</dl></section>}
         <div className="learn-goal"><span>DEIN ZIEL</span><p>{activeLesson.objective}</p></div>
         <section className="learn-idea"><h3>Kurz erklärt</h3><p>{shortExplanation}</p>{additionalExplanation && <details><summary>Mehr dazu lesen</summary><p>{additionalExplanation}</p></details>}</section>
 
         {activeLesson.visualSteps && <ol className="visual-steps" aria-label="Beispiel Schritt für Schritt">{activeLesson.visualSteps.map((step, stepIndex) => <li key={`${stepIndex}-${step}`}><span>{stepIndex + 1}</span><strong>{step}</strong></li>)}</ol>}
+
+        {activeLesson.setup && <section className="learn-setup"><h3>{activeLesson.setup.title}</h3><p>Arbeite die Schritte der Reihe nach ab. Die Befehle laufen im Terminal deines eigenen Projekts.</p><ol>{activeLesson.setup.steps.map((item, stepIndex) => <li key={`${stepIndex}-${item.text}`}><span>{item.text}</span>{item.command && <pre><code>{item.command}</code></pre>}</li>)}</ol><p className="learn-setup-verify"><strong>So prüfst du es:</strong> {activeLesson.setup.verify}</p>{(activeLesson.setup.source ?? activeLesson.resources?.[0]?.url) && <a href={activeLesson.setup.source ?? activeLesson.resources?.[0]?.url} target="_blank" rel="noreferrer noopener">Offizielle Anleitung öffnen ↗</a>}</section>}
 
         {examples.length > 0 && <section className="learn-examples"><button type="button" className="learn-section-toggle" aria-expanded={showExamples} onClick={() => setShowExamples((value) => !value)}>{showExamples ? "− Beispiel schließen" : "+ Ein Beispiel ansehen"}</button>{showExamples && <>
           <p className="learn-example-purpose">{isQuiz ? "Das Beispiel zeigt die Regel. Danach wählst du die passende Antwort." : isWorksheet ? "Nutze es als Orientierung für deinen eigenen Entwurf." : `Sieh dir an, wie du „${activeLesson.task}“ angehen kannst.`}</p>

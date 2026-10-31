@@ -1,0 +1,516 @@
+{
+  "schemaVersion": 1,
+  "id": "programming-intro",
+  "version": "5.1.0",
+  "title": "Einstieg in die Programmierung",
+  "category": "Programmiergrundlagen",
+  "skills": [
+    "program-output",
+    "program-why",
+    "program-input-result",
+    "program-order",
+    "program-decisions",
+    "program-repeat",
+    "program-search-workshop",
+    "program-debug",
+    "program-debug-workshop",
+    "program-languages",
+    "program-learning"
+  ],
+  "lessons": [
+    {
+      "id": "program-output",
+      "title": "Was ist ein Programm?",
+      "objective": "Du erkennst eine klare Regel hinter einer alltäglichen Handlung.",
+      "explanation": "Ein Programm ist eine genaue Anleitung für einen Computer. Menschen legen die Regeln fest; der Computer führt sie aus.",
+      "visualSteps": [
+        "🚦 Ampel zeigt Rot",
+        "👀 Regel prüfen: Rot bedeutet warten",
+        "🛑 Person bleibt stehen"
+      ],
+      "examples": [
+        {
+          "title": "Die Fußgängerampel",
+          "code": "Rot → warten\nGrün → gehen",
+          "note": "Die Farbe bestimmt die passende Handlung. Für jede Farbe ist die Regel eindeutig."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Die Ampel zeigt Rot. Was soll nach unserer Regel passieren?",
+        "options": [
+          "Warten",
+          "Gehen",
+          "Der Computer entscheidet zufällig"
+        ],
+        "correctIndex": 0,
+        "explanation": "Rot führt zur vorher festgelegten Handlung: warten."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Die Ampel zeigt Rot. Was soll nach unserer Regel passieren?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Erkläre nach der Lektion in einem Satz, was „Was ist ein Programm?“ bedeutet und nenne ein Beispiel.",
+      "retrievalAnswer": "Ziel dieser Lektion: Du erkennst eine klare Regel hinter einer alltäglichen Handlung.",
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-why",
+      "title": "Wozu programmieren Menschen?",
+      "objective": "Du erkennst ein kleines Problem, das ein Programm lösen kann.",
+      "explanation": "Programme helfen bei wiederkehrenden Aufgaben. Ein kleiner Anfang reicht: Eine Suche kann aus vielen Kursen die passenden zeigen.",
+      "visualSteps": [
+        "🔎 Viele Kurse sind sichtbar",
+        "⌨️ Du gibst „Spiel“ ein",
+        "🎮 Nur passende Kurse bleiben"
+      ],
+      "examples": [
+        {
+          "title": "Ein Kursfinder",
+          "code": "Wunsch: Spielekurse finden\nAktion: Suchwort eingeben\nErgebnis: passende Kurse sehen",
+          "note": "Das ist ein konkreter Nutzen. Die erste Version braucht noch keine große Plattform."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Welche erste Projektidee lässt sich leicht überprüfen?",
+        "options": [
+          "Eine Suche, die passende Kurse zeigt",
+          "Sofort alle Funktionen einer großen Lernplattform",
+          "Ein Projekt ohne klares Ergebnis"
+        ],
+        "correctIndex": 0,
+        "explanation": "Bei der Suche kannst du direkt sehen, ob das gewünschte Ergebnis erscheint."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Welche erste Projektidee lässt sich leicht überprüfen?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Was ist ein Programm?“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du erkennst eine klare Regel hinter einer alltäglichen Handlung.",
+      "previousLesson": {
+        "title": "Was ist ein Programm?",
+        "reminder": "Du erkennst eine klare Regel hinter einer alltäglichen Handlung."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-input-result",
+      "title": "Eingabe und Ergebnis",
+      "objective": "Du kannst sagen, was in eine Regel hineingeht und was herauskommt.",
+      "explanation": "Eine Eingabe ist das, womit ein Programm arbeitet. Das Ergebnis ist das, was du danach sehen oder benutzen kannst.",
+      "visualSteps": [
+        "🍎 Du wählst zwei Äpfel",
+        "➕ Die Anzahl wird um zwei erhöht",
+        "🧺 Im Korb liegen zwei Äpfel mehr"
+      ],
+      "examples": [
+        {
+          "title": "Einkaufskorb",
+          "code": "Eingabe: 2 Äpfel hinzufügen\nRegel: bisherige Anzahl + 2\nErgebnis: neue Anzahl im Korb",
+          "note": "Du musst die Regel noch nicht als Code schreiben. Benenne nur Anfang und Ergebnis."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Bei einer Suche gibst du „Spiel“ ein. Was ist die Eingabe?",
+        "options": [
+          "Das Wort „Spiel“",
+          "Die Liste der Treffer",
+          "Die Farbe der Seite"
+        ],
+        "correctIndex": 0,
+        "explanation": "Das Suchwort ist die Eingabe; die Trefferliste ist ein Ergebnis."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Bei einer Suche gibst du „Spiel“ ein. Was ist die Eingabe?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Wozu programmieren Menschen?“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du erkennst ein kleines Problem, das ein Programm lösen kann.",
+      "previousLesson": {
+        "title": "Wozu programmieren Menschen?",
+        "reminder": "Du erkennst ein kleines Problem, das ein Programm lösen kann."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-order",
+      "title": "Die Reihenfolge zählt",
+      "objective": "Du erkennst, warum Schritte in der richtigen Reihenfolge stehen müssen.",
+      "explanation": "Ein Computer arbeitet die beschriebenen Schritte ab. Fehlt ein Schritt oder kommt er zu früh, kann das Ergebnis falsch werden.",
+      "visualSteps": [
+        "🥣 Schüssel bereitstellen",
+        "🥛 Milch eingießen",
+        "🥣 Müsli dazugeben"
+      ],
+      "examples": [
+        {
+          "title": "Müsli machen",
+          "code": "1. Schüssel hinstellen\n2. Zutaten hineingeben\n3. Essen",
+          "note": "„Essen“ vor „Zutaten hineingeben“ wäre keine brauchbare Anleitung."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Du willst ein Foto speichern. Welcher Schritt muss zuerst passieren?",
+        "options": [
+          "Ein Foto aufnehmen",
+          "Den Dateinamen des noch nicht aufgenommenen Fotos öffnen",
+          "Das Foto löschen"
+        ],
+        "correctIndex": 0,
+        "explanation": "Erst wenn ein Foto aufgenommen wurde, kannst du es speichern."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Du willst ein Foto speichern. Welcher Schritt muss zuerst passieren?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Eingabe und Ergebnis“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du kannst sagen, was in eine Regel hineingeht und was herauskommt.",
+      "previousLesson": {
+        "title": "Eingabe und Ergebnis",
+        "reminder": "Du kannst sagen, was in eine Regel hineingeht und was herauskommt."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-decisions",
+      "title": "Entscheidungen treffen",
+      "objective": "Du verstehst eine Wenn-dann-Regel ohne Code.",
+      "explanation": "Manche Schritte hängen von einer Bedingung ab. Du beschreibst beide möglichen Fälle, damit nichts offenbleibt.",
+      "visualSteps": [
+        "🌧️ Regnet es?",
+        "Ja → ☂️ Schirm mitnehmen",
+        "Nein → 🚶 ohne Schirm gehen"
+      ],
+      "examples": [
+        {
+          "title": "Vor dem Spaziergang",
+          "code": "Wenn es regnet → Schirm mitnehmen\nSonst → ohne Schirm gehen",
+          "note": "Die Bedingung entscheidet, welcher der beiden Schritte passt."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Es regnet nicht. Welcher Zweig der Regel wird gewählt?",
+        "options": [
+          "Ohne Schirm gehen",
+          "Schirm mitnehmen",
+          "Beide Zweige gleichzeitig"
+        ],
+        "correctIndex": 0,
+        "explanation": "Die Bedingung „es regnet“ ist falsch. Darum gilt der Sonst-Fall."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Es regnet nicht. Welcher Zweig der Regel wird gewählt?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Die Reihenfolge zählt“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du erkennst, warum Schritte in der richtigen Reihenfolge stehen müssen.",
+      "previousLesson": {
+        "title": "Die Reihenfolge zählt",
+        "reminder": "Du erkennst, warum Schritte in der richtigen Reihenfolge stehen müssen."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-repeat",
+      "title": "Schritte wiederholen",
+      "objective": "Du erkennst, wann eine wiederholte Anweisung hilfreich ist.",
+      "explanation": "Wenn derselbe Schritt für mehrere Dinge gilt, musst du ihn nicht immer neu beschreiben. Du kannst sagen, für welche Dinge er wiederholt wird.",
+      "visualSteps": [
+        "🌱 Pflanze 1 gießen",
+        "🌱 Pflanze 2 gießen",
+        "🌱 Pflanze 3 gießen"
+      ],
+      "examples": [
+        {
+          "title": "Drei Pflanzen",
+          "code": "Für jede Pflanze:\n  Prüfen, ob die Erde trocken ist.\n  Wenn ja: gießen.",
+          "note": "Die gleiche Regel wird bei jeder Pflanze angewendet."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Was wiederholt sich bei den drei Pflanzen?",
+        "options": [
+          "Die Prüfung, ob die Erde trocken ist",
+          "Nur der Name der ersten Pflanze",
+          "Die Tageszeit wird zufällig geändert"
+        ],
+        "correctIndex": 0,
+        "explanation": "Jede Pflanze wird mit derselben Regel geprüft."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Was wiederholt sich bei den drei Pflanzen?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Entscheidungen treffen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du verstehst eine Wenn-dann-Regel ohne Code.",
+      "previousLesson": {
+        "title": "Entscheidungen treffen",
+        "reminder": "Du verstehst eine Wenn-dann-Regel ohne Code."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-search-workshop",
+      "title": "Baue eine Suchregel ohne Code",
+      "objective": "Du entwirfst eine kleine Regel und testest sie mit zwei Suchwörtern.",
+      "explanation": "Eine Kursliste kann nach einem Suchwort gefiltert werden. Filtern heißt: Nur passende Einträge bleiben sichtbar. Lege erst deine Regel fest und probiere dann einen Treffer und einen Nichttreffer aus.",
+      "visualSteps": [
+        "📚 Liste: Spiele, Web, Python",
+        "⌨️ Suchwort: Spiel",
+        "🎮 Sichtbar: Spiele"
+      ],
+      "examples": [
+        {
+          "title": "Ein anderer Testfall",
+          "code": "Liste: Spiele, Web, Python\nSuchwort: Web\nErwartet: Web",
+          "note": "Nutze für deinen Entwurf ein anderes Suchwort, damit du die Regel selbst prüfst."
+        }
+      ],
+      "task": "Schreibe eine Suchregel für drei eigene Kurstitel. Welche Titel bleiben bei zwei verschiedenen Suchwörtern sichtbar?",
+      "starterCode": "Meine drei Titel: \nSuchregel: \nSuchwort mit Treffer: \nErgebnis mit Treffer: \nSuchwort ohne Treffer: \nErgebnis ohne Treffer: \n",
+      "acceptanceCriteria": [
+        "Die Regel entscheidet anhand des Suchworts, welche Titel sichtbar bleiben.",
+        "Ein Beispiel zeigt mindestens einen Treffer.",
+        "Ein zweites Beispiel zeigt verständlich, was ohne Treffer passiert."
+      ],
+      "module": "02 · Selbst ausprobieren",
+      "duration": 15,
+      "language": "plaintext",
+      "concepts": [],
+      "practice": true,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Die Reihenfolge zählt“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du erkennst, warum Schritte in der richtigen Reihenfolge stehen müssen.",
+      "previousLesson": {
+        "title": "Schritte wiederholen",
+        "reminder": "Du erkennst, wann eine wiederholte Anweisung hilfreich ist."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-debug",
+      "title": "Fehler als Hinweis nutzen",
+      "objective": "Du kannst einen falschen Schritt mit einer kleinen Prüfung finden.",
+      "explanation": "Funktioniert etwas nicht, vergleiche Erwartung und Ergebnis. Prüfe dann einen Schritt nach dem anderen, statt alles zugleich zu ändern.",
+      "visualSteps": [
+        "🎯 Erwartet: 3 Treffer",
+        "👀 Tatsächlich: 0 Treffer",
+        "🔎 Prüfen: Ist das Suchwort richtig geschrieben?"
+      ],
+      "examples": [
+        {
+          "title": "Die Suche findet nichts",
+          "code": "Erwartet: Kurs „Spieleentwicklung“ erscheint\nTatsächlich: keine Treffer\nErste Prüfung: Suchwort und Kursname vergleichen",
+          "note": "Eine konkrete Beobachtung hilft mehr als „geht nicht“."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Die Suche zeigt nichts. Was hilft zuerst?",
+        "options": [
+          "Erwartetes und tatsächliches Ergebnis genau vergleichen",
+          "Alle Dateien gleichzeitig ändern",
+          "Den Fehler ignorieren"
+        ],
+        "correctIndex": 0,
+        "explanation": "Mit einer genauen Beobachtung kannst du eine mögliche Ursache gezielt prüfen."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Die Suche zeigt nichts. Was hilft zuerst?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Baue eine Suchregel ohne Code“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du entwirfst eine kleine Regel und testest sie mit zwei Suchwörtern.",
+      "previousLesson": {
+        "title": "Baue eine Suchregel ohne Code",
+        "reminder": "Du entwirfst eine kleine Regel und testest sie mit zwei Suchwörtern."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-debug-workshop",
+      "title": "Finde einen Fehler in deiner Suchregel",
+      "objective": "Du vergleichst Erwartung und Ergebnis und änderst gezielt eine Regel.",
+      "explanation": "Deine Suche soll bei „Spiel“ auch „Spiele“ finden. Zeigt sie nichts, prüfe zuerst die Schreibweise und danach die Regel. Ändere nur einen Punkt und teste denselben Fall erneut.",
+      "visualSteps": [
+        "🎯 Erwartet: Spiele",
+        "👀 Tatsächlich: keine Treffer",
+        "🔧 Eine Regel ändern → erneut prüfen"
+      ],
+      "examples": [
+        {
+          "title": "Ein möglicher Fehler",
+          "code": "Regel: Titel muss genau gleich dem Suchwort sein\nSuchwort: Spiel\nTitel: Spiele\nErgebnis: kein Treffer",
+          "note": "Die Regel ist zu streng. Eine Suche nach enthaltenem Wort kann hier besser passen."
+        }
+      ],
+      "task": "Untersuche den Fehler aus dem Beispiel: Was erwartest du, was passiert, welche Regel änderst du und wie prüfst du sie?",
+      "starterCode": "Erwartet: \nTatsächlich: \nVermutete Ursache: \nMeine Änderung: \nErneuter Test: \n",
+      "acceptanceCriteria": [
+        "Erwartetes und tatsächliches Ergebnis sind verschieden und konkret beschrieben.",
+        "Die vermutete Ursache bezieht sich auf die Suchregel.",
+        "Der erneute Test verwendet wieder das Suchwort „Spiel“."
+      ],
+      "module": "02 · Selbst ausprobieren",
+      "duration": 15,
+      "language": "plaintext",
+      "concepts": [],
+      "practice": true,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Fehler als Hinweis nutzen“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du kannst einen falschen Schritt mit einer kleinen Prüfung finden.",
+      "previousLesson": {
+        "title": "Fehler als Hinweis nutzen",
+        "reminder": "Du kannst einen falschen Schritt mit einer kleinen Prüfung finden."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-languages",
+      "title": "Welches Werkzeug passt zu deinem Ziel?",
+      "objective": "Du kannst ein Lernziel mit einem passenden nächsten Kurs verbinden.",
+      "explanation": "Du musst nicht alle Sprachen gleichzeitig lernen. Wähle zuerst, was du bauen möchtest. Im passenden Themenkurs lernst du später die benötigten Werkzeuge Schritt für Schritt.",
+      "visualSteps": [
+        "🌐 Website → Webentwicklung",
+        "🎮 Spiel → Spieleentwicklung",
+        "📊 Datenmodell → KI und Python",
+        "🗄️ Datenbank → SQL"
+      ],
+      "examples": [
+        {
+          "title": "Dein nächster Kurs",
+          "code": "Interaktive Website → Webentwicklung\nAPI und Server → Backendentwicklung\nSpiel → Spieleentwicklung\nDaten und Modelle → Künstliche Intelligenz",
+          "note": "Die Themenkurse führen dich an der passenden Stelle zum jeweiligen Sprachkurs."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Du möchtest ein kleines Spiel bauen. Welcher Themenkurs passt als Nächstes?",
+        "options": [
+          "Spieleentwicklung",
+          "Nur SQL",
+          "Zuerst alle Programmiersprachen gleichzeitig"
+        ],
+        "correctIndex": 0,
+        "explanation": "Im Spielekurs lernst du Regeln und Engines. Die benötigte Sprache folgt dort am passenden Punkt."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Du möchtest ein kleines Spiel bauen. Welcher Themenkurs passt als Nächstes?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Baue eine Suchregel ohne Code“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du entwirfst eine kleine Regel und testest sie mit zwei Suchwörtern.",
+      "previousLesson": {
+        "title": "Finde einen Fehler in deiner Suchregel",
+        "reminder": "Du vergleichst Erwartung und Ergebnis und änderst gezielt eine Regel."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    },
+    {
+      "id": "program-learning",
+      "title": "So lernst du weiter",
+      "objective": "Du kennst einen einfachen Rhythmus zum Verstehen und Üben.",
+      "explanation": "Lies eine kleine Idee, probiere sie aus und erkläre das Ergebnis mit eigenen Worten. Bei einem Fehler prüfst du eine Vermutung. Später wiederholst du, was noch unsicher ist.",
+      "visualSteps": [
+        "👀 Ein Beispiel ansehen",
+        "🧪 Eine Sache ändern",
+        "💬 Ergebnis erklären",
+        "🔁 Schwieriges später wiederholen"
+      ],
+      "examples": [
+        {
+          "title": "Eine kurze Lerneinheit",
+          "code": "1. Was erwarte ich?\n2. Was passiert wirklich?\n3. Warum?\n4. Was probiere ich als Nächstes?",
+          "note": "Ein kleiner Versuch mit Erklärung bringt mehr als bloßes Abschreiben."
+        }
+      ],
+      "knowledgeCheck": {
+        "question": "Ein Beispiel funktioniert nicht. Was ist der beste nächste Schritt?",
+        "options": [
+          "Eine Vermutung prüfen und nur eine Sache ändern",
+          "Alles ungelesen kopieren",
+          "Sofort ein neues Framework installieren"
+        ],
+        "correctIndex": 0,
+        "explanation": "Eine kleine Änderung zeigt dir, welche Ursache wirklich wichtig war."
+      },
+      "module": "01 · Programmieren verstehen",
+      "duration": 8,
+      "language": "plaintext",
+      "concepts": [],
+      "starterCode": "",
+      "task": "Ein Beispiel funktioniert nicht. Was ist der beste nächste Schritt?",
+      "practice": false,
+      "retrievalPrompt": "Zum Festigen: Was erinnerst du zu „Welches Werkzeug passt zu deinem Ziel?“? Nenne eine Regel und ein eigenes kleines Beispiel. Erst überlegen, dann bei Bedarf die Antwort einblenden.",
+      "retrievalAnswer": "Du kannst ein Lernziel mit einem passenden nächsten Kurs verbinden.",
+      "previousLesson": {
+        "title": "Welches Werkzeug passt zu deinem Ziel?",
+        "reminder": "Du kannst ein Lernziel mit einem passenden nächsten Kurs verbinden."
+      },
+      "definitions": [],
+      "successPattern": {
+        "source": "(?:)",
+        "flags": ""
+      }
+    }
+  ]
+}

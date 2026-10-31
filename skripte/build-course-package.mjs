@@ -6,7 +6,7 @@ import ts from "typescript";
 const root = process.cwd();
 const compilerOptions = { module: ts.ModuleKind.ES2022, target: ts.ScriptTarget.ES2022 };
 const extensionModules = {};
-for (const name of ["course-extensions", "language-extensions", "einstieg"]) {
+for (const name of ["course-extensions", "language-extensions", "einstieg", "lernmaterial"]) {
   const extensionSource = await readFile(resolve(root, `src/kurse/${name}.ts`), "utf8");
   const extensionCompiled = ts.transpileModule(extensionSource, { compilerOptions }).outputText;
   extensionModules[name] = `data:text/javascript;base64,${Buffer.from(extensionCompiled).toString("base64")}`;
@@ -16,19 +16,48 @@ let curriculumCompiled = ts.transpileModule(curriculumSource, { compilerOptions 
 for (const [name, url] of Object.entries(extensionModules)) curriculumCompiled = curriculumCompiled.replace(`from "./${name}"`, `from "${url}"`);
 const curriculumUrl = `data:text/javascript;base64,${Buffer.from(curriculumCompiled).toString("base64")}`;
 const source = await readFile(resolve(root, "src/kurse/course.ts"), "utf8");
-const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`).replace('from "./einstieg"', `from "${extensionModules.einstieg}"`);
+const compiled = ts.transpileModule(source, { compilerOptions }).outputText.replace('from "./course-curriculum"', `from "${curriculumUrl}"`).replace('from "./einstieg"', `from "${extensionModules.einstieg}"`).replace('from "./lernmaterial"', `from "${extensionModules.lernmaterial}"`);
 const moduleUrl = `data:text/javascript;base64,${Buffer.from(compiled).toString("base64")}`;
 const { programmingCourse, courseSkills, learningCourses } = await import(moduleUrl);
-if (programmingCourse.lessons.some((lesson) => lesson.language !== "plaintext" || !lesson.knowledgeCheck || !lesson.visualSteps?.length)) throw new Error("Der Einstiegskurs muss ohne Sprachcode beginnen und jede Lektion anschaulich prüfen");
+const { setups } = await import(extensionModules.lernmaterial);
+if (programmingCourse.lessons.some((lesson) => lesson.language !== "plaintext" || (!lesson.knowledgeCheck && !lesson.acceptanceCriteria?.length) || !lesson.visualSteps?.length)) throw new Error("Der Einstiegskurs muss ohne Sprachcode beginnen und jede Lektion anschaulich prüfen");
 for (const course of learningCourses) {
   const ids = course.lessons.map((lesson) => lesson.id);
   if (course.id !== "programming-intro" && ids[0] !== `${course.id}-orientation`) throw new Error(`Kurs ${course.id} beginnt nicht mit der Orientierung`);
   if (new Set(ids).size !== ids.length) throw new Error(`Doppelte Lektion im Kurs ${course.id}: ${ids.filter((id, index) => ids.indexOf(id) !== index).join(", ")}`);
   if (course.lessons.some((lesson) => !lesson.title || !lesson.objective || !lesson.explanation)) throw new Error(`Unvollständige Lektion im Kurs ${course.id}`);
+  if (course.lessons.some((lesson) => !lesson.visualSteps?.length)) throw new Error(`Anschauliche Schritte fehlen im Kurs ${course.id}`);
+  if (course.lessons.some((lesson, index) => index > 0 && lesson.previousLesson?.title !== course.lessons[index - 1].title)) throw new Error(`Lernübergang fehlt im Kurs ${course.id}`);
   for (const lesson of course.lessons) {
     if (lesson.languageCourse && !learningCourses.some((target) => target.id === lesson.languageCourse.id)) throw new Error(`Sprachkurs ${lesson.languageCourse.id} für ${lesson.id} fehlt`);
+    const check = lesson.knowledgeCheck;
+    if (check && (check.options.length < 2 || check.correctIndex < 0 || check.correctIndex >= check.options.length)) throw new Error(`Quiz kann nicht ausgewertet werden: ${lesson.id}`);
+    if (lesson.practice !== false && !lesson.task.trim()) throw new Error(`Praxisaufgabe ohne Arbeitsauftrag: ${lesson.id}`);
   }
 }
+const allLessons = learningCourses.flatMap((course) => course.lessons);
+for (const [id, setup] of Object.entries(setups)) {
+  const lesson = allLessons.find((entry) => entry.id === id);
+  if (!lesson || lesson.setup !== setup || setup.steps.length < 3 || !setup.verify) throw new Error(`Installationsanleitung fehlt oder ist unvollständig: ${id}`);
+}
+for (const course of learningCourses) {
+  if (course.lessons.filter((lesson) => lesson.practice !== false).length < 2) throw new Error(`Praxisübungen fehlen im Kurs ${course.id}`);
+}
+const orderChecks = {
+  "programming-intro": [["program-input-result", "program-search-workshop"], ["program-debug", "program-debug-workshop"]],
+  "web-development": [["web-development-combine-frontend", "web-development-vite-setup"], ["web-development-vite-setup", "web-development-frameworks"], ["web-development-frameworks", "web-development-typescript-ui"]],
+  backend: [["backend-server-model", "backend-api-model"], ["backend-fastify-setup", "backend-node-fastify-api"], ["backend-spring-setup", "backend-spring-api"]],
+  ai: [["ai-python-environment", "ai-dataframe"], ["ai-sklearn-setup", "ai-sklearn-model"], ["ai-pytorch-setup", "ai-pytorch-neural-network"], ["ai-fastapi-practice", "ai-project"]],
+  "game-development": [["game-development-orientation", "game-development-godot-setup"], ["game-development-godot-setup", "game-development-godot-first-game"], ["game-development-unity-setup", "game-development-unity-basics"]],
+  security: [["security-ethical-lab", "security-zap-setup"]],
+};
+for (const [courseId, pairs] of Object.entries(orderChecks)) {
+  const ids = learningCourses.find((course) => course.id === courseId).lessons.map((lesson) => lesson.id);
+  for (const [before, after] of pairs) {
+    if (ids.indexOf(before) < 0 || ids.indexOf(after) < 0 || ids.indexOf(before) >= ids.indexOf(after)) throw new Error(`Kursfolge unklar: ${before} muss vor ${after} liegen`);
+  }
+}
+process.stdout.write(`${learningCourses.length} Kurse, ${allLessons.length} Lektionen und ${Object.keys(setups).length} Installationsanleitungen geprüft.\n`);
 const packageData = {
   schemaVersion: 1,
   id: programmingCourse.id,

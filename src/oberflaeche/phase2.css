@@ -154,4 +154,19 @@
 .learn-next-course h3 { margin: 0 0 7px; font-size: 17px; }
 .learn-next-course p { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .learn-next-course > div { display: flex; flex-wrap: wrap; gap: 9px; }
+.learn-bridge { margin: 10px 0 18px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.learn-bridge strong { color: var(--ink); }
+.learn-terms { margin: 17px 0; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface-subtle); }
+.learn-terms > strong { display: block; margin-bottom: 9px; font-size: 12px; color: var(--brand-strong); }
+.learn-terms dl { display: grid; gap: 7px; margin: 0; }
+.learn-terms dl > div { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.45; }
+.learn-terms dt { flex: 0 0 auto; font-weight: 700; color: var(--ink); }
+.learn-terms dd { margin: 0; color: var(--muted); }
+.learn-setup { margin: 21px 0; padding: 18px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface); }
+.learn-setup h3 { margin: 0 0 8px; font-size: 16px; }
+.learn-setup > p { margin: 0 0 12px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.learn-setup ol { margin: 0; padding-left: 24px; display: grid; gap: 11px; }
+.learn-setup li { padding-left: 4px; font-size: 12px; line-height: 1.5; }
+.learn-setup pre { max-width: 100%; overflow: auto; white-space: pre-wrap; margin: 7px 0 0; padding: 10px 12px; border-radius: 9px; background: var(--surface-subtle); color: var(--ink); font: 12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace; }
+.learn-setup .learn-setup-verify { margin: 13px 0 0; color: var(--ink); }
 @media(max-width:680px) { .visual-steps { grid-template-columns: 1fr; } .learn-bottom { align-items: stretch; } .learn-bottom > .button { width: 100%; } }

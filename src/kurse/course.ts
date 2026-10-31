@@ -1,5 +1,6 @@
 import { courseCurricula } from "./course-curriculum";
 import { einstiegLektionen } from "./einstieg";
+import { enrichLesson } from "./lernmaterial";
 
 export type CourseLesson = {
   id: string;
@@ -14,6 +15,9 @@ export type CourseLesson = {
   successPattern: RegExp;
   exampleCode?: string;
   visualSteps?: string[];
+  previousLesson?: { title: string; reminder: string };
+  definitions?: { term: string; meaning: string }[];
+  setup?: { title: string; steps: { text: string; command?: string }[]; verify: string; source?: string };
   method?: { title: string; description: string };
   framework?: { title: string; description: string };
   module?: string;
@@ -34,7 +38,7 @@ export type LearningCourse = { id: string; version: string; title: string; categ
 
 export const programmingCourse: LearningCourse = {
   id: "programming-intro",
-  version: "5.0.0",
+  version: "5.1.0",
   title: "Einstieg in die Programmierung",
   category: "Programmiergrundlagen",
   lessons: einstiegLektionen,
@@ -88,7 +92,7 @@ function buildCourse(definition: typeof courseDefinitions[number]): LearningCour
       exampleCode: blueprint.examples[0]?.code,
     } satisfies CourseLesson;
   });
-  return { id: definition.id, version: "5.0.0", title: definition.title, category: definition.category, lessons };
+  return { id: definition.id, version: "5.1.0", title: definition.title, category: definition.category, lessons };
 }
 
 const learningLanguageTitles: Record<string, string> = { javascript: "JavaScript", typescript: "TypeScript", python: "Python", sql: "SQL", csharp: "C#", java: "Java", php: "PHP", gdscript: "GDScript" };
@@ -109,10 +113,10 @@ function addRetrievalPractice(lessons: CourseLesson[]): CourseLesson[] {
   });
 }
 
-programmingCourse.lessons = addRetrievalPractice(programmingCourse.lessons);
+programmingCourse.lessons = addRetrievalPractice(programmingCourse.lessons).map((lesson, index, all) => enrichLesson(lesson, all[index - 1]));
 export const learningCourses: LearningCourse[] = [programmingCourse, ...courseDefinitions.map((definition) => {
   const course = buildCourse(definition);
-  course.lessons = addRetrievalPractice(course.lessons);
+  course.lessons = addRetrievalPractice(course.lessons).map((lesson, index, all) => enrichLesson(lesson, all[index - 1]));
   return course;
 })];
 export function getLearningCourse(courseId: string): LearningCourse { return learningCourses.find((course) => course.id === courseId) ?? programmingCourse; }

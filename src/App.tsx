@@ -114,6 +114,13 @@ export default function App() {
     document.documentElement.dataset.motion = state.settings.reducedMotion ? "reduced" : "full";
   }, [effectiveTheme, state.settings.reducedMotion]);
 
+  useEffect(() => {
+    const behavior = state.settings.reducedMotion ? "instant" : "smooth";
+    const scroller = document.querySelector(".main-area");
+    if (scroller instanceof HTMLElement) scroller.scrollTo({ top: 0, behavior });
+    window.scrollTo({ top: 0, behavior });
+  }, [view, selectedLessonId, activeLesson.id, state.activeCourseId, state.settings.reducedMotion]);
+
   const update = (patch: Partial<DevPathState>) => setState((current) => {
     const next = { ...current, ...patch };
     if (patch.goal && patch.goal !== current.goal) {

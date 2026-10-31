@@ -5,6 +5,10 @@ function step(item: Intro): CourseLesson {
   return { ...item, module: "01 · Programmieren verstehen", duration: 8, language: "plaintext", concepts: [], starterCode: "", task: item.knowledgeCheck!.question, successPattern: /(?:)/, practice: false };
 }
 
+function workshop(item: Pick<CourseLesson, "id" | "title" | "objective" | "explanation" | "visualSteps" | "examples" | "task" | "starterCode" | "acceptanceCriteria">): CourseLesson {
+  return { ...item, module: "02 · Selbst ausprobieren", duration: 15, language: "plaintext", concepts: [], successPattern: /(?:)/, practice: true };
+}
+
 export const einstiegLektionen: CourseLesson[] = [
   step({
     id: "program-output", title: "Was ist ein Programm?", objective: "Du erkennst eine klare Regel hinter einer alltäglichen Handlung.",
@@ -48,12 +52,30 @@ export const einstiegLektionen: CourseLesson[] = [
     examples: [{ title: "Drei Pflanzen", code: "Für jede Pflanze:\n  Prüfen, ob die Erde trocken ist.\n  Wenn ja: gießen.", note: "Die gleiche Regel wird bei jeder Pflanze angewendet." }],
     knowledgeCheck: { question: "Was wiederholt sich bei den drei Pflanzen?", options: ["Die Prüfung, ob die Erde trocken ist", "Nur der Name der ersten Pflanze", "Die Tageszeit wird zufällig geändert"], correctIndex: 0, explanation: "Jede Pflanze wird mit derselben Regel geprüft." },
   }),
+  workshop({
+    id: "program-search-workshop", title: "Baue eine Suchregel ohne Code", objective: "Du entwirfst eine kleine Regel und testest sie mit zwei Suchwörtern.",
+    explanation: "Eine Kursliste kann nach einem Suchwort gefiltert werden. Filtern heißt: Nur passende Einträge bleiben sichtbar. Lege erst deine Regel fest und probiere dann einen Treffer und einen Nichttreffer aus.",
+    visualSteps: ["📚 Liste: Spiele, Web, Python", "⌨️ Suchwort: Spiel", "🎮 Sichtbar: Spiele"],
+    examples: [{ title: "Ein anderer Testfall", code: "Liste: Spiele, Web, Python\nSuchwort: Web\nErwartet: Web", note: "Nutze für deinen Entwurf ein anderes Suchwort, damit du die Regel selbst prüfst." }],
+    task: "Schreibe eine Suchregel für drei eigene Kurstitel. Welche Titel bleiben bei zwei verschiedenen Suchwörtern sichtbar?",
+    starterCode: "Meine drei Titel: \nSuchregel: \nSuchwort mit Treffer: \nErgebnis mit Treffer: \nSuchwort ohne Treffer: \nErgebnis ohne Treffer: \n",
+    acceptanceCriteria: ["Die Regel entscheidet anhand des Suchworts, welche Titel sichtbar bleiben.", "Ein Beispiel zeigt mindestens einen Treffer.", "Ein zweites Beispiel zeigt verständlich, was ohne Treffer passiert."],
+  }),
   step({
     id: "program-debug", title: "Fehler als Hinweis nutzen", objective: "Du kannst einen falschen Schritt mit einer kleinen Prüfung finden.",
     explanation: "Funktioniert etwas nicht, vergleiche Erwartung und Ergebnis. Prüfe dann einen Schritt nach dem anderen, statt alles zugleich zu ändern.",
     visualSteps: ["🎯 Erwartet: 3 Treffer", "👀 Tatsächlich: 0 Treffer", "🔎 Prüfen: Ist das Suchwort richtig geschrieben?"],
     examples: [{ title: "Die Suche findet nichts", code: "Erwartet: Kurs „Spieleentwicklung“ erscheint\nTatsächlich: keine Treffer\nErste Prüfung: Suchwort und Kursname vergleichen", note: "Eine konkrete Beobachtung hilft mehr als „geht nicht“." }],
     knowledgeCheck: { question: "Die Suche zeigt nichts. Was hilft zuerst?", options: ["Erwartetes und tatsächliches Ergebnis genau vergleichen", "Alle Dateien gleichzeitig ändern", "Den Fehler ignorieren"], correctIndex: 0, explanation: "Mit einer genauen Beobachtung kannst du eine mögliche Ursache gezielt prüfen." },
+  }),
+  workshop({
+    id: "program-debug-workshop", title: "Finde einen Fehler in deiner Suchregel", objective: "Du vergleichst Erwartung und Ergebnis und änderst gezielt eine Regel.",
+    explanation: "Deine Suche soll bei „Spiel“ auch „Spiele“ finden. Zeigt sie nichts, prüfe zuerst die Schreibweise und danach die Regel. Ändere nur einen Punkt und teste denselben Fall erneut.",
+    visualSteps: ["🎯 Erwartet: Spiele", "👀 Tatsächlich: keine Treffer", "🔧 Eine Regel ändern → erneut prüfen"],
+    examples: [{ title: "Ein möglicher Fehler", code: "Regel: Titel muss genau gleich dem Suchwort sein\nSuchwort: Spiel\nTitel: Spiele\nErgebnis: kein Treffer", note: "Die Regel ist zu streng. Eine Suche nach enthaltenem Wort kann hier besser passen." }],
+    task: "Untersuche den Fehler aus dem Beispiel: Was erwartest du, was passiert, welche Regel änderst du und wie prüfst du sie?",
+    starterCode: "Erwartet: \nTatsächlich: \nVermutete Ursache: \nMeine Änderung: \nErneuter Test: \n",
+    acceptanceCriteria: ["Erwartetes und tatsächliches Ergebnis sind verschieden und konkret beschrieben.", "Die vermutete Ursache bezieht sich auf die Suchregel.", "Der erneute Test verwendet wieder das Suchwort „Spiel“."],
   }),
   step({
     id: "program-languages", title: "Welches Werkzeug passt zu deinem Ziel?", objective: "Du kannst ein Lernziel mit einem passenden nächsten Kurs verbinden.",

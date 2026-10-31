@@ -395,10 +395,10 @@ const careerRubrics: Record<string, string[]> = {
 
 function extendTrack(id: string, base: LessonBlueprint[]): LessonBlueprint[] {
   const anchors: Record<string, Record<string, string>> = {
-    "web-development": { "vite-setup": "typescript-ui", "react-state": "project", "vue-practice": "project", "angular-practice": "project", "playwright-setup": "project", "frontend-release": "project" },
+    "web-development": { "vite-setup": "frameworks", "react-state": "project", "vue-practice": "project", "angular-practice": "project", "playwright-setup": "project", "frontend-release": "project" },
     backend: { "express-setup": "node-fastify-api", "fastify-setup": "node-fastify-api", "fastify-schema": "project", "backend-architecture": "project", "spring-setup": "project", "spring-api": "project", "api-operations": "project" },
     security: { "zap-setup": "injection-lab", "security-regression": "project", "security-defense": "project" },
-    ai: { "sklearn-setup": "sklearn-model", "ml-experiment": "sql-ai-data", "pytorch-setup": "pytorch-neural-network", "model-audit": "ai-capstone-pipeline" },
+    ai: { "sklearn-setup": "sklearn-model", "ml-experiment": "sql-ai-data", "pytorch-setup": "pytorch-neural-network", "model-audit": "ai-capstone-pipeline", "fastapi-practice": "ai-capstone-pipeline" },
     career: { "find-your-area": "roles", "project-management": "portfolio", "debugging-method": "tests-review", "git-setup": "git", "review-workflow": "tests-review", "portfolio-demo": "application-practice", "application-loop": "project" },
   };
   const additions = topicExtensions[id] ?? [];
@@ -419,7 +419,7 @@ export const courseCurricula: Record<string, LessonBlueprint[]> = {
   kotlin: languageOnly("kotlin", kotlin),
   swift: languageOnly("swift", swift),
   gdscript: [...gdscript.slice(0, -1), ...(languageExtensions.gdscript ?? []), gdscript[gdscript.length - 1]],
-  "web-development": extendTrack("web-development", [...webDevelopment, ...webPractice]),
+  "web-development": extendTrack("web-development", [...webDevelopment.slice(0, -1), ...webPractice.slice(0, 2), webDevelopment[webDevelopment.length - 1], ...webPractice.slice(2)]),
   backend: extendTrack("backend", [backend[0], ...backendFoundation, ...backend.slice(1), ...backendNodePath, ...backendPractice]),
   security: extendTrack("security", [security[0], ...securityPractice, ...security.slice(1), ...securityLabs]),
   ai: extendTrack("ai", [...aiJourney.slice(0, 2), ...mlFoundation, ...aiJourney.slice(2)]),
