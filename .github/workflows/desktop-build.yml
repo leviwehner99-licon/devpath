@@ -35,7 +35,7 @@ jobs:
       VITE_DEVPATH_API_URL: ${{ vars.VITE_DEVPATH_API_URL }}
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -75,7 +75,7 @@ jobs:
       VITE_DEVPATH_API_URL: ${{ vars.VITE_DEVPATH_API_URL }}
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22
@@ -108,7 +108,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v5
         with:
           name: CodeZone-windows-x64-${{ github.sha }}

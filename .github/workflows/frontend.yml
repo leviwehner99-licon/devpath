@@ -15,7 +15,7 @@ jobs:
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       VITE_DEVPATH_API_URL: ${{ vars.VITE_DEVPATH_API_URL }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v5
         with:
           node-version: 22
