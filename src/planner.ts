@@ -1,7 +1,29 @@
 import type { CourseLesson } from "./course";
 import type { LessonProgress } from "./types";
+import type { DevPathState } from "./types";
+import { learningCourses, type LearningCourse } from "./course";
 
 export type PlanRecommendation = { lesson: CourseLesson; reason: string; isReview: boolean };
+export type LearningPath = { courses: LearningCourse[]; recommendation: PlanRecommendation; course: LearningCourse };
+
+export function buildLearningPath(state: DevPathState, preferredCourseId?: string, now = new Date()): LearningPath {
+  const goal = state.goal.toLowerCase();
+  const targetId = preferredCourseId && preferredCourseId !== "programming-intro" ? preferredCourseId
+    : goal.includes("web") ? "web-development" : goal.includes("backend") || goal.includes("server") ? "backend"
+    : goal.includes("spiel") ? "game-development" : goal.includes("sicher") ? "security"
+    : goal.includes("ki") || goal.includes("künstliche") ? "ai" : goal.includes("beruf") || goal.includes("job") ? "career"
+    : goal.includes("software") ? "javascript" : "programming-intro";
+  const target = learningCourses.find((course) => course.id === targetId) ?? learningCourses[0];
+  const prerequisiteId: Record<string, string> = { "web-development": "javascript", backend: "javascript", ai: "python", "game-development": "csharp", security: "javascript" };
+  const ids = state.experience === "new" && target.id !== "programming-intro" ? ["programming-intro"] : [];
+  if (prerequisiteId[target.id] && state.experience !== "experienced") ids.push(prerequisiteId[target.id]);
+  ids.push(target.id);
+  const courses = [...new Set(ids)].map((id) => learningCourses.find((course) => course.id === id)!).filter(Boolean);
+  const lessons = courses.flatMap((course) => course.lessons);
+  const recommendation = recommendNextLesson(lessons, state.progress, now);
+  const course = courses.find((item) => item.lessons.some((lesson) => lesson.id === recommendation.lesson.id)) ?? target;
+  return { courses, recommendation, course };
+}
 
 export const weekdays = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"] as const;
 
@@ -40,7 +62,7 @@ export function recommendNextLesson(
       const entry = progress[lesson.id];
       return entry?.completed && entry.nextReviewAt && Number.isFinite(Date.parse(entry.nextReviewAt)) && Date.parse(entry.nextReviewAt) <= now.getTime();
     })
-    .sort((left, right) => Date.parse(progress[left.id].nextReviewAt!) - Date.parse(progress[right.id].nextReviewAt!));
+    .sort((left, right) => (progress[left.id].mastery ?? 0) - (progress[right.id].mastery ?? 0) || Date.parse(progress[left.id].nextReviewAt!) - Date.parse(progress[right.id].nextReviewAt!));
   const dueReview = dueReviews[0];
   if (dueReview) {
     const entry = progress[dueReview.id];
@@ -77,10 +99,16 @@ export function recommendNextLesson(
   };
 }
 
-export function reviewDate(confidence: number, now = new Date()): string {
-  const intervals = [1, 1, 3, 7, 14, 30];
+export function reviewDate(confidence: number, now = new Date(), mastery = 0): string {
+  const intervals = [1, 1, 2, 4, 7, 14];
   const safeConfidence = Math.min(5, Math.max(0, Math.round(confidence)));
   const next = new Date(now);
-  next.setDate(next.getDate() + intervals[safeConfidence]);
+  next.setDate(next.getDate() + intervals[Math.max(0, Math.min(5, Math.round((safeConfidence + mastery) / 2)))]);
   return next.toISOString();
+}
+
+export function measuredMastery(previous: LessonProgress | undefined, passed: boolean, hints: number, selfRating: number, isReview: boolean): number {
+  if (!passed) return Math.max(0, (previous?.mastery ?? 0) - 1);
+  const evidence = Math.max(1, Math.min(5, selfRating - Math.min(2, hints) - Math.min(2, previous?.failedAttempts ?? 0) + (isReview && hints === 0 && !previous?.failedAttempts ? 1 : 0)));
+  return previous?.mastery ? Math.round((previous.mastery + evidence) / 2) : evidence;
 }

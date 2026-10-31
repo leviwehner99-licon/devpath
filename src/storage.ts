@@ -125,6 +125,9 @@ function normalizeState(value: unknown): DevPathState {
         attempts: Number.isSafeInteger(value.attempts) && Number(value.attempts) >= 0 ? Number(value.attempts) : 0,
         hintCount: Number.isSafeInteger(value.hintCount) && Number(value.hintCount) >= 0 ? Number(value.hintCount) : 0,
         confidence: Number.isSafeInteger(value.confidence) && Number(value.confidence) >= 0 && Number(value.confidence) <= 5 ? Number(value.confidence) : 0,
+        mastery: Number.isSafeInteger(value.mastery) && Number(value.mastery) >= 0 && Number(value.mastery) <= 5 ? Number(value.mastery) : 0,
+        reviewCount: Number.isSafeInteger(value.reviewCount) && Number(value.reviewCount) >= 0 ? Number(value.reviewCount) : 0,
+        failedAttempts: Number.isSafeInteger(value.failedAttempts) && Number(value.failedAttempts) >= 0 ? Number(value.failedAttempts) : 0,
           ...(typeof value.nextReviewAt === "string" ? { nextReviewAt: value.nextReviewAt.slice(0, 40) } : {}),
         },
       });
@@ -181,6 +184,7 @@ function normalizeState(value: unknown): DevPathState {
     projects,
     activeProjectId: projects.some((project) => project.id === parsed.activeProjectId) ? parsed.activeProjectId! : projects[0].id,
     activeCourseId: typeof parsed.activeCourseId === "string" && /^[a-z0-9-]{1,80}$/.test(parsed.activeCourseId) ? parsed.activeCourseId : initialState.activeCourseId,
+    targetCourseId: typeof parsed.targetCourseId === "string" && /^[a-z0-9-]{1,80}$/.test(parsed.targetCourseId) ? parsed.targetCourseId : undefined,
     onboardingCompleted: hasCompletedOnboarding,
     ...(typeof parsed.courseCompletedAt === "string" ? { courseCompletedAt: parsed.courseCompletedAt.slice(0, 40) } : {}),
     courseCompletions: isRecord(parsed.courseCompletions) ? Object.fromEntries(Object.entries(parsed.courseCompletions).filter(([key, date]) => /^[a-z0-9-]{1,80}$/.test(key) && typeof date === "string").slice(0, 100)) as Record<string, string> : {},

@@ -50,6 +50,10 @@ export function Onboarding({ onFinish }: { onFinish: (values: { learnerName: str
   const goals = [
     ["Programmieren von Grund auf lernen", "Grundlagen verstehen und Schritt für Schritt erste Programme schreiben."],
     ["Webseiten und Webanwendungen bauen", "Mit interaktiven Oberflächen und Browserprojekten starten."],
+    ["Server und APIs entwickeln", "Backend, Datenbank und sichere Serverregeln verstehen."],
+    ["Spiele entwickeln", "Spielregeln programmieren und mit einer Engine umsetzen."],
+    ["Künstliche Intelligenz verstehen", "Daten, Modelltraining und Bewertung praktisch lernen."],
+    ["IT-Sicherheit lernen", "Schwachstellen und Schutzmaßnahmen in eigenen Übungen prüfen."],
     ["Eigene Softwareprojekte umsetzen", "Programmieren lernen, um eine eigene Idee in Code zu verwandeln."],
     ["Mich auf den Berufseinstieg vorbereiten", "Grundlagen festigen und später ein Portfolio aufbauen."],
   ];
@@ -72,16 +76,18 @@ export function Diploma({ course, completedAt, completedCount, reducedMotion }: 
   return <><PageTitle eyebrow="DEIN ERFOLG" title="Diplom" subtitle="Deine Lernnachweise bleiben auf diesem Gerät." />{earned ? <section className={`panel diploma-card ${reducedMotion ? "reduced" : ""}`}><div className="diploma-decoration" aria-hidden="true">✧</div><div className="eyebrow">CodeZone · LERNERFOLG</div><h2>{course.title}</h2><p>Verliehen für den Abschluss des Lernpfads „{course.title}“.</p><div className="diploma-seal">✓</div><div className="diploma-footer"><span>{new Date(completedAt!).toLocaleDateString()}</span><span>{completedCount} von {total} Lernzielen</span></div><p className="small-note">Dieses lokale Lerndiplom ist kein staatlich oder beruflich anerkanntes Zertifikat.</p></section> : <section className="panel diploma-locked"><div className="large-soft-icon">✧</div><h2>Dein Diplom wartet auf dich</h2><p>Schließe alle {total} Lernziele von „{course.title}“ ab. Bisher erreicht: {completedCount} von {total}.</p><div className="progress-line"><span style={{ width: `${Math.round(completedCount / total * 100)}%` }} /></div></section>}</>;
 }
 
-export function Learn({ courseTitle, lessons, activeLesson, progress, courseProgress, code, onSelect, openLanguageCourse, onCode, onHint, onComplete, openStudio, theme = "light" }: { courseTitle: string; lessons: CourseLesson[]; activeLesson: CourseLesson; progress: Record<string, LessonProgress>; courseProgress: number; code: string; onSelect: (id: string) => void; openLanguageCourse: (courseId: string) => void; onCode: (value: string | undefined) => void; onHint: (hintCount: number) => void; onComplete: (hintCount: number, passed: boolean, confidence: number) => void; openStudio: () => void; theme?: "light" | "dark" }) {
+export function Learn({ courseTitle, lessons, activeLesson, progress, courseProgress, code, isReview = false, onSelect, openLanguageCourse, onCode, onHint, onAttempt, onComplete, openStudio, theme = "light" }: { courseTitle: string; lessons: CourseLesson[]; activeLesson: CourseLesson; progress: Record<string, LessonProgress>; courseProgress: number; code: string; isReview?: boolean; onSelect: (id: string) => void; openLanguageCourse: (courseId: string) => void; onCode: (value: string | undefined) => void; onHint: (hintCount: number) => void; onAttempt: () => void; onComplete: (hintCount: number, passed: boolean, confidence: number) => void; openStudio: () => void; theme?: "light" | "dark" }) {
   const [hint, setHint] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showRecallAnswer, setShowRecallAnswer] = useState(false);
   const [confidence, setConfidence] = useState(3);
-  useEffect(() => { setHint(0); setSelectedAnswer(null); setShowRecallAnswer(false); setConfidence(3); }, [activeLesson.id]);
-  const hasEditedStarter = code.trim() !== activeLesson.starterCode.trim();
+  const [reviewStarted, setReviewStarted] = useState(false);
+  useEffect(() => { setHint(0); setSelectedAnswer(null); setShowRecallAnswer(false); setConfidence(3); setReviewStarted(false); }, [activeLesson.id, isReview]);
+  const shownCode = isReview && !reviewStarted ? activeLesson.starterCode : code;
+  const hasEditedStarter = shownCode.trim() !== activeLesson.starterCode.trim();
   const passed = activeLesson.practice === false
     ? selectedAnswer === activeLesson.knowledgeCheck?.correctIndex
-    : (hasEditedStarter || progress[activeLesson.id]?.completed === true) && activeLesson.successPattern.test(code);
+    : hasEditedStarter && activeLesson.successPattern.test(shownCode);
   const examples = activeLesson.examples ?? (activeLesson.exampleCode
     ? [{ title: "Beispiel", code: activeLesson.exampleCode, note: "Lies den Code von oben nach unten und verfolge, welcher Wert jeweils entsteht." }]
     : []);
@@ -104,11 +110,11 @@ export function Learn({ courseTitle, lessons, activeLesson, progress, courseProg
           {activeLesson.projectSteps && <div className="project-steps"><strong>Arbeite in diesen kleinen Schritten</strong><ol>{activeLesson.projectSteps.map((step) => <li key={step}>{step}</li>)}</ol>{activeLesson.acceptanceCriteria && <><strong className="acceptance-heading">Woran du den Erfolg erkennst</strong><ul>{activeLesson.acceptanceCriteria.map((criterion) => <li key={criterion}>{criterion}</li>)}</ul></>}</div>}
           {activeLesson.knowledgeCheck ? <div className="knowledge-check" role="group" aria-label={activeLesson.knowledgeCheck.question}>
             <p><strong>{activeLesson.knowledgeCheck.question}</strong></p>
-            {activeLesson.knowledgeCheck.options.map((option, index) => <button key={option} className={`knowledge-option ${selectedAnswer === index ? (index === activeLesson.knowledgeCheck!.correctIndex ? "correct" : "incorrect") : ""}`} aria-pressed={selectedAnswer === index} onClick={() => setSelectedAnswer(index)}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}
+            {activeLesson.knowledgeCheck.options.map((option, index) => <button key={option} className={`knowledge-option ${selectedAnswer === index ? (index === activeLesson.knowledgeCheck!.correctIndex ? "correct" : "incorrect") : ""}`} aria-pressed={selectedAnswer === index} onClick={() => { if (index !== selectedAnswer && index !== activeLesson.knowledgeCheck!.correctIndex) onAttempt(); setSelectedAnswer(index); }}><span>{String.fromCharCode(65 + index)}</span>{option}</button>)}
             {selectedAnswer !== null && <p className={`knowledge-feedback ${passed ? "correct" : "incorrect"}`} role="status">{passed ? "Richtig. " : "Noch nicht. "}{activeLesson.knowledgeCheck.explanation}</p>}
           </div> : <>
             <p className="practice-instructions">Nutze die Erklärung und Beispiele als Hilfe. Ändere den Startcode und prüfe, ob du die Aufgabe selbst erklären kannst.</p>
-            <div className="mini-editor"><Editor height="260px" language={activeLesson.language} theme={theme === "dark" ? "vs-dark" : "vs"} value={code} onChange={onCode} options={{ minimap: { enabled: false }, fontSize: 14, lineNumbers: "on", scrollBeyondLastLine: false, wordWrap: "on", automaticLayout: true, ariaLabel: `${activeLesson.language.toUpperCase()}-Aufgabe bearbeiten` }} /></div>
+            <div className="mini-editor"><Editor height="260px" language={activeLesson.language} theme={theme === "dark" ? "vs-dark" : "vs"} value={shownCode} onChange={(value) => { setReviewStarted(true); onCode(value); }} options={{ minimap: { enabled: false }, fontSize: 14, lineNumbers: "on", scrollBeyondLastLine: false, wordWrap: "on", automaticLayout: true, ariaLabel: `${activeLesson.language.toUpperCase()}-Aufgabe bearbeiten` }} /></div>
             <div className="lesson-check" role="status"><span className={passed ? "check-good" : "check-pending"}>{passed ? "✓" : "○"}</span>{passed ? "Deine eigene Bearbeitung enthält den erwarteten Baustein. Prüfe zusätzlich Beispiele und Randfälle." : !hasEditedStarter ? "Bearbeite den Startcode selbst. Die Aufgabe gilt nicht schon beim Öffnen als erledigt." : "Ergänze noch den passenden Baustein und vergleiche dein Ergebnis mit den Beispielen."}</div>
           </>}
         </section>

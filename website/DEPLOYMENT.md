@@ -47,7 +47,7 @@ Für eine komplett neue Datenbank zuerst `../server/migrations/001_initial.sql`,
 
 Migration 004 in Supabase unter **SQL Editor → New query** öffnen, vollständig ausführen und auf `COMMIT` ohne Fehler warten. Danach `GET /api/v1/courses` prüfen: die Antwort soll `programming-intro` enthalten und `pilot-html-css` nicht mehr enthalten. `GET /api/health/ready` allein bestätigt nur, dass die Datenbank erreichbar ist.
 
-Wenn eine neue Fassung des Einstiegskurses veröffentlicht wird, zusätzlich die neueste nummerierte Migration in `server/migrations` ausführen. Migration 005 veröffentlicht Version 2.0.0 und verweist auf das passende JSON-Paket. Erst nachdem das statische Website-Deployment abgeschlossen ist und der Inhaltspfad erreichbar ist, die Migration ausführen. Danach `GET /api/v1/courses` aufrufen und bei `programming-intro` Version `2.0.0` sowie den neuen `contentPath` kontrollieren.
+Wenn eine neue Fassung des Einstiegskurses veröffentlicht wird, zusätzlich die neueste nummerierte Veröffentlichung in `server/migrations` ausführen. Migration 006 veröffentlicht Version 3.0.0 mit einem Einstieg ohne Code in den ersten Lektionen. Erst nachdem das statische Website-Deployment abgeschlossen und `/courses/programming-intro-3.0.0.json` erreichbar ist, die Migration ausführen. Danach `GET /api/v1/courses` aufrufen und bei `programming-intro` Version `3.0.0` sowie den neuen `contentPath` kontrollieren.
 
 ## Öffentliche Desktop-Installer
 

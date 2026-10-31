@@ -7,6 +7,9 @@ export type LessonProgress = {
   attempts: number;
   hintCount: number;
   confidence: number;
+  mastery?: number;
+  reviewCount?: number;
+  failedAttempts?: number;
   nextReviewAt?: string;
 };
 export type SavedVersion = { id: string; name: string; note: string; code: string; createdAt: string; lessonId: string; projectId?: string; files?: Record<string, string> };
@@ -36,6 +39,7 @@ export type DevPathState = {
   projects: LocalProject[];
   activeProjectId: string;
   activeCourseId: string;
+  targetCourseId?: string;
   onboardingCompleted: boolean;
   courseCompletedAt?: string;
   courseCompletions: Record<string, string>;

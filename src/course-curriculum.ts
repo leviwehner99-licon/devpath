@@ -438,24 +438,47 @@ const backendNodePath: LessonBlueprint[] = [
   lesson("node-postgres-api", "05 · API bauen", "PostgreSQL sicher aus Node.js nutzen", "javascript", "Du verbindest API-Logik mit PostgreSQL, nutzt Parameter und behandelst Verbindungsfehler.", "Ein Backend hält Datenbankzugangsdaten serverseitig. Werte werden als Parameter gebunden und niemals in SQL-Text hineinkopiert. Ein Connection-Pool begrenzt Verbindungen; Transaktionen schützen zusammengehörige Änderungen. In Produktion kommen Zugangsdaten aus dem Secret-Management des Hosters, lokal aus einer nicht eingecheckten Umgebungsdatei.", [example("Parametrisierte Abfrage", "const result = await pool.query(\n  'SELECT id, title FROM courses WHERE id = $1',\n  [courseId]\n);", "Der Parameter bleibt Dateninhalt und kann die SQL-Struktur nicht verändern."), example("Fehlerzustand", "try {\n  const result = await repository.findCourse(courseId);\n  return result ?? reply.code(404).send({ error: 'not_found' });\n} catch {\n  request.log.error('course lookup failed');\n  return reply.code(503).send({ error: 'temporarily_unavailable' });\n}", "Interne Fehlermeldungen und Zugangsdaten gehören nicht in die öffentliche Antwort.")], "const result = await pool.query(\n  'SELECT id, title FROM courses WHERE id = $1',\n  [courseId]\n);\n", "Integriere die parametrisierte Abfrage in die Detailroute. Behandle leeres Ergebnis und Datenbankausfall getrennt, ohne interne Fehlerdetails preiszugeben.", "\\$1|pool\\.query|temporarily_unavailable", "Teste Datenbanklogik getrennt vom HTTP-Handler, damit Fehlerfälle zuverlässig nachstellbar sind.", ["Pool über serverseitige Umgebungsvariable konfigurieren.", "Repository-Funktion für Kursdetails schreiben.", "SQL-Parameter statt String-Verkettung einsetzen.", "404- und Ausfallfall mit kontrolliertem Fehlerstatus testen."], ["Kein Datenbankpasswort im Code oder Log", "SQL-Werte sind parametrisiert", "Leerer Datensatz und DB-Ausfall unterscheiden sich", "Fehlerantwort verrät keine interne Konfiguration"]),
 ];
 
+function languageOnly(id: string, basics: LessonBlueprint[]): LessonBlueprint[] {
+  const arc = projectArcs[id];
+  const frameworkTerms = /React|Spring Boot|FastAPI|Laravel|ASP\.NET|Ktor|SwiftUI|JUnit|pytest|PHPUnit|xUnit|Catch2|XCTest|Zod|Axum|SQLAlchemy|Vitest|Angular|Vue/i;
+  const core = basics.filter((item) => !frameworkTerms.test(`${item.title} ${item.explanation} ${item.examples.map((sample) => `${sample.title} ${sample.code} ${sample.note}`).join(" ")}`));
+  return [...core,
+    lesson("problem-solving", "06 · Selbst anwenden", "Ein Problem in Schritte zerlegen", "plaintext", "Du planst eine kleine Lösung mit Eingabe, Regel, Ergebnis und Randfall.", "Wähle ein Problem, das du mit den Sprachmitteln dieses Kurses lösen kannst. Formuliere erst einen Normalfall und einen Randfall. Schreibe dann die kleinste Kernfunktion und prüfe ihre Ausgabe. Du brauchst dafür kein Framework.", [example("Plan vor Code", "Eingabe → Regel → Ergebnis → Randfall", "Eine eindeutige Regel lässt sich einfacher programmieren und prüfen.")], "", `Plane eine kleine Aufgabe in ${id}: beschreibe Eingabe, erwartetes Ergebnis und Randfall.`, "Eingabe|Ergebnis|Randfall"),
+    lesson("language-project", "07 · Eigenes Sprachprojekt", `Abschlussprojekt in ${id.toUpperCase()}`, arc.language, "Du verbindest die Sprachelemente zu einem eigenen Programm und erklärst jeden Schritt.", "Baue eine kleine Kernfunktion mit den Mitteln der Sprache. Ergänze Eingabeprüfung und einen Randfall. Die Beispiele zeigen einen möglichen Anfang, den du selbst erweitern sollst.", [example("Kernfunktion", arc.capstoneExample, "Verfolge Eingabe und Ausgabe und ändere danach eine Regel selbst.")], "", "Schreibe eine eigene Kernfunktion, prüfe einen normalen und einen leeren oder ungültigen Fall und erkläre das Ergebnis.", arc.capstoneMarker, "Sprachbeherrschung zeigt sich daran, dass du die Lösung selbst ändern und Fehler erklären kannst.", ["Problem und zwei Beispiele festlegen.", "Kernfunktion schreiben.", "Normal- und Randfall prüfen.", "Eine Änderung ohne Vorlage vornehmen und erklären."], ["Das Programm zeigt ein nachvollziehbares Ergebnis.", "Ein Randfall ist geprüft.", "Alle verwendeten Sprachmittel sind erklärbar."])
+  ];
+}
+
+const backendFoundation: LessonBlueprint[] = [
+  intro("server-model", "Was passiert hinter einer Website?", "plaintext", "Ein Browser sendet eine Anfrage an einen Server. Der Server ordnet sie einer Route zu, prüft Daten und Rechte, wendet Regeln an und fragt bei Bedarf eine Datenbank. Danach sendet er eine Antwort mit Status und Daten zurück. Mehrere Nutzer können gleichzeitig anfragen; deshalb müssen Zustände, Fehler und Berechtigungen bewusst behandelt werden. Zeichne diesen Weg erst ohne Code.", [example("Ein Kurs wird geöffnet", "Browser → Anfrage → Route → Rechteprüfung → Datenbank → Antwort", "Jeder Schritt hat eine eigene Verantwortung."), example("Wenn etwas schiefgeht", "Ungültige Eingabe → 400\nNicht gefunden → 404\nServerfehler → 500", "Ein Status hilft dem Client, die Situation richtig anzuzeigen.")], "Was gehört zum Backend?", "Anfragen prüfen, Regeln ausführen und Daten verwalten", "Nur Farben und Abstände einer Seite festlegen", "Nur Bilder im Browser zeichnen"),
+  intro("api-model", "Was sind Server und APIs?", "plaintext", "Ein Server ist ein laufendes Programm, das auf Anfragen wartet. Eine API legt fest, welche Anfragen erlaubt sind und welche Antworten zurückkommen. HTTP nutzt Methoden wie GET zum Lesen und POST zum Anlegen. JSON transportiert Daten. Ein Framework wie Fastify, Express oder Spring Boot erleichtert Routen und Middleware; die Regeln hinter der API musst du weiterhin selbst verstehen und testen.", [example("Ein Vertrag", "GET /courses/7 → 200 + Kursdaten\nGET /courses/999 → 404", "Methode, Pfad, Status und Daten bilden einen überprüfbaren API-Vertrag.")], "Wozu dient eine API?", "Sie beschreibt erlaubte Anfragen und ihre Antworten", "Sie legt ausschließlich die Schriftart fest", "Sie ersetzt alle Serverregeln"),
+];
+const securityPractice: LessonBlueprint[] = [
+  intro("ethical-lab", "Angriffe in einer erlaubten Testumgebung verstehen", "plaintext", "Sicherheitsprüfungen finden Schwachstellen, bevor sie ausgenutzt werden. Übe nur an eigenen Projekten oder ausdrücklich freigegebenen Laboren. Dokumentiere Ziel, erwartetes Verhalten und Ergebnis. Bei einer SQL-Injection wird Nutzereingabe fälschlich als Teil einer Abfrage behandelt; bei XSS landet ungeprüfter Inhalt als ausführbarer Code im Browser. Beides lässt sich an einer lokalen Demo nachvollziehen und danach gezielt beheben.", [example("Lokaler Prüfablauf", "Testeingabe → unsichere Verarbeitung beobachten → Schutz einbauen → erneut testen", "Der gleiche Test zeigt, ob die Korrektur wirkt.")], "Welcher Prüfablauf ist sinnvoll?", "Eine eigene Testanwendung prüfen und die Korrektur erneut testen", "Beliebige fremde Websites ohne Erlaubnis scannen", "Nur einen Scanner starten und alle Ergebnisse ungeprüft übernehmen"),
+  lesson("firewall-lab", "05 · Netzwerke schützen", "Firewall-Regeln praktisch prüfen", "plaintext", "Du erklärst und testest eine einfache Firewall-Regel für einen eigenen Server.", "Eine Firewall entscheidet anhand von Quelle, Ziel, Port und Protokoll, welche Verbindung passieren darf. Starte lokal mit einer Standardregel, die eingehende Verbindungen sperrt, und öffne nur den benötigten Dienst. Prüfe den erlaubten und den blockierten Fall. Eine Firewall ersetzt weder Authentifizierung noch sichere Anwendungseingaben.", [example("Regeltabelle", "Eingehend 443/TCP: erlaubt\nEingehend 5432/TCP: gesperrt\nAusgehend DNS: nach Bedarf", "Die Datenbank sollte nicht öffentlich erreichbar sein.")], "", "Schreibe eine Regeltabelle für eine eigene Webanwendung und beschreibe je einen erlaubten und blockierten Verbindungstest.", "443|5432|TCP|erlaubt|gesperrt"),
+];
+const gameEnginePractice: LessonBlueprint[] = [
+  intro("engine-choice", "Was macht eine Spiele-Engine?", "plaintext", "Eine Engine bietet Editor, Szenen, Eingaben, Physik, Ton und Export. Godot nutzt Szenen und Nodes; Unity nutzt GameObjects und Komponenten. Für den ersten Prototyp reicht ein kleines Ziel: Figur bewegen, Objekt berühren, Punkt anzeigen. Wähle eine Engine nach Plattform und Lernaufwand und prüfe die aktuellen Lizenzbedingungen vor Veröffentlichung.", [example("Erster Prototyp", "Szene → Spielfigur → Eingabe → Kollision → Punktestand", "Jeder Schritt liefert ein sichtbares Ergebnis.")], "Was hilft eine Engine zu organisieren?", "Szenen, Eingaben, Darstellung und Export", "Nur den Quelltext einer Webseite", "Automatisch jede Spielidee ohne eigene Regeln"),
+  lesson("godot-first-game", "06 · Erstes Engine-Spiel", "Godot: ein Sammelspiel programmieren", "gdscript", "Du verbindest Szene, Eingabe, Bewegung und Punktestand in Godot.", "Lege eine 2D-Szene mit Spielfigur und Sammelobjekt an. Ein Script bewegt die Figur pro Frame mit delta. Das Sammelobjekt sendet bei Berührung ein Signal; der Spielzustand erhöht den Punktestand genau einmal. Teste Neustart, Rand des Spielfelds und einen Punktesieg.", [example("Bewegung", "func _process(delta):\n    var direction = Input.get_axis('ui_left', 'ui_right')\n    position.x += direction * speed * delta", "delta macht Bewegung unabhängig von der Bildrate."), example("Sammelregel", "func collect_coin():\n    score += 1\n    update_score_label()", "Die Regel und ihre sichtbare Rückmeldung gehören zusammen.")], "extends Node2D\nvar score = 0\n", "Ergänze eine Bewegungsfunktion und eine Sammelfunktion, die den Punktestand aktualisiert.", "_process|collect_coin|score\\s*\\+="),
+];
+
 export const courseCurricula: Record<string, LessonBlueprint[]> = {
-  javascript: [...javascript, ...projectLessons("javascript", projectArcs.javascript)],
-  java: [...java, ...projectLessons("java", projectArcs.java)],
-  python: [...python, ...projectLessons("python", projectArcs.python)],
-  php: [...php, ...projectLessons("php", projectArcs.php)],
-  typescript: [...typescript, ...projectLessons("typescript", projectArcs.typescript)],
-  cpp: [...cpp, ...projectLessons("cpp", projectArcs.cpp)],
-  csharp: [...csharp, ...projectLessons("csharp", projectArcs.csharp)],
-  rust: [...rust, ...projectLessons("rust", projectArcs.rust)],
-  sql: [...sql, ...projectLessons("sql", projectArcs.sql)],
-  c: [...c, ...projectLessons("c", projectArcs.c)],
-  kotlin: [...kotlin, ...projectLessons("kotlin", projectArcs.kotlin)],
-  swift: [...swift, ...projectLessons("swift", projectArcs.swift)],
+  javascript: languageOnly("javascript", javascript),
+  java: languageOnly("java", java),
+  python: languageOnly("python", python),
+  php: languageOnly("php", php),
+  typescript: languageOnly("typescript", typescript),
+  cpp: languageOnly("cpp", cpp),
+  csharp: languageOnly("csharp", csharp),
+  rust: languageOnly("rust", rust),
+  sql: languageOnly("sql", sql),
+  c: languageOnly("c", c),
+  kotlin: languageOnly("kotlin", kotlin),
+  swift: languageOnly("swift", swift),
   "web-development": [...webDevelopment, ...projectLessons("web-development", projectArcs["web-development"])],
-  backend: [...backend, ...backendNodePath, ...projectLessons("backend", projectArcs.backend)],
-  security: [...security, ...projectLessons("security", projectArcs.security)],
+  backend: [...backendFoundation, ...backend, ...backendNodePath, ...projectLessons("backend", projectArcs.backend)],
+  security: [...securityPractice, ...security, ...projectLessons("security", projectArcs.security)],
   ai: aiJourney,
-  "game-development": [...gameDevelopment, ...projectLessons("game-development", projectArcs["game-development"])],
+  "game-development": [...gameEnginePractice, ...gameDevelopment, ...projectLessons("game-development", projectArcs["game-development"])],
   career: [...career, ...projectLessons("career", projectArcs.career)],
 };
 
