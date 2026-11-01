@@ -44,7 +44,7 @@ const videoFolder = resolve(root, "public/videos");
 const [videoIndex, subtitles, videoFile, poster] = await Promise.all([
   readFile(resolve(videoFolder, "einstieg-kapitel-final.json"), "utf8").then(JSON.parse),
   readFile(resolve(videoFolder, "einstieg-programmierung-final.vtt"), "utf8"),
-  stat(resolve(videoFolder, "einstieg-programmierung-final.mp4")),
+  stat(resolve(videoFolder, "einstieg-programmierung-visual.mp4")),
   stat(resolve(videoFolder, "einstieg-poster-final.png")),
 ]);
 const introIds = programmingCourse.lessons.map((lesson) => lesson.id);

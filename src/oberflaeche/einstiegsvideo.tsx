@@ -41,7 +41,7 @@ export function Einstiegsvideo({ lessonId }: { lessonId: string }) {
       <summary>{open ? "Video einklappen" : "Video und Kapitel öffnen"}</summary>
       <div className="intro-video-inner">
         <video ref={videoRef} className="intro-video-player" controls preload="metadata" playsInline poster={asset("einstieg-poster-final.png")} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => window.speechSynthesis?.cancel()} onError={() => setError(true)}>
-          <source src={asset("einstieg-programmierung-final.mp4")} type="video/mp4" />
+          <source src={asset("einstieg-programmierung-visual.mp4")} type="video/mp4" />
           <track kind="captions" src={asset("einstieg-programmierung-final.vtt")} srcLang="de" label="Deutsch (optional)" />
           Dein Gerät kann dieses Video nicht abspielen.
         </video>
