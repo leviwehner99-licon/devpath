@@ -42,10 +42,10 @@ for (const course of learningCourses) {
 const allLessons = learningCourses.flatMap((course) => course.lessons);
 const videoFolder = resolve(root, "public/videos");
 const [videoIndex, subtitles, videoFile, poster] = await Promise.all([
-  readFile(resolve(videoFolder, "einstieg-kapitel-neu.json"), "utf8").then(JSON.parse),
-  readFile(resolve(videoFolder, "einstieg-programmierung-neu.vtt"), "utf8"),
-  stat(resolve(videoFolder, "einstieg-programmierung-neu.mp4")),
-  stat(resolve(videoFolder, "einstieg-poster-neu.png")),
+  readFile(resolve(videoFolder, "einstieg-kapitel-final.json"), "utf8").then(JSON.parse),
+  readFile(resolve(videoFolder, "einstieg-programmierung-final.vtt"), "utf8"),
+  stat(resolve(videoFolder, "einstieg-programmierung-final.mp4")),
+  stat(resolve(videoFolder, "einstieg-poster-final.png")),
 ]);
 const introIds = programmingCourse.lessons.map((lesson) => lesson.id);
 if (videoIndex.duration < 600 || videoIndex.duration > 1200 || videoIndex.chapters?.length !== introIds.length || videoIndex.chapters.some((chapter, position) => chapter.id !== introIds[position] || (position > 0 && chapter.start <= videoIndex.chapters[position - 1].start)) || videoFile.size < 1_000_000 || poster.size < 1_000 || !subtitles.startsWith("WEBVTT")) throw new Error("Einstiegsvideo, Kapitel oder Untertitel sind unvollständig");

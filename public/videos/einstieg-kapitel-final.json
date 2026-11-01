@@ -1,0 +1,70 @@
+{
+  "duration": 967.2,
+  "chapters": [
+    {
+      "id": "program-output",
+      "title": "Was Programmierung wirklich ist",
+      "start": 0.0
+    },
+    {
+      "id": "program-why",
+      "title": "Welches Problem lösen wir?",
+      "start": 70.9
+    },
+    {
+      "id": "program-input-result",
+      "title": "Eingabe, Verarbeitung, Ergebnis",
+      "start": 146.84
+    },
+    {
+      "id": "program-order",
+      "title": "Abläufe und Zustände",
+      "start": 219.76
+    },
+    {
+      "id": "program-decisions",
+      "title": "Entscheidungen und Randfälle",
+      "start": 292.48
+    },
+    {
+      "id": "program-repeat",
+      "title": "Wiederholung und Zerlegung",
+      "start": 360.84
+    },
+    {
+      "id": "program-search-workshop",
+      "title": "Die Kurssuche selbst entwerfen",
+      "start": 431.47
+    },
+    {
+      "id": "program-debug",
+      "title": "Fehler systematisch finden",
+      "start": 506.26
+    },
+    {
+      "id": "program-debug-workshop",
+      "title": "Die Suchregel verbessern",
+      "start": 581.41
+    },
+    {
+      "id": "program-ecosystem",
+      "title": "Sprache, Laufzeit und Werkzeuge",
+      "start": 658.96
+    },
+    {
+      "id": "program-languages",
+      "title": "Welche Sprache passt zum Ziel?",
+      "start": 736.17
+    },
+    {
+      "id": "program-system",
+      "title": "Wie entsteht ein ganzes System?",
+      "start": 817.51
+    },
+    {
+      "id": "program-learning",
+      "title": "Dein nächster Lernweg",
+      "start": 896.33
+    }
+  ]
+}

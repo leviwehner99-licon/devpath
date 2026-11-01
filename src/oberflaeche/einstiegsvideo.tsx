@@ -15,7 +15,7 @@ export function Einstiegsvideo({ lessonId }: { lessonId: string }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(asset("einstieg-kapitel-neu.json"), { signal: controller.signal })
+    fetch(asset("einstieg-kapitel-final.json"), { signal: controller.signal })
       .then((response) => { if (!response.ok) throw new Error("Kapitel fehlen"); return response.json() as Promise<VideoIndex>; })
       .then(setIndex)
       .catch((reason) => { if (reason?.name !== "AbortError") setError(true); });
@@ -36,13 +36,13 @@ export function Einstiegsvideo({ lessonId }: { lessonId: string }) {
   const currentChapter = index?.chapters.reduce((current, chapter) => currentTime >= chapter.start ? chapter : current, index.chapters[0]);
 
   return <section className="intro-video-section" aria-label="Animationsvideo zum Einstiegskurs">
-    <div className="intro-video-summary"><span aria-hidden="true">▶</span><div><strong>Einstieg als Lernvideo</strong><small>Alle 13 Lektionen · anschauliche Beispiele und Kapitelübersichten · ca. 15 Minuten</small></div></div>
+    <div className="intro-video-summary"><span aria-hidden="true">▶</span><div><strong>Einstieg als Lernvideo</strong><small>Alle 13 Lektionen · anschauliche Beispiele und Kapitelübersichten · 16 Minuten</small></div></div>
     <details open={open} onToggle={(event) => { setOpen(event.currentTarget.open); if (!event.currentTarget.open) videoRef.current?.pause(); }}>
       <summary>{open ? "Video einklappen" : "Video und Kapitel öffnen"}</summary>
       <div className="intro-video-inner">
-        <video ref={videoRef} className="intro-video-player" controls preload="metadata" playsInline poster={asset("einstieg-poster-neu.png")} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => window.speechSynthesis?.cancel()} onError={() => setError(true)}>
-          <source src={asset("einstieg-programmierung-neu.mp4")} type="video/mp4" />
-          <track kind="captions" src={asset("einstieg-programmierung-neu.vtt")} srcLang="de" label="Deutsch" default />
+        <video ref={videoRef} className="intro-video-player" controls preload="metadata" playsInline poster={asset("einstieg-poster-final.png")} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} onPlay={() => window.speechSynthesis?.cancel()} onError={() => setError(true)}>
+          <source src={asset("einstieg-programmierung-final.mp4")} type="video/mp4" />
+          <track kind="captions" src={asset("einstieg-programmierung-final.vtt")} srcLang="de" label="Deutsch (optional)" />
           Dein Gerät kann dieses Video nicht abspielen.
         </video>
         {error && <p className="intro-video-error" role="status">Das Video konnte nicht geladen werden. Die einzelnen Lektionen und ihre Audio-Erklärungen bleiben verfügbar.</p>}
